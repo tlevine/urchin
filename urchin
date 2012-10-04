@@ -1,2 +1,23 @@
 #!/bin/sh
 
+recurse() {
+  potential_test="$1"
+  if [ -d "$potential_test" ]
+    then
+    (
+      cd "$potential_test"
+      [ -f setup ] && sh setup
+      ls test* | xargs recurse
+      [ -f teardown ] && sh teardown
+    )
+  elif [ -f "$potential_test" ]
+    then
+    sh "$potential_test"
+    if [ "$@" = '0' ]
+      then
+      echo .
+    else
+      echo F
+    fi
+  fi
+}
