@@ -1,7 +1,6 @@
 Urchin 2
 ====
 
-## Organizing tests in files
 Tests are organized recursively in directories, where the names of the files
 and directories have special meanings.
 
