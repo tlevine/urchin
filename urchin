@@ -1,8 +1,5 @@
 #!/bin/sh
 
-count_errors=0
-count_passing=0
-
 recurse() {
   potential_test="$1"
   if [ -d "$potential_test" ]
@@ -27,3 +24,10 @@ recurse() {
     fi
   fi
 }
+
+if [ -d tests ]
+  then
+  recurse tests
+else
+  echo 'No tests directory' && exit 1
+fi
