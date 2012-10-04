@@ -1,5 +1,8 @@
 #!/bin/sh
 
+count_errors=0
+count_passing=0
+
 recurse() {
   potential_test="$1"
   if [ -d "$potential_test" ]
@@ -15,9 +18,12 @@ recurse() {
     sh "$potential_test"
     if [ "$@" = '0' ]
       then
-      echo .
+      # Print a '.'
+      echo -n .
     else
-      echo F
+      # Print a red 'F'
+      echo -ne '\033[31mF'
+      echo -ne "\033[0m"
     fi
   fi
 }
