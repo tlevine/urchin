@@ -9,7 +9,7 @@ written in POSIX-compliant shell, originally designed for test-driven server dep
 at <a href="https://scraperwiki.com">ScraperWiki</a>.
 
 ## Install
-Downlolad Urchin like so (as root)
+Download Urchin like so (as root)
 
     wget -O /usr/local/bin https://raw.github.com/scraperwiki/urchin/master/urchin
     chmod +x /usr/local/bin/urchin
