@@ -9,13 +9,17 @@ and directories have special meanings.
       bar/
         setup
         test_that_something_works
-      teardown
+        teardown
       baz/
         jack-in-the-box/
           setup
           test_that_something_works
           teardown
         cat-in-the-box/
+          fixtures/
+            thingy.pdf
+          test_thingy
+      teardown
 
 Directories are processed in a depth-first order. When a particular directory
 is processed, `setup` is run before everything else in the directory, including
