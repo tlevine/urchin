@@ -19,9 +19,10 @@ Now you can run it.
     urchin
 
 ## Writing tests
-Make a directory named `tests`. Inside it, put files that begin with `test`
-that exit `0` on success and something else on fail. Then run urchin from
-the parent directory of the `tests` directory.
+Make a root directory for your tests. Inside it, put executable files that
+exit `0` on success and something else on fail. Non-executable files are
+ignored, so you can store fixtures right next to your tests. Run urchin from
+inside the tests directory.
 
 ## More about writing tests
 Tests are organized recursively in directories, where the names of the files
