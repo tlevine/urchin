@@ -20,9 +20,9 @@ Now you can run it.
 
 ## Writing tests
 Make a root directory for your tests. Inside it, put executable files that
-exit `0` on success and something else on fail. Non-executable files are
-ignored, so you can store fixtures right next to your tests. Run urchin from
-inside the tests directory.
+exit `0` on success and something else on fail. Non-executable files and hidden
+files (dotfiles) are ignored, so you can store fixtures right next to your
+tests. Run urchin from inside the tests directory.
 
 ## More about writing tests
 Tests are organized recursively in directories, where the names of the files
@@ -55,6 +55,6 @@ directory.
 actually only includes files whose names contain "test". The test passes if the
 file exits 0; otherwise, it fails.
 
-Aside from files named '`setup`' or '`teardown`', files and directories are run
-only if they start with '`test`'. Thus, fixtures and libraries can be included
+Files are only run if they are executable, and files beginning with `.` are
+ignored. Thus, fixtures and libraries can be included
 sloppily within the test directory tree.

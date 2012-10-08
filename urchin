@@ -6,11 +6,11 @@ recurse() {
     then
     (
       cd "$potential_test"
-      [ -f setup ] && sh setup
-      for test in test*
+      [ -f setup ] && [ -x setup ] && ./setup
+      for test in *
         do recurse "${test}"
       done
-      [ -f teardown ] && sh teardown
+      [ -f teardown ] && [ -x teardown ] && ./teardown
     )
   elif [ -x "$potential_test" ]
     then
@@ -28,12 +28,8 @@ recurse() {
   fi
 }
 
-if [ -d tests ]
-  then
-  echo Running tests
-  recurse tests
-  echo
-  echo Done
-else
-  echo 'No tests directory' && exit 1
-fi
+then
+echo Running tests
+recurse tests
+echo
+echo Done
