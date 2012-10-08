@@ -16,7 +16,7 @@ Downlolad Urchin like so (as root)
 
 Now you can run it.
 
-    ./urchin
+    urchin
 
 ## Writing tests
 Make a directory named `tests`. Inside it, put files that begin with `test`
