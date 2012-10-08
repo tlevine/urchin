@@ -28,7 +28,13 @@ recurse() {
   fi
 }
 
-echo Running tests
-recurse .
-echo
-echo Done
+if [ "$*" = '' ]
+  then
+  echo Running tests
+  recurse .
+  echo
+  echo Done
+else
+  echo 'Run `urchin` without arguments from a directory containing urchin tests.'
+  echo 'Go to http://www.urchin.sh for documentation on writing tests.'
+fi
