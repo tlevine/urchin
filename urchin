@@ -7,7 +7,9 @@ recurse() {
     (
       cd "$potential_test"
       [ -f setup ] && sh setup
-      ls test* | xargs recurse
+      for test in test*
+        do recurse "${test}"
+      done
       [ -f teardown ] && sh teardown
     )
   elif [ -f "$potential_test" ]
@@ -27,7 +29,10 @@ recurse() {
 
 if [ -d tests ]
   then
+  echo Running tests
   recurse tests
+  echo
+  echo Done
 else
   echo 'No tests directory' && exit 1
 fi
