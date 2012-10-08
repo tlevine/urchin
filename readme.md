@@ -46,15 +46,13 @@ and directories have special meanings.
       teardown
 
 Directories are processed in a depth-first order. When a particular directory
-is processed, `setup` is run before everything else in the directory, including
-subdirectories. Use `urchin_export`, which works like `export`, to set variables
-in the setup function and make them available to other files in the same
-directory.
+is processed, `setup` is sourced before everything else in the directory, including
+subdirectories. Set variables in the setup function t make them available to other
+files in the same directory.
 
-`teardown` is run after everything else in the directory. The "everything else"
-actually only includes files whose names contain "test". The test passes if the
-file exits 0; otherwise, it fails.
+`teardown` is run after everything else in the directory. 
 
 Files are only run if they are executable, and files beginning with `.` are
-ignored. Thus, fixtures and libraries can be included
-sloppily within the test directory tree.
+ignored. Thus, fixtures and libraries can be included sloppily within the test
+directory tree. The test passes if the file exits 0; otherwise, it fails.
+
