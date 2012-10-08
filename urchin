@@ -23,6 +23,7 @@ recurse() {
       # Print a red 'F'
       echo -ne '\033[31mF'
       echo -ne "\033[0m"
+      echo -n "(${potential_test})"
     fi
   fi
 }
