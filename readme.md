@@ -1,6 +1,29 @@
-Urchin
-====
 
+      ,  ,  ,_     _,  , ,   ___, ,  , 
+      |  |  |_)   /    |_|, ' |   |\ | 
+     '\__| '| \  '\_  '| |   _|_, |'\| 
+    `  '  `    `  ' `  '     '  ` 
+
+Urchin is an experimental language-agnostic lightweight cross-platform test skeleton
+written in POSIX-compliant shell, originally designed for test-driven server deployment
+at <a href="https://scraperwiki.com">ScraperWiki</a>.
+
+## Install
+Downlolad Urchin like so
+
+    wget https://raw.github.com/scraperwiki/urchin/master/urchin
+    chmod +x urchin
+
+Now you can run it.
+
+    ./urchin
+
+## Writing tests
+Make a directory named `tests`. Inside it, put files that begin with `test`
+that exit `0` on success and something else on fail. Then run urchin from
+the parent directory of the `tests` directory.
+
+## More about writing tests
 Tests are organized recursively in directories, where the names of the files
 and directories have special meanings.
 
