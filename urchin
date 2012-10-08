@@ -28,8 +28,7 @@ recurse() {
   fi
 }
 
-then
 echo Running tests
-recurse tests
+recurse .
 echo
 echo Done
