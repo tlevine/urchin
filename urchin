@@ -6,7 +6,7 @@ recurse() {
     then
     (
       cd "$potential_test"
-      [ -f setup ] && . setup
+      [ -f setup ] && . ./setup
       for test in *
         do recurse "${test}"
       done
