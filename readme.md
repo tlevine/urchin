@@ -47,8 +47,8 @@ and directories have special meanings.
 
 Directories are processed in a depth-first order. When a particular directory
 is processed, `setup` is sourced before everything else in the directory, including
-subdirectories. Set variables in the setup function t make them available to other
-files in the same directory.
+subdirectories. Export variables from the setup function to make them available
+to other files in the same directory.
 
 `teardown` is run after everything else in the directory. 
 
