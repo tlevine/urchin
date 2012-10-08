@@ -1,4 +1,4 @@
-Urchin 2
+Urchin
 ====
 
 Tests are organized recursively in directories, where the names of the files
