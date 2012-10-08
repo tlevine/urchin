@@ -12,10 +12,10 @@ recurse() {
       done
       [ -f teardown ] && sh teardown
     )
-  elif [ -f "$potential_test" ]
+  elif [ -x "$potential_test" ]
     then
-    sh "$potential_test"
-    if [ "$@" = '0' ]
+    ./"$potential_test"
+    if [ "$?" = '0' ]
       then
       # Print a '.'
       echo -n .
