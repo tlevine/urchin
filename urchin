@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 recurse() {
   potential_test="$1"
@@ -14,17 +14,21 @@ recurse() {
     )
   elif [ -x "$potential_test" ]
     then
-    ./"$potential_test"
+    #stdout_file=$(mktemp)
+    stdout_file=/tmp/urchin_stdout
+    ./"$potential_test" > $stdout_file
     if [ "$?" = '0' ]
       then
-      # Print a '.'
-      echo -n .
+      # Print a '✓'
+      echo -ne '\033[32m✓ \033[0m'
+      echo "${potential_test}"
     else
-      # Print a red 'F'
-      echo -ne '\033[31mF'
-      echo -n "(${potential_test})"
-      echo -ne "\033[0m"
+      # Print a red '✗'
+      echo -ne '\033[31m✗ \033[0m'
+      echo "${potential_test}"
+      cat $stdout_file
     fi
+    rm $stdout_file
   fi
 }
 
