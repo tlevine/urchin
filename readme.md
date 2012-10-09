@@ -1,10 +1,9 @@
-
       ,  ,  ,_     _,  , ,   ___, ,  , 
       |  |  |_)   /    |_|, ' |   |\ | 
      '\__| '| \  '\_  '| |   _|_, |'\| 
     `  '  `    `  ' `  '     '  ` 
 
-Urchin is an experimental language-agnostic lightweight cross-platform test skeleton
+Urchin is a language-agnostic lightweight cross-platform test skeleton
 written in POSIX-compliant shell, originally designed for test-driven server deployment
 at <a href="https://scraperwiki.com">ScraperWiki</a>.
 
