@@ -32,7 +32,7 @@ recurse() {
   fi
 }
 
-if [ "$*" = '' ]
+if [ "$#" = '0' ]
   then
   echo Running tests
   recurse .
