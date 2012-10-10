@@ -46,13 +46,13 @@ recurse() {
   fi
 }
 
-if [ "$#" = '0' ]
+if [ "$#" = '1' ] && [ -d "$1" ]
   then
   echo Running tests
-  recurse .
+  recurse "$1"
   echo
   echo Done
 else
-  echo 'Run `urchin` without arguments from a directory containing urchin tests.'
+  echo "usage: $0 <test directory>"
   echo 'Go to http://www.urchin.sh for documentation on writing tests.'
 fi

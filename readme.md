@@ -13,7 +13,7 @@ Download Urchin like so (as root)
 
 Now you can run it.
 
-    urchin
+    urchin <test directory>
 
 ## Writing tests
 Make a root directory for your tests. Inside it, put executable files that
