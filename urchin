@@ -12,7 +12,7 @@ recurse() {
     then
     (
       cd "$potential_test"
-      [ -f setup_dir ] && [ -x setup_dir ] && . ./setup_dir
+      [ -f setup_dir ] && [ -x setup_dir ] && ./setup_dir
       for test in *
         do recurse "${test}"
       done
@@ -23,7 +23,7 @@ recurse() {
     #stdout_file=$(mktemp)
     stdout_file=/tmp/urchin_stdout
 
-    [ -f setup ] && [ -x setup ] && . ./setup &>> $stdout_file
+    [ -f setup ] && [ -x setup ] && ./setup &>> $stdout_file
 
     # Run the test
     ./"$potential_test" &>> $stdout_file
@@ -40,7 +40,7 @@ recurse() {
       # On fail, print a red '✗'
       echo -ne '\033[31m✗ \033[0m'
       echo "${potential_test}"
-#     cat $stdout_file
+      cat $stdout_file
     fi
     rm $stdout_file
   fi
