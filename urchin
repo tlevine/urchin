@@ -3,10 +3,10 @@
 recurse() {
   potential_test="$1"
 
-  [ potential_test = 'setup_dir' ] && return
-  [ potential_test = 'teardown_dir' ] && return
-  [ potential_test = 'setup' ] && return
-  [ potential_test = 'teardown' ] && return
+  [ "$potential_test" = 'setup_dir' ] && return
+  [ "$potential_test" = 'teardown_dir' ] && return
+  [ "$potential_test" = 'setup' ] && return
+  [ "$potential_test" = 'teardown' ] && return
 
   if [ -d "$potential_test" ]
     then
