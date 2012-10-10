@@ -10,6 +10,7 @@ We added directory-based indents.
 
 We allowed for multiple tests to be written in a file
 
+We adjusted the input parameters so it is harder to accidentally run all executible files in your home directory.
 
 
 Done
