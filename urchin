@@ -18,9 +18,9 @@ recurse() {
     stdout_file=/tmp/urchin_stdout
 
     # Run the test
-    [ -f setup ] && . ./setup
-    ./"$potential_test" > $stdout_file
-    [ -f teardown ] && [ -x teardown ] && ./teardown
+    [ -f setup ] && . ./setup &>> $stdout_file
+    ./"$potential_test" &>> $stdout_file
+    [ -f teardown ] && [ -x teardown ] && ./teardown &>> $stdout_file
 
     if [ "$?" = '0' ]
       then
