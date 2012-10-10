@@ -6,24 +6,29 @@ recurse() {
     then
     (
       cd "$potential_test"
-      [ -f setup ] && . ./setup
+      [ -f setup_dir ] && . ./setup_dir
       for test in *
         do recurse "${test}"
       done
-      [ -f teardown ] && [ -x teardown ] && ./teardown
+      [ -f teardown_dir ] && [ -x teardown_dir ] && ./teardown_dir
     )
   elif [ -x "$potential_test" ]
     then
     #stdout_file=$(mktemp)
     stdout_file=/tmp/urchin_stdout
+
+    # Run the test
+    [ -f setup ] && . ./setup
     ./"$potential_test" > $stdout_file
+    [ -f teardown ] && [ -x teardown ] && ./teardown
+
     if [ "$?" = '0' ]
       then
-      # Print a '✓'
+      # On success, print a '✓'
       echo -ne '\033[32m✓ \033[0m'
       echo "${potential_test}"
     else
-      # Print a red '✗'
+      # On fail, print a red '✗'
       echo -ne '\033[31m✗ \033[0m'
       echo "${potential_test}"
       cat $stdout_file
