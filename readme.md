@@ -3,9 +3,7 @@
      '\__| '| \  '\_  '| |   _|_, |'\| 
     `  '  `    `  ' `  '     '  ` 
 
-Urchin is a language-agnostic lightweight cross-platform test skeleton
-written in POSIX-compliant shell, originally designed for test-driven server deployment
-at <a href="https://scraperwiki.com">ScraperWiki</a>.
+Urchin is a test framework for shell.
 
 ## Install
 Download Urchin like so (as root)
@@ -22,6 +20,9 @@ Make a root directory for your tests. Inside it, put executable files that
 exit `0` on success and something else on fail. Non-executable files and hidden
 files (dotfiles) are ignored, so you can store fixtures right next to your
 tests. Run urchin from inside the tests directory.
+
+Urchin only cares about the exit code, so you can actually write your tests
+in any language, not just shell.
 
 ## More about writing tests
 Tests are organized recursively in directories, where the names of the files
@@ -54,4 +55,3 @@ to other files in the same directory.
 Files are only run if they are executable, and files beginning with `.` are
 ignored. Thus, fixtures and libraries can be included sloppily within the test
 directory tree. The test passes if the file exits 0; otherwise, it fails.
-
