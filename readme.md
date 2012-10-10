@@ -30,6 +30,7 @@ and directories have special meanings.
 
     tests/
       setup
+      setup_dir
       bar/
         setup
         test_that_something_works
@@ -46,11 +47,11 @@ and directories have special meanings.
       teardown
 
 Directories are processed in a depth-first order. When a particular directory
-is processed, `setup` is sourced before everything else in the directory, including
-subdirectories. Export variables from the setup function to make them available
-to other files in the same directory.
+is processed, `setup_dir` is run before everything else in the directory, including
+subdirectories. `teardown_dir` is run after everything else in the directory. 
 
-`teardown` is run after everything else in the directory. 
+A directory's `setup` file, if it exists, is run right before each test file
+within the particular directory, and the `teardown` file is run right after.
 
 Files are only run if they are executable, and files beginning with `.` are
 ignored. Thus, fixtures and libraries can be included sloppily within the test
