@@ -2,6 +2,12 @@
 
 recurse() {
   potential_test="$1"
+
+  [ potential_test = 'setup_dir' ] && return
+  [ potential_test = 'teardown_dir' ] && return
+  [ potential_test = 'setup' ] && return
+  [ potential_test = 'teardown' ] && return
+
   if [ -d "$potential_test" ]
     then
     (
@@ -20,9 +26,10 @@ recurse() {
     # Run the test
     [ -f setup ] && . ./setup &>> $stdout_file
     ./"$potential_test" &>> $stdout_file
+    exit_code="$?"
     [ -f teardown ] && [ -x teardown ] && ./teardown &>> $stdout_file
 
-    if [ "$?" = '0' ]
+    if [ "$exit_code" = '0' ]
       then
       # On success, print a '✓'
       echo -ne '\033[32m✓ \033[0m'
