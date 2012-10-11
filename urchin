@@ -1,7 +1,13 @@
 #!/bin/bash
 
+indent() {
+  level="$1"
+  printf "%$((2 * ${level}))s"
+}
+
 recurse() {
   potential_test="$1"
+  indent_level="$2"
 
   [ "$potential_test" = 'setup_dir' ] && return
   [ "$potential_test" = 'teardown_dir' ] && return
@@ -14,12 +20,17 @@ recurse() {
   if [ -d "$potential_test" ]
     then
     (
+      indent $indent_level
+      echo "  ${potential_test}"
       cd "$potential_test"
       [ -f setup_dir ] && [ -x setup_dir ] && ./setup_dir &>> $stdout_file
       for test in *
         do
         [ -f setup ] && [ -x setup ] && ./setup &>> $stdout_file
-        recurse "${test}"
+
+        # $2 instead of $indent_level so it doesn't clash
+        recurse "${test}" $(( $2 + 1 ))
+
         [ -f teardown ] && [ -x teardown ] && ./teardown &>> $stdout_file
       done
       [ -f teardown_dir ] && [ -x teardown_dir ] && ./teardown_dir &>> $stdout_file
@@ -35,6 +46,7 @@ recurse() {
 
     [ -f teardown ] && [ -x teardown ] && ./teardown &>> $stdout_file
 
+    indent $indent_level
     if [ "$exit_code" = '0' ]
       then
       # On success, print a '✓'
@@ -53,7 +65,7 @@ recurse() {
 if [ "$#" = '1' ] && [ -d "$1" ]
   then
   echo Running tests
-  recurse "$1"
+  recurse "$1" 0
   echo
   echo Done
 else
