@@ -1,0 +1,3 @@
+#!/bin/sh
+
+../../urchin .fixture | grep '7 tests failed.'
