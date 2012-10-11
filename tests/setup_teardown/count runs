@@ -1,0 +1,3 @@
+#!/bin/sh
+
+[ $(../../urchin .fixtures| grep 31|wc -l) -lt 3 ]
