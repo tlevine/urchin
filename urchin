@@ -109,7 +109,7 @@ else
 fi
 
 # Go
-if  echo "$1"| grep test || $FORCE
+if  echo $(basename "$(readlink -f "$1")") | grep test || $FORCE
   then
   echo Running tests
 
