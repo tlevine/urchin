@@ -1,6 +1,7 @@
 #!/bin/bash
 
 stdout_file=/tmp/urchin_stdout
+logfile=$(readlink -f "$1/.urchin.log")
 
 indent() {
   level="$1"
@@ -68,24 +69,7 @@ recurse() {
 
 USAGE="usage: $0 <test directory>"
 
-FORCE=false
-HELP=false
-while [ $# -gt 0 ]
-do
-    case "$1" in
-        -f) FORCE=true;;
-        -h) HELP=true;; 
-#       --xsd) action=testsuite;;
-#       --) shift; break;;
-        -*) echo >&2 $USAGE
-            exit 1;;
-        *)  break;;
-    esac
-    shift
-done
-
-if $HELP
-  then
+urchin_help() {
   echo
   echo "$USAGE"
   echo
@@ -97,30 +81,20 @@ if $HELP
   echo 'Go to http://www.urchin.sh for documentation on writing tests.'
   echo
   exit 0
-fi
+}
 
-# Check
-if [ "$#" = '1' ] && [ -d "$1" ]
-  then
-  sleep 0s
-else
-  echo "$USAGE"
-  exit 1
-fi
-
-# Go
-if  echo $(basename "$(readlink -f "$1")") | grep test || $FORCE
-  then
+urchin_go() {
   echo Running tests
 
-  logfile=$(readlink -f "$1/.urchin.log")
   echo > "$logfile"
   recurse "$1" 0
 
   echo Done
   echo $(grep -e 'passed$' "$logfile"|wc -l) tests passed.
   echo $(grep -e 'failed$' "$logfile"|wc -l) tests failed.
-else
+}
+
+urchin_molly_guard() {
   echo
   echo 'The directory on which you are running urchin is not'
   echo 'called "test", so I am not running in case that'
@@ -128,4 +102,35 @@ else
   echo 'to run urchin on that directory.'
   echo
   exit 1
+}
+
+FORCE=false
+HELP=false
+while [ $# -gt 0 ]
+do
+    case "$1" in
+        -f) FORCE=true;;
+        -h) HELP=true;;
+#       --xsd) action=testsuite;;
+#       --) shift; break;;
+        -*) echo >&2 $USAGE
+            exit 1;;
+        *)  break;;
+    esac
+    shift
+done
+
+# Help first
+$HELP && urchin_help
+
+# Verify argument for main stuff
+[ "$#" = '1' ] && [ -d "$1" ] ||
+( echo "$USAGE" &&  exit 1 )
+
+# Run or present the Molly guard.
+if echo "$(basename "$(readlink -f "$1")")" | grep test || $FORCE
+  then
+  urchin_go "$1"
+else
+  urchin_molly_guard
 fi
