@@ -35,6 +35,7 @@ recurse() {
         [ -f teardown ] && [ -x teardown ] && ./teardown &>> $stdout_file
       done
       [ -f teardown_dir ] && [ -x teardown_dir ] && ./teardown_dir &>> $stdout_file
+      echo
     )
   elif [ -x "$potential_test" ]
     then
