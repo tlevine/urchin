@@ -52,12 +52,12 @@ recurse() {
       # On success, print a '✓'
       echo -ne '\033[32m✓ \033[0m'
       echo "${potential_test}"
-      echo "${potential_test} passed" >> "$logfile"
+      [ -z "$logfile" ] || echo "${potential_test} passed" >> "$logfile"
     else
       # On fail, print a red '✗'
       echo -ne '\033[31m✗ \033[0m'
       echo "${potential_test}"
-      echo "${potential_test} failed" >> "$logfile"
+      [ -z "$logfile" ] || echo "${potential_test} failed" >> "$logfile"
       cat $stdout_file
     fi
     rm $stdout_file
@@ -83,12 +83,12 @@ urchin_help() {
 urchin_go() {
   echo Running tests
 
-  echo > "$logfile"
+  [ -z "$logfile" ] || echo > "$logfile"
   recurse "$1" 0
 
   echo Done
-  echo $(grep -e 'passed$' "$logfile"|wc -l) tests passed.
-  echo $(grep -e 'failed$' "$logfile"|wc -l) tests failed.
+  [ -z "$logfile" ] || echo $(grep -e 'passed$' "$logfile"|wc -l) tests passed.
+  [ -z "$logfile" ] || echo $(grep -e 'failed$' "$logfile"|wc -l) tests failed.
 }
 
 urchin_molly_guard() {
@@ -118,7 +118,8 @@ do
 done
 
 # Constants
-logfile=$(readlink -f "$1/.urchin.log")
+logfile=$(readlink -f "$1/.urchin.log") ||
+  echo readlink -f is not supported, so some features are not available. 1>&2
 stdout_file=/tmp/urchin_stdout
 
 # Help first
@@ -128,8 +129,11 @@ $HELP && urchin_help
 [ "$#" = '1' ] && [ -d "$1" ] ||
 ( echo "$USAGE" &&  exit 1 )
 
+# Expand the starting directory if readlink -f works.
+startdir=$(readlink -f "$1" 2> /dev/null) || startdir="$1"
+
 # Run or present the Molly guard.
-if echo "$(basename "$(readlink -f "$1")")" | grep test || $FORCE
+if echo "$startdir" | grep test || $FORCE
   then
   urchin_go "$1"
 else

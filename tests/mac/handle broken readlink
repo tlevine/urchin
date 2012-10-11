@@ -1,0 +1,4 @@
+#!/bin/sh
+
+export PATH="$PWD/.bin:$PATH"
+urchin .test
