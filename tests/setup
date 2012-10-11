@@ -1,1 +1,3 @@
-#urchin_export tmp=$(mktemp -d)
+#!/bin/sh
+
+export variable_set_in_setup='value'
