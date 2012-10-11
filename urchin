@@ -66,7 +66,35 @@ recurse() {
   fi
 }
 
+USAGE="usage: $0 <test directory>"
+# echo 'Go to http://www.urchin.sh for documentation on writing tests.'
+
+FORCE=false
+
+while [ $# -gt 0 ]
+do
+    case "$1" in
+        -f) FORCE=true;;
+#       --xsd) action=testsuite;;
+#       --) shift; break;;
+        -*) echo >&2 $USAGE
+            exit 1;;
+        *)  break;;
+    esac
+    shift
+done
+
+# Check
 if [ "$#" = '1' ] && [ -d "$1" ]
+  then
+  sleep 0s
+else
+  echo "$USAGE"
+  exit 1
+fi
+
+# Go
+if  echo "$1"| grep test || $FORCE
   then
   echo Running tests
 
@@ -79,6 +107,11 @@ if [ "$#" = '1' ] && [ -d "$1" ]
   echo $(grep -e 'passed$' "$logfile"|wc -l) tests passed.
   echo $(grep -e 'failed$' "$logfile"|wc -l) tests failed.
 else
-  echo "usage: $0 <test directory>"
-  echo 'Go to http://www.urchin.sh for documentation on writing tests.'
+  echo
+  echo 'The directory on which you are running urchin is not'
+  echo 'called "test", so I am not running in case that'
+  echo 'was an accident. Use the -f flag if you really want'
+  echo 'to run urchin on that directory.'
+  echo
+  exit 1
 fi
