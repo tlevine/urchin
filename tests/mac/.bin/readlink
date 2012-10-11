@@ -1,4 +1,0 @@
-#!/bin/sh
-
-echo This is broken on Mac. 1>&2
-exit 1
