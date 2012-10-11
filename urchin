@@ -8,20 +8,24 @@ recurse() {
   [ "$potential_test" = 'setup' ] && return
   [ "$potential_test" = 'teardown' ] && return
 
+  # stdout_file=$(mktemp)
+  stdout_file=/tmp/urchin_stdout
+
   if [ -d "$potential_test" ]
     then
     (
       cd "$potential_test"
-      [ -f setup_dir ] && [ -x setup_dir ] && ./setup_dir
+      [ -f setup_dir ] && [ -x setup_dir ] && ./setup_dir &>> $stdout_file
       for test in *
-        do recurse "${test}"
+        do
+        [ -f setup ] && [ -x setup ] && ./setup &>> $stdout_file
+        recurse "${test}"
+        [ -f teardown ] && [ -x teardown ] && ./teardown &>> $stdout_file
       done
-      [ -f teardown_dir ] && [ -x teardown_dir ] && ./teardown_dir
+      [ -f teardown_dir ] && [ -x teardown_dir ] && ./teardown_dir &>> $stdout_file
     )
   elif [ -x "$potential_test" ]
     then
-    #stdout_file=$(mktemp)
-    stdout_file=/tmp/urchin_stdout
 
     [ -f setup ] && [ -x setup ] && ./setup &>> $stdout_file
 
