@@ -67,14 +67,14 @@ recurse() {
 }
 
 USAGE="usage: $0 <test directory>"
-# echo 'Go to http://www.urchin.sh for documentation on writing tests.'
 
 FORCE=false
-
+HELP=false
 while [ $# -gt 0 ]
 do
     case "$1" in
         -f) FORCE=true;;
+        -h) HELP=true;; 
 #       --xsd) action=testsuite;;
 #       --) shift; break;;
         -*) echo >&2 $USAGE
@@ -83,6 +83,21 @@ do
     esac
     shift
 done
+
+if $HELP
+  then
+  echo
+  echo "$USAGE"
+  echo
+  echo '-f      Force urchin to run on directories not named "test".'
+  echo '-h      This help'
+  echo
+  echo '--xsd   Output xUnit XML schema for an integration server.'
+  echo
+  echo 'Go to http://www.urchin.sh for documentation on writing tests.'
+  echo
+  exit 0
+fi
 
 # Check
 if [ "$#" = '1' ] && [ -d "$1" ]
@@ -102,7 +117,6 @@ if  echo "$1"| grep test || $FORCE
   echo > "$logfile"
   recurse "$1" 0
 
-  echo
   echo Done
   echo $(grep -e 'passed$' "$logfile"|wc -l) tests passed.
   echo $(grep -e 'failed$' "$logfile"|wc -l) tests failed.
