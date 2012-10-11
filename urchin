@@ -1,8 +1,5 @@
 #!/bin/bash
 
-stdout_file=/tmp/urchin_stdout
-logfile=$(readlink -f "$1/.urchin.log")
-
 indent() {
   level="$1"
   printf "%$((2 * ${level}))s"
@@ -119,6 +116,10 @@ do
     esac
     shift
 done
+
+# Constants
+logfile=$(readlink -f "$1/.urchin.log")
+stdout_file=/tmp/urchin_stdout
 
 # Help first
 $HELP && urchin_help
