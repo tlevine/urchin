@@ -6,12 +6,13 @@ Not done
 ------
 We made the colors brighter.
 
-We added directory-based indents.
-
 We allowed for multiple tests to be written in a file
 
-We adjusted the input parameters so it is harder to accidentally run all executible files in your home directory.
-
+We added flags for verbosity and for Molly guards
 
 Done
 -----
+
+We adjusted the input parameters so it is harder to accidentally run all executible files in your home directory.
+
+We added directory-based indents.
