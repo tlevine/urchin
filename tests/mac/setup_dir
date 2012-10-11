@@ -1,0 +1,2 @@
+export OLD_PATH="$PATH"
+export PATH="$PWD/.bin:$PATH"
