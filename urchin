@@ -132,8 +132,11 @@ stdout_file=/tmp/urchin_stdout
 $HELP && urchin_help
 
 # Verify argument for main stuff
-[ "$#" = '1' ] && [ -d "$1" ] ||
-( echo "$USAGE" &&  exit 1 )
+if [ "$#" != '1' ] && [ ! -d "$1" ]
+  then
+  echo "$USAGE"
+  exit 1
+fi
 
 # Run or present the Molly guard.
 if echo "$(basename "$(fullpath "$1")")" | grep test || $FORCE
