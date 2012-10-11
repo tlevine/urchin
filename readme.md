@@ -3,9 +3,21 @@
      '\__| '| \  '\_  '| |   _|_, |'\| 
     `  '  `    `  ' `  '     '  ` 
 
-Urchin is a test framework for shell.
+Urchin is a test framework for shell. It currently supports bash on
+GNU/Linux and Mac.
 
-## Install
+## Try it out
+Urchin's tests are written in Urchin, so you can run them to see what Urchin
+is like. Clone the repository
+
+    git clone git://github.com/scraperwiki/urchin.git
+
+Run the tests
+
+    cd urchin/tests
+    ../urchin .    
+
+## Globally
 Download Urchin like so (as root)
 
     wget -O /usr/local/bin https://raw.github.com/scraperwiki/urchin/master/urchin
