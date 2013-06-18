@@ -84,7 +84,6 @@ urchin_help() {
   echo
   echo 'Go to http://www.urchin.sh for documentation on writing tests.'
   echo
-  exit 0
 }
 
 urchin_go() {
@@ -109,15 +108,15 @@ urchin_molly_guard() {
 }
 
 FORCE=false
-HELP=false
 while [ $# -gt 0 ]
 do
     case "$1" in
         -f) FORCE=true;;
-        -h) HELP=true;;
+        -h|--help) urchin_help
+          exit 0;;
 #       --xsd) action=testsuite;;
 #       --) shift; break;;
-        -*) echo >&2 $USAGE
+        -*) urchin_help 1>&2
             exit 1;;
         *)  break;;
     esac
@@ -127,9 +126,6 @@ done
 # Constants
 logfile=$(fullpath "$1")/.urchin.log
 stdout_file=/tmp/urchin_stdout
-
-# Help first
-$HELP && urchin_help
 
 # Verify argument for main stuff
 if [ "$#" != '1' ] && [ ! -d "$1" ]
