@@ -57,12 +57,12 @@ recurse() {
     if [ "$exit_code" = '0' ]
       then
       # On success, print a '✓'
-      echo -ne '\033[32m✓ \033[0m'
+      printf '\033[32m✓ \033[0m'
       echo "${potential_test}"
       echo "${potential_test} passed" >> "$logfile"
     else
       # On fail, print a red '✗'
-      echo -ne '\033[31m✗ \033[0m'
+      printf '\033[31m✗ \033[0m'
       echo "${potential_test}"
       echo "${potential_test} failed" >> "$logfile"
       cat $stdout_file
