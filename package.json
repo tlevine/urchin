@@ -9,6 +9,7 @@
   "scripts": {
     "test": "./urchin tests"
   },
+  "bin": "./urchin",
   "repository": {
     "type": "git",
     "url": "git://github.com/scraperwiki/urchin.git"
