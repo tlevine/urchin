@@ -29,29 +29,29 @@ recurse() {
       indent $indent_level
       echo "  ${potential_test}"
       cd "$potential_test"
-      [ -f setup_dir ] && [ -x setup_dir ] && ./setup_dir >> $stdout_file
+      [ -f setup_dir ] && [ -x setup_dir ] && ./setup_dir >> "$stdout_file"
       for test in *
         do
-        [ -f setup ] && [ -x setup ] && ./setup >> $stdout_file
+        [ -f setup ] && [ -x setup ] && ./setup >> "$stdout_file"
 
         # $2 instead of $indent_level so it doesn't clash
         recurse "${test}" $(( $2 + 1 ))
 
-        [ -f teardown ] && [ -x teardown ] && ./teardown >> $stdout_file
+        [ -f teardown ] && [ -x teardown ] && ./teardown >> "$stdout_file"
       done
-      [ -f teardown_dir ] && [ -x teardown_dir ] && ./teardown_dir >> $stdout_file
+      [ -f teardown_dir ] && [ -x teardown_dir ] && ./teardown_dir >> "$stdout_file"
       echo
     )
   elif [ -x "$potential_test" ]
     then
 
-    [ -f setup ] && [ -x setup ] && ./setup >> $stdout_file
+    [ -f setup ] && [ -x setup ] && ./setup >> "$stdout_file"
 
     # Run the test
-    ./"$potential_test" &> $stdout_file
+    ./"$potential_test" &> "$stdout_file"
     exit_code="$?"
 
-    [ -f teardown ] && [ -x teardown ] && ./teardown >> $stdout_file
+    [ -f teardown ] && [ -x teardown ] && ./teardown >> "$stdout_file"
 
     indent $indent_level
     if [ "$exit_code" = '0' ]
@@ -65,9 +65,9 @@ recurse() {
       printf '\033[31m✗ \033[0m'
       echo "${potential_test}"
       echo "${potential_test} failed" >> "$logfile"
-      cat $stdout_file
+      cat "$stdout_file"
     fi
-    rm $stdout_file
+    rm "$stdout_file"
   fi
 }
 
@@ -125,7 +125,7 @@ done
 
 # Constants
 logfile=$(fullpath "$1")/.urchin.log
-stdout_file=/tmp/urchin_stdout
+stdout_file=$(fullpath "$1")/.urchin_stdout
 
 # Verify argument for main stuff
 if [ "$#" != '1' ] && [ ! -d "$1" ]
