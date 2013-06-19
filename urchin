@@ -48,7 +48,7 @@ recurse() {
     [ -f setup ] && [ -x setup ] && ./setup >> "$stdout_file"
 
     # Run the test
-    ./"$potential_test" &> "$stdout_file"
+    ./"$potential_test" > "$stdout_file" 2>&1
     exit_code="$?"
 
     [ -f teardown ] && [ -x teardown ] && ./teardown >> "$stdout_file"
