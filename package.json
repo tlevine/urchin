@@ -1,0 +1,25 @@
+{
+  "name": "urchin",
+  "version": "0.0.0",
+  "description": "Test framework for shell",
+  "main": "urchin",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "./urchin tests"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/scraperwiki/urchin.git"
+  },
+  "keywords": [
+    "shell",
+    "test",
+    "testing"
+  ],
+  "author": "ScraperWiki Limited <feedback@scraperwiki.com>",
+  "license": "BSD",
+  "readmeFilename": "readme.md",
+  "gitHead": "015052dcfd7152a0df037bef1bc5452e0c956695"
+}
