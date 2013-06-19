@@ -3,8 +3,9 @@
      '\__| '| \  '\_  '| |   _|_, |'\| 
     `  '  `    `  ' `  '     '  ` 
 
-Urchin is a test framework for shell. It currently supports bash on
-GNU/Linux and Mac.
+Urchin is a test framework for shell. It is implemented in
+portable /bin/sh and should work on GNU/Linux, Mac OS X, and
+other Unix platforms.
 
 ## Try it out
 Urchin's tests are written in Urchin, so you can run them to see what Urchin
@@ -33,7 +34,7 @@ exit `0` on success and something else on fail. Non-executable files and hidden
 files (dotfiles) are ignored, so you can store fixtures right next to your
 tests. Run urchin from inside the tests directory.
 
-Urchin only cares about the exit code, so you can actually write your tests
+Urchin only cares about the exit status, so you can actually write your tests
 in any language, not just shell.
 
 ## More about writing tests
