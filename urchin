@@ -86,6 +86,18 @@ urchin_help() {
   echo
 }
 
+plural () {
+  # Make $1 a plural according to the number $2.
+  # If $3 is supplied, use that instead of "${1}s".
+  # Result is written to stdout.
+  if [ "$2" = 1 ]
+  then
+    printf '%s\n' "$1"
+  else
+    printf '%s\n' "${3-${1}s}"
+  fi
+}
+
 urchin_go() {
   echo Running tests
 
@@ -93,8 +105,9 @@ urchin_go() {
   recurse "$1" 0
 
   echo Done
-  echo $(grep -e 'passed$' "$logfile"|wc -l) tests passed.
-  echo $(grep -e 'failed$' "$logfile"|wc -l) tests failed.
+  set -- $(grep -e 'passed$' "$logfile"|wc -l) $(grep -e 'failed$' "$logfile"|wc -l)
+  printf '%s\n' "$1 $(plural test "$1") passed."
+  printf '%s\n' "$2 $(plural test "$2") failed."
 }
 
 urchin_molly_guard() {
