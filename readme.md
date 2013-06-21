@@ -19,10 +19,15 @@ Run the tests
     ../urchin .    
 
 ## Globally
-Download Urchin like so (as root)
+Download Urchin like so (as root) (or use npm, below):
 
-    wget -O /usr/local/bin https://raw.github.com/scraperwiki/urchin/master/urchin
-    chmod +x /usr/local/bin/urchin
+    cd /usr/local/bin
+    wget https://raw.github.com/scraperwiki/urchin/master/urchin
+    chmod +x urchin
+
+Can be installed with npm too:
+
+    npm install -g urchin
 
 Now you can run it.
 
