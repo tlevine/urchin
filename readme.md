@@ -1,7 +1,8 @@
-      ,  ,  ,_     _,  , ,   ___, ,  , 
-      |  |  |_)   /    |_|, ' |   |\ | 
-     '\__| '| \  '\_  '| |   _|_, |'\| 
-    `  '  `    `  ' `  '     '  ` 
+                       __    _     
+      __  ____________/ /_  (_)___ 
+     / / / / ___/ ___/ __ \/ / __ \
+    / /_/ / /  / /__/ / / / / / / /
+    \__,_/_/   \___/_/ /_/_/_/ /_/ 
 
 Urchin is a test framework for shell. It is implemented in
 portable /bin/sh and should work on GNU/Linux, Mac OS X, and
