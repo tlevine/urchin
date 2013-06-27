@@ -19,6 +19,12 @@ Run the tests
     cd urchin/tests
     ../urchin .    
 
+The above command will run the tests in your login shell; to test cross-shell
+compatibility, run this.
+
+    cd urchin
+    ./cross-shell-tests
+
 ## Globally
 Download Urchin like so (as root) (or use npm, below):
 
