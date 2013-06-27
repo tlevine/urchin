@@ -12,3 +12,4 @@ for shell in dash bash ksh oksh pdksh zsh; do
     echo Skipping $shell because it is not in the PATH
   fi
 done
+echo
