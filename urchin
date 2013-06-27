@@ -148,7 +148,7 @@ if [ "$#" != '1' ] && [ ! -d "$1" ]
 fi
 
 # Run or present the Molly guard.
-if echo "$(basename "$(fullpath "$1")")" | grep test || $FORCE
+if basename "$(fullpath "$1")" | grep test || $FORCE
   then
   urchin_go "$1"
 else
