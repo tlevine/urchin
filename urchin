@@ -99,12 +99,15 @@ plural () {
 }
 
 urchin_go() {
-  echo Running tests
+  echo Running tests at $(date +%Y-%m-%dT%H:%M:%S)
+  start=$(date +%s)
 
   echo > "$logfile"
   recurse "$1" 0
 
-  echo Done
+  finish=$(date +%s)
+  elapsed=$(($finish - $start))
+  echo Done, took $elapsed $(plural second $elapsed)
   set -- $(grep -e 'passed$' "$logfile"|wc -l) $(grep -e 'failed$' "$logfile"|wc -l)
   printf '%s\n' "$1 $(plural test "$1") passed."
   printf '%s\n' "$2 $(plural test "$2") failed."
