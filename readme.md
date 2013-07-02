@@ -16,8 +16,8 @@ is like. Clone the repository
 
 Run the tests
 
-    cd urchin/tests
-    ../urchin .    
+    cd urchin
+    ./urchin tests
 
 The above command will run the tests in your systems default
 shell, /bin/sh (on recent Ubuntu this is dash, but it could be
