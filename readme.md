@@ -19,8 +19,10 @@ Run the tests
     cd urchin/tests
     ../urchin .    
 
-The above command will run the tests in your login shell; to test cross-shell
-compatibility, run this.
+The above command will run the tests in your systems default
+shell, /bin/sh (on recent Ubuntu this is dash, but it could be
+ksh or bash on other systems); to test cross-shell compatibility,
+run this:
 
     cd urchin
     ./cross-shell-tests
