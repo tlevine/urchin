@@ -2,7 +2,7 @@
 
 fullpath() {
   (
-    cd "$1"
+    cd -- "$1"
     pwd
   )
 }
@@ -28,7 +28,7 @@ recurse() {
     (
       indent $indent_level
       echo "  ${potential_test}"
-      cd "$potential_test"
+      cd -- "$potential_test"
       [ -f setup_dir ] && [ -x setup_dir ] && ./setup_dir >> "$stdout_file"
       for test in *
         do
