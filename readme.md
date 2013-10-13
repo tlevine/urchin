@@ -83,3 +83,7 @@ within the particular directory, and the `teardown` file is run right after.
 Files are only run if they are executable, and files beginning with `.` are
 ignored. Thus, fixtures and libraries can be included sloppily within the test
 directory tree. The test passes if the file exits 0; otherwise, it fails.
+
+## Alternatives to Urchin
+Alternatives to Urchin are discussed in
+[this blog post](https://blog.scraperwiki.com/2012/12/how-to-test-shell-scripts/).
