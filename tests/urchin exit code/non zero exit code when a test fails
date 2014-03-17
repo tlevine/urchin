@@ -1,0 +1,6 @@
+../../urchin "../Counts should be kept of successes and failures./.test" > /dev/null
+case $? in
+  0) exit 8;;
+  *) exit 0;;
+esac
+
