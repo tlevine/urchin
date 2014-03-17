@@ -111,6 +111,7 @@ urchin_go() {
   set -- $(grep -e 'passed$' "$logfile"|wc -l) $(grep -e 'failed$' "$logfile"|wc -l)
   printf '%s\n' "$1 $(plural test "$1") passed."
   printf '%s\n' "$2 $(plural test "$2") failed."
+  return "$2"
 }
 
 urchin_molly_guard() {
