@@ -1,0 +1,8 @@
+#!/bin/sh
+
+# Check the prerequisites for our test.
+which bash >/dev/null || { printf '%s\n' "ERROR: Cannot test -s option: bash is not available." >&2; exit 1; }
+[ -x /usr/bin/awk ] || { printf '%s\n' "ERROR: Cannot test -s option: /usr/bin/awk is not available." >&2; exit 1; }
+
+# Run urchin with bash and the -s option so as to see if it then runs tests that either have NO shebang line or shebang line '#!/bin/sh' with bash, too.
+bash ../../urchin -s -f ./.test

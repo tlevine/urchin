@@ -21,7 +21,7 @@ Run the tests
 
 The above command will run the tests in your systems default
 shell, /bin/sh (on recent Ubuntu this is dash, but it could be
-ksh or bash on other systems); to test cross-shell compatibility,
+ksh or bash on other systems); to test urchin's own cross-shell compatibility,
 run this:
 
     cd urchin
@@ -83,6 +83,34 @@ within the particular directory, and the `teardown` file is run right after.
 Files are only run if they are executable, and files beginning with `.` are
 ignored. Thus, fixtures and libraries can be included sloppily within the test
 directory tree. The test passes if the file exits 0; otherwise, it fails.
+
+### Running tests with a specifiable shell for cross-shell compatibility tests
+
+By default, urchin invokes test executables directly, so their shebang lines
+are respected.  
+If, by contrast, you want your tests to be run with a specifiable shell, do the following:
+
+* Use either no shebang line at all or shebang line `#!/bin/sh` in your tests.
+* Invoke urchin itself with the shell of interest, and specify the `-s` option.  
+This will cause urchin to run all tests that either have no shebang line or shebang line `#!/bin/sh`
+with instances of the same shell that's running urchin itself.
+
+Note: The `-s` option is necessary, because different POSIX-like shells behave differently 
+when invoking an executable shell script _without_ a shebang line:
+some execute such scripts with an instance of _themselves_, whereas others _fall back to `sh`_.  
+Furthermore, by also applying to tests with shebang line `#!/bin/sh`, you can test
+portable shell code against specific shells known to act as `sh` on other platforms.
+
+Example:
+
+    bash urchin -s ./tests
+
+Runs both urchin and all tests in subtree `./tests` whose shebang line is either missing or is `#!/bin/sh` with `bash`.
+
+This is handy for testing shell code that should run on all major POSIX-like shells; e.g.:
+
+    for shell in sh bash ksh zsh; do $shell urchin -s ./tests; done
+
 
 ## Alternatives to Urchin
 Alternatives to Urchin are discussed in
