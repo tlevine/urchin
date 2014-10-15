@@ -90,14 +90,16 @@ By default, urchin invokes test executables directly, so their shebang lines
 are respected.  
 If, by contrast, you want your tests to be run with a specifiable shell, do the following:
 
-* Use either no shebang line at all or shebang line `#!/bin/sh` or  in your tests.
+* Use either no shebang line at all or shebang line `#!/bin/sh` in your tests.
 * Invoke urchin itself with the shell of interest, and specify the `-s` option.  
 This will cause urchin to run all tests that either have no shebang line or shebang line `#!/bin/sh`
 with instances of the same shell that's running urchin itself.
 
-Note: This option is necessary, because different POSIX-like shells behave differently 
+Note: The `-s` option is necessary, because different POSIX-like shells behave differently 
 when invoking an executable shell script _without_ a shebang line:
-some execute such scripts with an instance of _themselves_, whereas others _fall back to `sh`_.
+some execute such scripts with an instance of _themselves_, whereas others _fall back to `sh`_.  
+Furthermore, by also applying to tests with shebang line `#!/bin/sh`, you can test
+portable shell code against specific shells known to act as `sh` on other platforms.
 
 Example:
 
