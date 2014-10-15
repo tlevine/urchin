@@ -49,7 +49,8 @@ recurse() {
     [ -f setup ] && [ -x setup ] && ./setup >> "$stdout_file"
 
     # Run the test
-    if [ -n "$shell_for_sh_tests" ] && { head -n 1 ./"$potential_test" | grep -qE '^#![[:blank:]]*/bin/sh($|[[:blank:]])'; }; then
+    if [ -n "$shell_for_sh_tests" ] && has_sh_or_no_shebang_line ./"$potential_test"
+      then
       "$shell_for_sh_tests" ./"$potential_test" > "$stdout_file" 2>&1
     else
       ./"$potential_test" > "$stdout_file" 2>&1
@@ -59,7 +60,7 @@ recurse() {
     [ -f teardown ] && [ -x teardown ] && ./teardown >> "$stdout_file"
 
     indent $indent_level
-    if [ "$exit_code" = '0' ]
+    if [ $exit_code -eq 0 ]
       then
       # On success, print a green '✓'
       printf '\033[32m✓ \033[0m'
@@ -78,14 +79,20 @@ recurse() {
   [ $indent_level -eq 0 ] && rm "$stdout_file"
 }
 
+has_sh_or_no_shebang_line() {
+  head -n 1 "$1" | grep -vqE '^#!' && return 0 # no shebang line at all
+  head -n 1 "$1" | grep -qE '^#![[:blank:]]*/bin/sh($|[[:blank:]])' && return 0  # shebang line is '#!/bin/sh' or legal variations thereof
+  return 1
+}
+
 USAGE="usage: $0 <test directory>"
 
 urchin_help() {
   echo
   echo "$USAGE"
   echo
-  echo '-s      Run tests that have shebang line '#!/bin/sh' with the same shell that'
-  echo '        is running urchin itself.'
+  echo '-s      Run tests that have either no shebang line or have shebang line "#!/bin/sh"'
+  echo '        with instances of the same shell that is running urchin itself.'
   echo '-f      Force urchin to run on directories not named "test".'
   echo '-h      This help'
   # echo
@@ -118,9 +125,9 @@ urchin_go() {
   echo "Done, took $elapsed $(plural second $elapsed)."
   set -- $(grep -e 'passed$' "$logfile"|wc -l) $(grep -e 'failed$' "$logfile"|wc -l)
   printf '%s\n' "$1 $(plural test "$1") passed."
-  [ $2 -gt 0 ] && printf '\033[31m' # If tests failed, print the message in red.
+  [ $2 -gt 0 ] && printf '\033[31m' || printf '\033[32m' # If tests failed, print the message in red, otherwise in green.
   printf '%s\n' "$2 $(plural test "$2") failed."
-  [ $2 -gt 0 ] && printf '\033[m'
+  printf '\033[m'
   return "$2"
 }
 
@@ -154,16 +161,16 @@ do
     shift
 done
 
-# Constants
-logfile=$(fullpath "$1")/.urchin.log
-stdout_file=$(fullpath "$1")/.urchin_stdout
-
 # Verify argument for main stuff
-if [ "$#" != '1' ] && [ ! -d "$1" ]
+if [ "$#" != '1' ] || [ ! -d "$1" ]
   then
   echo "$USAGE"
   exit 1
 fi
+
+# Constants
+logfile=$(fullpath "$1")/.urchin.log
+stdout_file=$(fullpath "$1")/.urchin_stdout
 
 # Run or present the Molly guard.
 if basename "$(fullpath "$1")" | grep test > /dev/null || $force

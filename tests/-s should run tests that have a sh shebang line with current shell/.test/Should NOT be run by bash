@@ -1,4 +1,0 @@
-#!/usr/bin/awk -f
-
-# This command will only execute if it is indeed awk processing this script.
-BEGIN { print "ok" }

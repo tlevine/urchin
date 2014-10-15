@@ -1,0 +1,4 @@
+#!/usr/bin/awk -f
+
+# This command will only execute (successfully) if it is indeed awk (and not a shell) processing this script.
+BEGIN { print "ok" }
