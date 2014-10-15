@@ -21,7 +21,7 @@ Run the tests
 
 The above command will run the tests in your systems default
 shell, /bin/sh (on recent Ubuntu this is dash, but it could be
-ksh or bash on other systems); to test cross-shell compatibility,
+ksh or bash on other systems); to test urchin's own cross-shell compatibility,
 run this:
 
     cd urchin
@@ -83,6 +83,27 @@ within the particular directory, and the `teardown` file is run right after.
 Files are only run if they are executable, and files beginning with `.` are
 ignored. Thus, fixtures and libraries can be included sloppily within the test
 directory tree. The test passes if the file exits 0; otherwise, it fails.
+
+### Running tests with a specifiable shell for cross-shell compatibility tests
+
+By default, urchin invokes test executables directly, so their shebang lines
+are respected.  
+If, by contrast, you want your tests to be run with a specifiable shell, do the following:
+
+* Use shebang line `#!/bin/sh` in all tests of interest.
+* Invoke urchin itself with the shell of interest, and specify the `-s` option.  
+This will cause it to run all tests that have shebang line `#!/bin/sh` with the same shell that's running urchin itself.
+
+Example:
+
+    bash urchin -s ./tests
+
+Runs both urchin and all tests in subtree `./tests` whose shebang line is `#!/bin/sh` with `bash`.
+
+This is handy for testing shell code that should run on all major (mostly) POSIX-compliant shells; e.g.:
+
+    for shell in sh bash ksh zsh; do $shell urchin -s ./tests; done
+
 
 ## Alternatives to Urchin
 Alternatives to Urchin are discussed in

@@ -1,0 +1,5 @@
+#!/bin/sh
+
+# Assuming that urchin itself is being run by bash and was invoked with -s, this test should succeed.
+[ "$(ps -o comm= -p $$)" = 'bash' ]
+

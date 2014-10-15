@@ -15,13 +15,14 @@ indent() {
 recurse() {
   potential_test="$1"
   indent_level="$2"
+  shell_for_sh_tests="$3" # optional
 
   [ "$potential_test" = 'setup_dir' ] && return
   [ "$potential_test" = 'teardown_dir' ] && return
   [ "$potential_test" = 'setup' ] && return
   [ "$potential_test" = 'teardown' ] && return
 
-  echo > "$stdout_file"
+  [ $indent_level -eq 0 ] && : > "$stdout_file"
 
   if [ -d "$potential_test" ]
     then
@@ -35,7 +36,7 @@ recurse() {
         [ -f setup ] && [ -x setup ] && ./setup >> "$stdout_file"
 
         # $2 instead of $indent_level so it doesn't clash
-        recurse "${test}" $(( $2 + 1 ))
+        recurse "${test}" $(( $2 + 1 )) "$shell_for_sh_tests"
 
         [ -f teardown ] && [ -x teardown ] && ./teardown >> "$stdout_file"
       done
@@ -48,7 +49,11 @@ recurse() {
     [ -f setup ] && [ -x setup ] && ./setup >> "$stdout_file"
 
     # Run the test
-    ./"$potential_test" > "$stdout_file" 2>&1
+    if [ -n "$shell_for_sh_tests" ] && { head -n 1 ./"$potential_test" | grep -qE '^#![[:blank:]]*/bin/sh($|[[:blank:]])'; }; then
+      "$shell_for_sh_tests" ./"$potential_test" > "$stdout_file" 2>&1
+    else
+      ./"$potential_test" > "$stdout_file" 2>&1
+    fi
     exit_code="$?"
 
     [ -f teardown ] && [ -x teardown ] && ./teardown >> "$stdout_file"
@@ -56,7 +61,7 @@ recurse() {
     indent $indent_level
     if [ "$exit_code" = '0' ]
       then
-      # On success, print a '✓'
+      # On success, print a green '✓'
       printf '\033[32m✓ \033[0m'
       printf '%s\n' "${potential_test}"
       printf '%s\n' "${potential_test} passed" >> "$logfile"
@@ -65,10 +70,12 @@ recurse() {
       printf '\033[31m✗ \033[0m'
       printf '%s\n' "${potential_test}"
       printf '%s\n' "${potential_test} failed" >> "$logfile"
+      printf '\033[31m' # Print output captured from failed test in red.
       cat "$stdout_file"
+      printf '\033[0m'
     fi
-    rm "$stdout_file"
   fi
+  [ $indent_level -eq 0 ] && rm "$stdout_file"
 }
 
 USAGE="usage: $0 <test directory>"
@@ -77,12 +84,14 @@ urchin_help() {
   echo
   echo "$USAGE"
   echo
+  echo '-s      Run tests that have shebang line '#!/bin/sh' with the same shell that'
+  echo '        is running urchin itself.'
   echo '-f      Force urchin to run on directories not named "test".'
   echo '-h      This help'
+  # echo
+  # echo '--xsd   Output xUnit XML schema for an integration server.'
   echo
-  echo '--xsd   Output xUnit XML schema for an integration server.'
-  echo
-  echo 'Go to http://www.urchin.sh for documentation on writing tests.'
+  echo 'Go to https://github.com/scraperwiki/urchin for documentation on writing tests.'
   echo
 }
 
@@ -99,36 +108,41 @@ plural () {
 }
 
 urchin_go() {
-  echo Running tests at $(date +%Y-%m-%dT%H:%M:%S)
+  echo Running tests at $(date +%Y-%m-%dT%H:%M:%S) | tee "$logfile"
   start=$(date +%s)
 
-  echo > "$logfile"
-  recurse "$1" 0
+  recurse "$1" 0 "$2"  # test folder, indentation level, [shell to invoke tests with]
 
   finish=$(date +%s)
   elapsed=$(($finish - $start))
-  echo Done, took $elapsed $(plural second $elapsed)
+  echo "Done, took $elapsed $(plural second $elapsed)."
   set -- $(grep -e 'passed$' "$logfile"|wc -l) $(grep -e 'failed$' "$logfile"|wc -l)
   printf '%s\n' "$1 $(plural test "$1") passed."
+  [ $2 -gt 0 ] && printf '\033[31m' # If tests failed, print the message in red.
   printf '%s\n' "$2 $(plural test "$2") failed."
+  [ $2 -gt 0 ] && printf '\033[m'
   return "$2"
 }
 
 urchin_molly_guard() {
-  echo
-  echo 'The directory on which you are running urchin is not'
-  echo 'called "test", so I am not running in case that'
-  echo 'was an accident. Use the -f flag if you really want'
-  echo 'to run urchin on that directory.'
-  echo
+  {
+    echo
+    echo 'The directory on which you are running urchin is not'
+    echo 'called "test", so I am not running in case that'
+    echo 'was an accident. Use the -f flag if you really want'
+    echo 'to run urchin on that directory.'
+    echo
+  } >&2
   exit 1
 }
 
-FORCE=false
+shell_for_sh_tests=
+force=false
 while [ $# -gt 0 ]
 do
     case "$1" in
-        -f) FORCE=true;;
+        -f) force=true;;
+        -s) shell_for_sh_tests=$(ps -o comm= -p $$);;
         -h|--help) urchin_help
           exit 0;;
 #       --xsd) action=testsuite;;
@@ -152,9 +166,9 @@ if [ "$#" != '1' ] && [ ! -d "$1" ]
 fi
 
 # Run or present the Molly guard.
-if basename "$(fullpath "$1")" | grep test > /dev/null || $FORCE
+if basename "$(fullpath "$1")" | grep test > /dev/null || $force
   then
-  urchin_go "$1"
+  urchin_go "$1" "$shell_for_sh_tests"
 else
   urchin_molly_guard
 fi
