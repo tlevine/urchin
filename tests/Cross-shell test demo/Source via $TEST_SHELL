@@ -1,0 +1,19 @@
+#!/bin/sh
+
+# Sample cross-shell compatibility test for sourced functionality:
+# This test demonstrates how to control what shell is used to run *this* script via environment variable TEST_SHELL, optionally overriding this script's shebang line.
+# (Define TEST_SHELL by prepending the urchin invocation as follows, for instance: `TEST_SHELL=bash urchin ./tests`):
+# This is helpful if you want to *source* functionality in this script and have it tested with different shells.
+
+# If a shell to run tests with was specified, *reinvoke this very test with that shell*.
+# NOTE: $TEST_SHELL is set to empty before re-invocation.
+[ -n "$TEST_SHELL" ] && TEST_SHELL= exec "$TEST_SHELL" -- "$0" "$@"
+
+# If $TEST_SHELL was nonempty, getting here means that it is now shell $TEST_SHELL executing this script.
+# Note, however, that the env. *variable* $TEST_SHELL itself is empty at this point (or still undefined, if it wasn't defined).
+
+# Source the script to test...
+. './.tests/define function echoing current shell name'
+
+# ... and invoke the function defined by the script.
+echo_current_shell

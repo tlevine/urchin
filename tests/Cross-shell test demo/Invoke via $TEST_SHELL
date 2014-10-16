@@ -1,0 +1,18 @@
+#!/bin/sh
+
+# Sample cross-shell compatibility test:
+# This test demonstrates how to control invocation of a shell script to be tested through environment variable TEST_SHELL
+# (define it by prepending the urchin invocation as follows, for instance: `TEST_SHELL=bash urchin ./tests`):
+#  - If TEST_SHELL is defined, the script is passed (as an argument) to the shell specified there for execution, thus overriding the script's shebang line.
+#  - Otherwise, by default, the script is invoked directly, as usual (letting its shebang line control what executable runs it).
+
+
+# Helper function for invoking the specified script (plus arguments, if any):
+#  - if env. variable TEST_SHELL is nonempty: *passes the script to $TEST_SHELL* for execution.
+#  - otherwise: *invokes the script directly* (letting its shebang line control the executable).
+# Below, pass every shell script to execute to *this* function instead of executing it directly.
+x() { if [ -n "$TEST_SHELL" ]; then "$TEST_SHELL" -- "$@"; else "$@"; fi }
+
+# Invoke the script to test - directly, by default, or - if specified - with $TEST_SHELL.
+# A sample argument is passed.
+x './.tests/echo current shell name' "$(date)"

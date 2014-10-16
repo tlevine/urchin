@@ -21,7 +21,7 @@ Run the tests
 
 The above command will run the tests in your systems default
 shell, /bin/sh (on recent Ubuntu this is dash, but it could be
-ksh or bash on other systems); to test cross-shell compatibility,
+ksh or bash on other systems); to test urchin's own cross-shell compatibility,
 run this:
 
     cd urchin
@@ -83,6 +83,48 @@ within the particular directory, and the `teardown` file is run right after.
 Files are only run if they are executable, and files beginning with `.` are
 ignored. Thus, fixtures and libraries can be included sloppily within the test
 directory tree. The test passes if the file exits 0; otherwise, it fails.
+
+### Writing cross-shell compatibility tests for testing shell code
+
+While you could write your test scripts to explicitly invoke the functionality
+to test with various shells, a more flexible approach is to pass the shell
+to use via environment variable `TEST_SHELL`.  
+(Note that urchin always invokes the test scripts themselves directly, so whatever shebang line
+_they_ specify is respected.)
+
+On invocation of urchin, prepend an environment-variable definition
+defining the shell to test with, e.g.: `TEST_SHELL=zsh urchin test`.
+To test with multiple shells in sequence, use something like:
+
+    for shell in sh bash ksh zsh; do
+      TEST_SHELL=$shell urchin ./tests
+    done
+
+To use this approach, you must design your test scripts accordingly:
+
+#### Writing a cross-shell compatibility test script controlled by environment variable `TEST_SHELL`
+
+Note: If you've cloned urchin's repository, find a demonstration of the techniques below in subfolder `tests/Cross-shell test demo`.
+
+Your test scripts must modify their behavior based on whether the environment variable
+`TEST_SHELL` has a value or not:
+
+- If `TEST_SHELL` has a value, the script to test must be passed (as an argument) to the shell specified there, thus overriding that script's shebang line.
+- Otherwise, the script must be invoked directly, as usual (letting its shebang line control what executable runs it).
+
+The following helper function, when placed at the top of your test script, facilitates this:
+
+    x() { if [ -n "$TEST_SHELL" ]; then "$TEST_SHELL" -- "$@"; else "$@"; fi }
+
+Then use `x` to invoke the shell script to test, e.g., `x ../foo`
+
+Alternatively, if the shell code to test must be _sourced_ (because that's how it will be run in practice), place the following
+at the top of your test script:
+
+    [ -n "$TEST_SHELL" ] && TEST_SHELL= exec "$TEST_SHELL" -- "$0" "$@"
+
+If `TEST_SHELL` has a value, this re-invokes the test script itself with the specified shell.  
+Place the command that sources the shell code to test (e.g., `. ../foo`) below that line, and it will be run by the desired shell.
 
 ## Alternatives to Urchin
 Alternatives to Urchin are discussed in

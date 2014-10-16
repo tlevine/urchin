@@ -1,0 +1,6 @@
+#!/this/should/be/ignored
+
+# Function that outputs the executable name of the shell running this script.
+echo_current_shell() {
+  ps -o comm= -p $$
+}

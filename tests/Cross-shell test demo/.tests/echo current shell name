@@ -1,0 +1,8 @@
+#!/bin/sh
+
+# Print the arguments passed in diagnostic form.
+i=1; for a; do echo "\$$i=[$a]"; i=$((i+1)); done
+
+# Output the executable name of the shell running this script.
+# Note: The `&& :` part prevents shells such as ksh from optimizing themselves away via an implicit `exec`.
+ps -o comm= -p $$ && :
