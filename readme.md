@@ -21,7 +21,7 @@ Run the tests
 
 The above command will run the tests in your systems default
 shell, /bin/sh (on recent Ubuntu this is dash, but it could be
-ksh or bash on other systems); to test cross-shell compatibility,
+ksh or bash on other systems); to test urchin's cross-shell compatibility,
 run this:
 
     cd urchin

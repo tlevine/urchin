@@ -1,4 +1,3 @@
 #!/bin/sh
 
-mkdir /tmp/urchintmp
-! ../../urchin /tmp/urchintmp
+! ../../urchin ./.chainsaw
