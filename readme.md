@@ -42,6 +42,8 @@ Now you can run it.
 
     urchin <test directory>
 
+Run `urchin -h` to get command-line help.
+
 ## Writing tests
 Make a root directory for your tests. Inside it, put executable files that
 exit `0` on success and something else on fail. Non-executable files and hidden
@@ -83,6 +85,55 @@ within the particular directory, and the `teardown` file is run right after.
 Files are only run if they are executable, and files beginning with `.` are
 ignored. Thus, fixtures and libraries can be included sloppily within the test
 directory tree. The test passes if the file exits 0; otherwise, it fails.
+
+### Writing cross-shell compatibility tests for testing shell code
+
+While you could write your test scripts to explicitly invoke the functionality
+to test with various shells, urchin facilitates a more flexible approach.
+
+The specific approach depends on your test scenario:
+
+* (a) Your test scripts _invoke_ scripts containing portable shell code.
+* (b) Your scripts _source_ scripts containing portable shell code.
+
+#### (a) Cross-shell tests with test scripts that _invoke_ shell scripts
+
+Write your test scripts to invoke the shell scripts to test via the shell
+specified in environment variable `TEST_SHELL` rather than directly;
+e.g.: `$TEST_SHELL ../foo bar` (rather than just `../foo bar`)
+
+Then, on invocation of urchin, prepend a definition of environment variable `TEST_SHELL`
+specifying the shell to test with, e.g.: `TEST_SHELL=zsh urchin ./tests`.
+To test with multiple shells in sequence, use something like:
+
+    for shell in sh bash ksh zsh; do
+      TEST_SHELL=$shell urchin ./tests
+    done
+
+If `TEST_SHELL` has no value, urchin defines it as `/bin/sh`, so the test
+scripts can rely on `$TEST_SHELL` always containing a value.
+
+#### (b) Cross-shell tests with test scripts that _source_ shell scripts
+
+If you _source_ shell code in your test scripts, it is the test scripts
+themselves that must be run with the shell specified.
+
+To that end, urchin supports the `-s <shell>` option, which instructs
+urchin to invoke the test scripts with the specified shell; e.g., `-s bash`
+
+Note that only test scripts that either have no shebang line at all or
+have shebang line '#!/bin/sh' are invoked with the specified shell.
+This allows non-shell test scripts or test scripts for _specific, hard-coded_ 
+shells to coexist with those whose invocation should be controlled by `-s`.
+
+To test with multiple shells in sequence, use something like:
+
+    for shell in sh bash ksh zsh; do
+      urchin -s $shell ./tests
+    done
+
+Urchin will also define environment variable `TEST_SHELL` to contain the
+the shell specified via `-s`.
 
 ## Alternatives to Urchin
 Alternatives to Urchin are discussed in

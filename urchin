@@ -15,6 +15,7 @@ indent() {
 recurse() {
   potential_test="$1"
   indent_level="$2"
+  shell_for_sh_tests="$3"
 
   [ "$potential_test" = 'setup_dir' ] && return
   [ "$potential_test" = 'teardown_dir' ] && return
@@ -35,7 +36,7 @@ recurse() {
         [ -f setup ] && [ -x setup ] && ./setup >> "$stdout_file"
 
         # $2 instead of $indent_level so it doesn't clash
-        recurse "${test}" $(( $2 + 1 ))
+        recurse "${test}" $(( $2 + 1 )) "$shell_for_sh_tests"
 
         [ -f teardown ] && [ -x teardown ] && ./teardown >> "$stdout_file"
       done
@@ -48,8 +49,14 @@ recurse() {
     [ -f setup ] && [ -x setup ] && ./setup >> "$stdout_file"
 
     # Run the test
-    ./"$potential_test" > "$stdout_file" 2>&1
+    if [ -n "$shell_for_sh_tests" ] && has_sh_or_no_shebang_line ./"$potential_test"
+      then    
+      TEST_SHELL="$TEST_SHELL" "$shell_for_sh_tests" ./"$potential_test" > "$stdout_file" 2>&1
+    else
+      TEST_SHELL="$TEST_SHELL" ./"$potential_test" > "$stdout_file" 2>&1
+    fi
     exit_code="$?"
+
 
     [ -f teardown ] && [ -x teardown ] && ./teardown >> "$stdout_file"
 
@@ -73,15 +80,23 @@ recurse() {
   [ $indent_level -eq 0 ] && rm "$stdout_file"
 }
 
-USAGE="usage: $0 <test directory>"
+has_sh_or_no_shebang_line() {
+  head -n 1 "$1" | grep -vqE '^#!' && return 0 # no shebang line at all
+  head -n 1 "$1" | grep -qE '^#![[:blank:]]*/bin/sh($|[[:blank:]])' && return 0  # shebang line is '#!/bin/sh' or legal variations thereof
+  return 1
+}
+
+USAGE="usage: $0 [<options>] <test directory>"
 
 urchin_help() {
   echo
   echo "$USAGE"
   echo
-  echo '-f      Force urchin to run on directories whose name does not contain'
-  echo '        the word "test".'
-  echo '-h      This help'
+  echo '-s <shell>  Invoke test scripts that either have no shebang line or'
+  echo '            shebang line "#!/bin/sh" with the specified shell.'
+  echo '-f          Force running even if the test directory'\''s name does not'
+  echo '            contain the word "test".'
+  echo '-h          This help.'
   # echo
   # echo '--xsd   Output xUnit XML schema for an integration server.'
   echo
@@ -105,7 +120,20 @@ urchin_go() {
   echo Running tests at $(date +%Y-%m-%dT%H:%M:%S) | tee "$logfile"
   start=$(date +%s)
 
-  recurse "$1" 0  # test folder, indentation level
+  # Determine the environment variable to define for test scripts
+  # that reflects the specified or implied shell to use for shell-code tests.
+  #  - Set it to the shell specified via -s, if any.
+  #  - Otherwise, use its present value, if non-empty.
+  #  - Otherwise, default to '/bin/sh'.
+  if [ -n "$2" ]
+    then
+    TEST_SHELL="$2"
+  elif [ -z "$TEST_SHELL" ]
+    then
+    TEST_SHELL='/bin/sh'
+  fi
+
+  recurse "$1" 0 "$2"  # test folder -- indentation level -- [shell to invoke test scripts with]
 
   finish=$(date +%s)
   elapsed=$(($finish - $start))
@@ -130,16 +158,20 @@ urchin_molly_guard() {
   exit 1
 }
 
+shell_for_sh_tests=
 force=false
 while [ $# -gt 0 ]
 do
     case "$1" in
         -f) force=true;;
+        -s)
+          shift
+          shell_for_sh_tests=$1
+          which "$shell_for_sh_tests" >/dev/null || { echo "Cannot find specified shell: '$shell_for_sh_tests'" >&2; urchin_help >&2; exit 2; }
+          ;;
         -h|--help) urchin_help
           exit 0;;
-#       --xsd) action=testsuite;;
-#       --) shift; break;;
-        -*) urchin_help 1>&2
+        -*) urchin_help >&2
             exit 1;;
         *)  break;;
     esac
@@ -151,7 +183,7 @@ if [ "$#" != '1' ] || [ ! -d "$1" ]
   then
   [ -d "$1" ] || echo "Not a directory: '$1'" >&2
   echo "$USAGE" >&2
-  exit 1
+  exit 2
 fi
 
 # Constants
@@ -161,7 +193,7 @@ stdout_file=$(fullpath "$1")/.urchin_stdout
 # Run or present the Molly guard.
 if basename "$(fullpath "$1")" | grep -Fi 'test' > /dev/null || $force
   then
-  urchin_go "$1"
+  urchin_go "$1" "$shell_for_sh_tests"
 else
   urchin_molly_guard
 fi
