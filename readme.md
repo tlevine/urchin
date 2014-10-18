@@ -124,7 +124,7 @@ themselves that must be run with the shell specified.
 
 To that end, Urchin supports the `-s <shell>` option, which instructs
 Urchin to invoke the test scripts with the specified shell; e.g., `-s bash`.  
-(In addition, Urchin sets environment variable `TEST_SHELL` to the specfied
+(In addition, Urchin sets environment variable `TEST_SHELL` to the specified
 shell.)
 
 Note that only test scripts that either have no shebang line at all or
