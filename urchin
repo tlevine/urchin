@@ -181,7 +181,7 @@ done
 # Verify argument for main stuff
 if [ "$#" != '1' ] || [ ! -d "$1" ]
   then
-  [ -d "$1" ] || echo "Not a directory: '$1'" >&2
+  [ -n "$1" ] && [ ! -d "$1" ] && echo "Not a directory: '$1'" >&2
   echo "$USAGE" >&2
   exit 2
 fi
