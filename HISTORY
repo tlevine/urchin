@@ -1,7 +1,7 @@
 HISTORY
 -------
 
-Version 0.0.3
+Version 0.0.4
 ---------------------
 General tidying
 
@@ -9,7 +9,7 @@ Run with different shells in three ways
 
 * urchin -s
 * $TEST_SHELL variable with $TEST_SHELL
-* $TEST_SHELL variable with urchin -sh
+* $TEST_SHELL variable with urchin -x
 
 Before version 0.0.3
 ----------------------
