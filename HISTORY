@@ -1,0 +1,16 @@
+HISTORY
+-------
+
+Version 0.0.3
+---------------------
+General tidying
+
+Run with different shells
+
+
+Before version 0.0.3
+----------------------
+We adjusted the input parameters so it is harder to accidentally run all executable files in you
+r home directory.
+
+We added directory-based indents.
