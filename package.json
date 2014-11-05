@@ -1,6 +1,6 @@
 {
   "name": "urchin",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Test framework for shell",
   "main": "urchin",
   "directories": {
@@ -12,14 +12,14 @@
   "bin": "./urchin",
   "repository": {
     "type": "git",
-    "url": "git://github.com/scraperwiki/urchin.git"
+    "url": "git://github.com/tlevine/urchin.git"
   },
   "keywords": [
     "shell",
     "test",
     "testing"
   ],
-  "author": "ScraperWiki Limited <feedback@scraperwiki.com>",
+  "author": "Thomas Levine <_@thomaslevine.com>",
   "license": "BSD",
   "readmeFilename": "readme.md",
   "gitHead": "015052dcfd7152a0df037bef1bc5452e0c956695"
