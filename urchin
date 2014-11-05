@@ -31,6 +31,12 @@ recurse() {
       echo "  ${potential_test}"
       cd -- "$potential_test"
       [ -f setup_dir ] && [ -x setup_dir ] && ./setup_dir >> "$stdout_file"
+
+      if [ -n "$ZSH_VERSION" ]; then
+        # avoid "no matches found: *" error when directories are empty
+        setopt NULL_GLOB
+      fi
+
       for test in *
         do
         [ -f setup ] && [ -x setup ] && ./setup >> "$stdout_file"
