@@ -1,6 +1,6 @@
 {
   "name": "urchin",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Test framework for shell",
   "main": "urchin",
   "directories": {
