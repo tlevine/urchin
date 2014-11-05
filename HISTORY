@@ -3,13 +3,20 @@ HISTORY
 
 Version 0.0.4
 ---------------------
+* Switch urchin -x to urchin -sh and fix some problems with it
+* Documentation
+
+Version 0.0.3
+---------------------
 General tidying
 
 Run with different shells in three ways
 
 * urchin -s
 * $TEST_SHELL variable with $TEST_SHELL
-* $TEST_SHELL variable with urchin -x
+* $TEST_SHELL variable with urchin -sh
+
+Set NULL_GLOB so zsh doesn't print a warning.
 
 Before version 0.0.3
 ----------------------
