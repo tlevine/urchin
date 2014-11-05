@@ -7,7 +7,7 @@
     "test": "tests"
   },
   "scripts": {
-    "test": "./urchin tests"
+    "test": "export PATH=\"$PWD:$PATH\" && urchin tests"
   },
   "bin": "./urchin",
   "repository": {

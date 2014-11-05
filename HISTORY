@@ -5,8 +5,11 @@ Version 0.0.3
 ---------------------
 General tidying
 
-Run with different shells
+Run with different shells in three ways
 
+* urchin -s
+* $TEST_SHELL variable with $TEST_SHELL
+* $TEST_SHELL variable with urchin -sh
 
 Before version 0.0.3
 ----------------------

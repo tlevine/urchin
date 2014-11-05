@@ -169,6 +169,10 @@ do
           shell_for_sh_tests=$1
           which "$shell_for_sh_tests" >/dev/null || { echo "Cannot find specified shell: '$shell_for_sh_tests'" >&2; urchin_help >&2; exit 2; }
           ;;
+        -sh) # `urchin -sh` is equivalent to "$TEST_SHELL"
+          urchinsh=${TEST_SHELL:-/bin/sh}
+          "$urchinsh" "$@"
+          exit $?;;
         -h|--help) urchin_help
           exit 0;;
         -*) urchin_help >&2
