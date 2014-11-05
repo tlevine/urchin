@@ -105,10 +105,8 @@ urchin_help() {
   echo '-x          Run "$TEST_SHELL", falling back on /bin/sh. This might be'
   echo '            useful in the shebang line (experimental).'
   echo '-h          This help.'
-  # echo
-  # echo '--xsd   Output xUnit XML schema for an integration server.'
   echo
-  echo 'Go to https://github.com/scraperwiki/urchin for documentation on writing tests.'
+  echo 'Go to https://github.com/tlevine/urchin for documentation on writing tests.'
   echo
 }
 
