@@ -139,13 +139,18 @@ To test with multiple shells in sequence, use something like:
     done
 
 #### (c) Cross shell tests with `urchin -x` (experimental)
-If you run urchin with the `-sh` flag, it will be as if you ran
+If you run urchin with the `-x` flag, it will be as if you ran
 `$TEST_SHELL`. Unless `$TEST_SHELL` isn't set, in which case it'll
 be as if you ran `/bin/sh`. Putting this in she shebang line might
 eventually work out to be a cleaner way of doing cross-shell testing.
 
     #!/usr/bin/env urchin -x
     test a = a
+
+It might make sense if you do this.
+
+    export TEST_SHELL=zsh && urchin -x
+    export TEST_SHELL=bash && urchin -x
 
 ## Alternatives to Urchin
 Alternatives to Urchin are discussed in
