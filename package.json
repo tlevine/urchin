@@ -28,6 +28,5 @@
     {"name": "Tom Mortimer-Jones", "email": "tom@morty.co.uk"}
     {"name": "Michael Klement", "email": "mklement0@gmail.com"}
   ],
-  "license": "BSD",
-  "readmeFilename": "readme.md"
+  "license": "BSD"
 }

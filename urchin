@@ -95,19 +95,22 @@ has_sh_or_no_shebang_line() {
 USAGE="usage: $0 [<options>] <test directory>"
 
 urchin_help() {
-  echo
-  echo "$USAGE"
-  echo
-  echo '-s <shell>  Invoke test scripts that either have no shebang line or'
-  echo '            shebang line "#!/bin/sh" with the specified shell.'
-  echo '-f          Force running even if the test directory'\''s name does not'
-  echo '            contain the word "test".'
-  echo '-x          Run "$TEST_SHELL", falling back on /bin/sh. This might be'
-  echo '            useful in the shebang line (experimental).'
-  echo '-h          This help.'
-  echo
-  echo 'Go to https://github.com/tlevine/urchin for documentation on writing tests.'
-  echo
+  cat <<EOF
+
+$USAGE
+
+-s <shell>  Invoke test scripts that either have no shebang line at all or
+            have shebang line "#!/bin/sh" with the specified shell.
+-f          Force running even if the test directory's name does not
+            contain the word "test".
+-x          [Experimental; not meant for direct invocation, but for use in
+            the shebang line of test scripts]
+            Run with "\$TEST_SHELL", falling back on /bin/sh.
+-h          This help.
+
+Go to https://github.com/tlevine/urchin for documentation on writing tests.
+
+EOF
 }
 
 plural () {
@@ -175,7 +178,7 @@ do
           shell_for_sh_tests=$1
           which "$shell_for_sh_tests" >/dev/null || { echo "Cannot find specified shell: '$shell_for_sh_tests'" >&2; urchin_help >&2; exit 2; }
           ;;
-        -x) # `urchin -sh` is equivalent to "$TEST_SHELL"
+        -x) # `urchin -x <test-script>` is equivalent to `"$TEST_SHELL" <test-script>`
           shift
           urchinsh=${TEST_SHELL:-/bin/sh}
           "$urchinsh" "$@"
