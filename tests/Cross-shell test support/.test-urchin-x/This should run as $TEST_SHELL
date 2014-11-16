@@ -1,4 +1,4 @@
-#! ../../urchin -x
-echo "Running shell: $(ps -o comm= -p $$ && :)"
-echo "\$TEST_SHELL: $TEST_SHELL"
-[ "$TEST_SHELL" = 'bash' ]
+#! ../../../urchin -x
+running=$(ps -o comm= -p $$ && :)
+echo "Running shell: $running"
+[ "$running" = bash ]
