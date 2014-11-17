@@ -177,8 +177,10 @@ do
           ;;
         -x) # `urchin -sh` is equivalent to "$TEST_SHELL"
           shift
-          urchinsh=${TEST_SHELL:-/bin/sh}
-          "$urchinsh" "$@"
+         #current_shell=$(ps -o comm= -p $$ && :)
+         #urchinsh=${TEST_SHELL:-$current_shell}
+          export TEST_SHELL=${TEST_SHELL:-/bin/sh}
+          "$TEST_SHELL" "$@"
           exit $?;;
         -h|--help) urchin_help
           exit 0;;
