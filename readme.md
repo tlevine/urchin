@@ -12,14 +12,14 @@ other Unix platforms.
 Urchin's tests are written in Urchin, so you can run them to see what Urchin
 is like. Clone the repository
 
-    git clone git://github.com/scraperwiki/urchin.git
+    git clone git://github.com/tlevine/urchin.git
 
 Run the tests
 
     cd urchin
     ./urchin tests
 
-The above command will run the tests in your systems default
+The above command will run the tests in your system's default
 shell, /bin/sh (on recent Ubuntu this is dash, but it could be
 ksh or bash on other systems); to test urchin's cross-shell compatibility,
 run this:
@@ -31,7 +31,7 @@ run this:
 Download Urchin like so (as root) (or use npm, below):
 
     cd /usr/local/bin
-    wget https://raw.github.com/scraperwiki/urchin/master/urchin
+    wget https://raw.github.com/tlevine/urchin/master/urchin
     chmod +x urchin
 
 Can be installed with npm too:
@@ -154,4 +154,4 @@ It might make sense if you do this.
 
 ## Alternatives to Urchin
 Alternatives to Urchin are discussed in
-[this blog post](https://blog.scraperwiki.com/2012/12/how-to-test-shell-scripts/).
+[this blog post](https://blog.tlevine.com/2012/12/how-to-test-shell-scripts/).
