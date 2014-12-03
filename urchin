@@ -1,5 +1,9 @@
 #!/bin/sh
 
+# Make sure that CDPATH isn't set, as it causes `cd` to behave unpredictably - notably, it can produce output,
+# which breaks fullpath().
+unset CDPATH
+
 fullpath() {
   (
     cd -- "$1"
