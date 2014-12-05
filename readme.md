@@ -138,6 +138,7 @@ To test with multiple shells in sequence, use something like:
       urchin -s $shell ./tests
     done
 
+<!--
 #### (c) Cross shell tests with `urchin -x` (experimental)
 If you run urchin with the `-x` flag, it will be as if you ran
 `$TEST_SHELL`. Unless `$TEST_SHELL` isn't set, in which case it'll
@@ -151,7 +152,7 @@ It might make sense if you do this.
 
     export TEST_SHELL=zsh && urchin -x
     export TEST_SHELL=bash && urchin -x
-
+-->
 ## Alternatives to Urchin
 Alternatives to Urchin are discussed in
-[this blog post](https://blog.tlevine.com/2012/12/how-to-test-shell-scripts/).
+[this blog post](https://blog.scraperwiki.com/2012/12/how-to-test-shell-scripts/).
