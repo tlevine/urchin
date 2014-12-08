@@ -1,6 +1,6 @@
 {
   "name": "urchin",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "Test framework for shell",
   "main": "urchin",
   "directories": {
@@ -24,8 +24,8 @@
     {"name": "Thomas Levine", "email": "_@thomaslevine.com"},
     {"name": "David Jones", "email": "drj@pobox.com"},
     {"name": "Francis Irving", "email": "francis@flourish.org"},
-    {"name": "Zarino Zappia", "email": "mail@zarino.co.uk"}
-    {"name": "Tom Mortimer-Jones", "email": "tom@morty.co.uk"}
+    {"name": "Zarino Zappia", "email": "mail@zarino.co.uk"},
+    {"name": "Tom Mortimer-Jones", "email": "tom@morty.co.uk"},
     {"name": "Michael Klement", "email": "mklement0@gmail.com"}
   ],
   "license": "BSD"
