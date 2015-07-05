@@ -98,6 +98,13 @@ The specific approach depends on your test scenario:
 
 #### (a) Cross-shell tests with test scripts that _invoke_ shell scripts
 
+First, consider using [shall](https://github.com/mklement0/shall).
+
+    #!/usr/bin/env shall
+    echo This is a test file.
+
+Alternatively, you can use urchin's built-in recognition of the
+`TEST_SHELL` environment variable.
 In your test scripts, invoke the shell scripts to test via the shell
 specified in environment variable `TEST_SHELL` rather than directly;
 e.g.: `$TEST_SHELL ../foo bar` (rather than just `../foo bar`).  
