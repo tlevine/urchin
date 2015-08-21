@@ -86,6 +86,15 @@ Files are only run if they are executable, and files beginning with `.` are
 ignored. Thus, fixtures and libraries can be included sloppily within the test
 directory tree. The test passes if the file exits 0; otherwise, it fails.
 
+In case you care about the order in which your tests execute, consider that
+urchin looks for files within a directory in the following manner.
+
+    for file in *; do
+      do_something_with_test_file $file
+    done
+
+Tests within a directory are executed in whatever order `*` returns.
+
 ### Writing cross-shell compatibility tests for testing shell code
 
 While you could write your test scripts to explicitly invoke the functionality
