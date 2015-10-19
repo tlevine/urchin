@@ -172,3 +172,9 @@ It might make sense if you do this.
 ## Alternatives to Urchin
 Alternatives to Urchin are discussed in
 [this blog post](https://blog.scraperwiki.com/2012/12/how-to-test-shell-scripts/).
+
+## Ideas for new features
+
+* Support [Nagios plugins](https://nagios-plugins.org/doc/guidelines.html)
+* Stop running if a test fails so one can use Urchin as a
+    [setup framework](https://github.com/tlevine/urchin/issues/16).
