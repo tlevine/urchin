@@ -112,10 +112,6 @@ $USAGE
 Go to https://github.com/tlevine/urchin for documentation on writing tests.
 
 EOF
-  # [Experimental -x option left undocumented for now.]
-  # -x          [Experimental; not meant for direct invocation, but for use in
-  #             the shebang line of test scripts]
-  #             Run with "\$TEST_SHELL", falling back on /bin/sh.
 }
 
 plural () {
@@ -183,11 +179,6 @@ do
           shell_for_sh_tests=$1
           which "$shell_for_sh_tests" >/dev/null || { echo "Cannot find specified shell: '$shell_for_sh_tests'" >&2; urchin_help >&2; exit 2; }
           ;;
-        -x) # [EXPERIMENTAL; UNDOCUMENTED FOR NOW] `urchin -x <test-script>` in a test script's shebang line is equivalent to invoking that script with `"$TEST_SHELL" <test-script>`
-          shift
-          urchinsh=${TEST_SHELL:-/bin/sh}
-          "$urchinsh" "$@"
-          exit $?;;
         -h|--help) urchin_help
           exit 0;;
         -*) urchin_help >&2
