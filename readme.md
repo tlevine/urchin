@@ -4,9 +4,9 @@
     / /_/ / /  / /__/ / / / / / / /
     \__,_/_/   \___/_/ /_/_/_/ /_/ 
 
-Urchin is a test framework for shell. It is implemented in
-portable /bin/sh and should work on GNU/Linux, Mac OS X, and
-other Unix platforms.
+Urchin is a file-based test harness, normally used for testing shell programs.
+It is written in portable shell and should thus work on GNU/Linux, BSD
+(including Mac OS X), and other Unix-like platforms.
 
 ## Try it out
 Urchin's tests are written in Urchin, so you can run them to see what Urchin
