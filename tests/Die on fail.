@@ -1,0 +1,11 @@
+tmp=$(mktemp)
+../urchin -e -f ./.die-on-fail > $tmp
+result=$?
+
+grep '1 should run.' $tmp
+grep '2 should run.' $tmp
+grep -v '3 should not run.' $tmp
+grep -v '4 should not run.' $tmp
+
+rm $tmp
+exit $result
