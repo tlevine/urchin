@@ -27,14 +27,15 @@ run this:
     cd urchin
     ./cross-shell-tests
 
-## Globally
-Download Urchin like so (as root) (or use npm, below):
+## Install
+Urchin is contained in a single file, so you can install it by copying it to a
+directory in your `PATH`. For example, you can run the following as root.
 
     cd /usr/local/bin
     wget https://raw.github.com/tlevine/urchin/master/urchin
     chmod +x urchin
 
-Can be installed with npm too:
+Urchin can be installed with npm too.
 
     npm install -g urchin
 
@@ -86,14 +87,13 @@ Files are only run if they are executable, and files beginning with `.` are
 ignored. Thus, fixtures and libraries can be included sloppily within the test
 directory tree. The test passes if the file exits 0; otherwise, it fails.
 
-In case you care about the order in which your tests execute, consider that
+Tests files and subdirectories are run in ASCIIbetical order within each
+directory; that is,
 urchin looks for files within a directory in the following manner.
 
     for file in *; do
       do_something_with_test_file $file
     done
-
-Tests within a directory are executed in whatever order `*` returns.
 
 ### Writing cross-shell compatibility tests for testing shell code
 
