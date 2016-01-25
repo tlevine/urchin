@@ -48,6 +48,12 @@ recurse() {
         # $2 instead of $indent_level so it doesn't clash
         recurse "${test}" $(( $2 + 1 )) "$shell_for_sh_tests"
 
+        if $exit_on_fail && test $? -ne 0; then
+          [ -f teardown ] && [ -x teardown ] && ./teardown >> "$stdout_file"
+          [ -f teardown_dir ] && [ -x teardown_dir ] && ./teardown_dir >> "$stdout_file"
+          return 1
+        fi
+
         [ -f teardown ] && [ -x teardown ] && ./teardown >> "$stdout_file"
       done
       [ -f teardown_dir ] && [ -x teardown_dir ] && ./teardown_dir >> "$stdout_file"
@@ -67,7 +73,6 @@ recurse() {
     fi
     exit_code="$?"
 
-
     [ -f teardown ] && [ -x teardown ] && ./teardown >> "$stdout_file"
 
     indent $indent_level
@@ -86,6 +91,11 @@ recurse() {
       cat "$stdout_file"
       printf '\033[0m'
     fi
+
+    if $exit_on_fail && ! $exit_code; then
+      break
+    fi
+
   fi
   [ $indent_level -eq 0 ] && rm "$stdout_file"
 }
@@ -173,9 +183,11 @@ urchin_molly_guard() {
 
 shell_for_sh_tests=
 force=false
+exit_on_fail=false
 while [ $# -gt 0 ]
 do
     case "$1" in
+        -e) exit_on_fail=true;;
         -f) force=true;;
         -s)
           shift
