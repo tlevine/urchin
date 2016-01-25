@@ -47,8 +47,9 @@ recurse() {
 
         # $2 instead of $indent_level so it doesn't clash
         recurse "${test}" $(( $2 + 1 )) "$shell_for_sh_tests"
+        exit_code=$?
 
-        if $exit_on_fail && test $? -ne 0; then
+        if $exit_on_fail && test $exit_code -ne 0; then
           [ -f teardown ] && [ -x teardown ] && ./teardown >> "$stdout_file"
           [ -f teardown_dir ] && [ -x teardown_dir ] && ./teardown_dir >> "$stdout_file"
           return 1
@@ -92,10 +93,9 @@ recurse() {
       printf '\033[0m'
     fi
 
-    if $exit_on_fail && ! $exit_code; then
-      break
+    if $exit_on_fail && test 0 -ne $exit_code; then
+      return 1
     fi
-
   fi
   [ $indent_level -eq 0 ] && rm "$stdout_file"
 }
