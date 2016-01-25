@@ -105,6 +105,9 @@ $USAGE
 
 -s <shell>  Invoke test scripts that either have no shebang line at all or
             have shebang line "#!/bin/sh" with the specified shell.
+-e          Stop running if any single test fails. This is helpful if you want
+            to use Urchin to run things other than tests, such as a set of
+            configuration scripts.
 -f          Force running even if the test directory's name does not
             contain the word "test".
 -h          This help.
