@@ -106,24 +106,20 @@ The specific approach depends on your test scenario:
 * (b) Your scripts _source_ scripts containing portable shell code.
 
 #### (a) Cross-shell tests with test scripts that _invoke_ shell scripts
+Urchin sets the `TEST_SHELL` environment variable so that you may change the
+shell with which your tests call other shell programs. To run your test
+scripts in multiple shells you must call `$TEST_SHELL` in your tests and then
+run urchin with the appropriate option.
 
-First, consider using [shall](https://github.com/mklement0/shall).
-
-    #!/usr/bin/env shall
-    echo This is a test file.
-
-Alternatively, you can use urchin's built-in recognition of the
-`TEST_SHELL` environment variable.
 In your test scripts, invoke the shell scripts to test via the shell
 specified in environment variable `TEST_SHELL` rather than directly;
 e.g.: `$TEST_SHELL ../foo bar` (rather than just `../foo bar`).  
-Note that if you alsow want your test scripts to work when run directly,
-outside of Urchin, be sure to target scripts that happen to be in the 
-current directory with prefix `./`; e.g., `$TEST_SHELL ./baz`
-(rather than `$TEST_SHELL baz`).
 
-Then, on invocation of Urchin, prepend a definition of environment variable
-`TEST_SHELL` specifying the shell to test with, e.g.: `TEST_SHELL=zsh urchin ./tests`.  
+On invocation of Urchin, prepend a definition of environment variable
+`TEST_SHELL` specifying the shell to test with, e.g.,
+
+    TEST_SHELL=zsh urchin ./tests
+
 To test with multiple shells in sequence, use something like:
 
     for shell in sh bash ksh zsh; do
@@ -131,14 +127,20 @@ To test with multiple shells in sequence, use something like:
     done
 
 If `TEST_SHELL` has no value, Urchin defines it as `/bin/sh`, so the test
-scripts can rely on `$TEST_SHELL` always containing a value.
+scripts can rely on `$TEST_SHELL` always containing a value when Urchin runs
+them.
+
+That said, we still recommand that you account for the possibility that
+`$TEST_SHELL` does not contain a value so that you may run your test scripts
+without Urchin. Supporting this case is very simple; when you invoke scripts
+that happen to be in the current directory, be sure to use the prefix `./`,
+e.g., `$TEST_SHELL ./baz` rather than `$TEST_SHELL baz`.
 
 #### (b) Cross-shell tests with test scripts that _source_ shell scripts
-
 If you _source_ shell code in your test scripts, it is the test scripts
 themselves that must be run with the shell specified.
 
-To that end, Urchin supports the `-s <shell>` option, which instructs
+Urchin supports the `-s <shell>` option, which instructs
 Urchin to invoke the test scripts with the specified shell; e.g., `-s bash`.  
 (In addition, Urchin sets environment variable `TEST_SHELL` to the specified
 shell.)
@@ -154,21 +156,12 @@ To test with multiple shells in sequence, use something like:
       urchin -s $shell ./tests
     done
 
-<!--
-#### (c) Cross shell tests with `urchin -x` (experimental)
-If you run urchin with the `-x` flag, it will be as if you ran
-`$TEST_SHELL`. Unless `$TEST_SHELL` isn't set, in which case it'll
-be as if you ran `/bin/sh`. Putting this in she shebang line might
-eventually work out to be a cleaner way of doing cross-shell testing.
+Also consider using [shall](https://github.com/mklement0/shall).
+It does something similar, but the interface may be more intuitive.
 
-    #!/usr/bin/env urchin -x
-    test a = a
+    #!/usr/bin/env shall
+    echo This is a test file.
 
-It might make sense if you do this.
-
-    export TEST_SHELL=zsh && urchin -x
-    export TEST_SHELL=bash && urchin -x
--->
 ## Alternatives to Urchin
 Alternatives to Urchin are discussed in
 [this blog post](https://blog.scraperwiki.com/2012/12/how-to-test-shell-scripts/).
