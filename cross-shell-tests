@@ -6,7 +6,7 @@ for shell in dash bash ksh zsh; do
   if which $shell > /dev/null 2> /dev/null; then
     echo
     echo Running urchin tests in $shell
-    $shell urchin tests | tail -n 3
+    $shell urchin -s $shell tests | tail -n 3
   else
     echo
     echo Skipping $shell because it is not in the PATH
