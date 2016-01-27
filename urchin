@@ -82,7 +82,8 @@ recurse() {
       else
         result=not\ ok
       fi
-      echo "${result} - ${potential_test}"
+      n=$(grep -ce  '^\(?:not \)\?ok' "$logfile")
+      echo "${result} $((n + 1)) - ${potential_test}" | tee --append "$logfile"
     else
       indent $indent_level
       if [ $exit_code -eq 0 ]
@@ -163,8 +164,10 @@ urchin_go() {
 
   finish=$(date +%s)
   elapsed=$(($finish - $start))
+
+
   if $tap_format; then
-    sleep 0s
+    echo "# Took $elapsed $(plural second $elapsed)."
   else
     echo "Done, took $elapsed $(plural second $elapsed)."
     set -- $(grep -e 'passed$' "$logfile"|wc -l) $(grep -e 'failed$' "$logfile"|wc -l)
