@@ -31,8 +31,14 @@ recurse() {
   if [ -d "$potential_test" ]
     then
     (
-      indent $indent_level
-      echo "  ${potential_test}"
+      if $tap_format; then
+        indent $indent_level | sed 's/  /#/g'
+        echo "# ${potential_test}"
+      else
+        indent $indent_level
+        echo "  ${potential_test}"
+      fi
+
       cd -- "$potential_test"
       [ -f setup_dir ] && [ -x setup_dir ] && ./setup_dir >> "$stdout_file"
 
