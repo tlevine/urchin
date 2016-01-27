@@ -213,7 +213,6 @@ urchin_go() {
   finish=$(date +%s)
   elapsed=$(($finish - $start))
 
-
   if $tap_format; then
     echo "# Took $elapsed $(plural second $elapsed)."
   else
@@ -228,7 +227,7 @@ urchin_go() {
     printf '%s\n' "$failed $(plural test "$failed") failed."
     printf '\033[m'
   fi
-  test -z "$2" || test "$2" -eq '0'
+  test -z "$failed" || test "$failed" -eq '0'
 }
 
 urchin_molly_guard() {
