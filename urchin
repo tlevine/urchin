@@ -91,6 +91,7 @@ recurse() {
       result=skip
     fi
 
+    echo "${result}" >> "$logfile"
     if $tap_format; then
       n=$(grep -ce '^\(success\|fail\|skip\)' "$logfile")
 
@@ -104,8 +105,7 @@ recurse() {
       else
         skip=''
       fi
-      echo "${not}ok $((n + 1)) - ${skip}${potential_test}"
-      echo "${result} ${potential_test}" >> "$logfile"
+      echo "${not}ok $n - ${skip}${potential_test}"
       if [ "$result" == fail ]; then
         echo '# ------------ Begin output ------------'
         sed 's/^/# /' "$stdout_file"
@@ -118,20 +118,17 @@ recurse() {
           # On success, print a green '✓'
           printf '\033[32m✓ \033[0m'
           printf '%s\n' "${potential_test}"
-          printf '%s\n' "${potential_test} passed" >> "$logfile"
         ;;
         fail)
           # On fail, print a red '✗'
           printf '\033[31m✗ \033[0m'
           printf '%s\n' "${potential_test}"
-          printf '%s\n' "${potential_test} failed" >> "$logfile"
           printf '\033[31m' # Print output captured from failed test in red.
           cat "$stdout_file"
           printf '\033[0m'
         ;;
         skip)
           printf '  %s\n' "${potential_test}"
-          printf '%s\n' "${potential_test} skipped" >> "$logfile"
         ;;
       esac
     fi
@@ -177,10 +174,11 @@ plural () {
 }
 
 urchin_go() {
+  rm -f "$logfile"
   if "$tap_format"; then
     printf \#\ 
   fi
-  echo Running tests at $(date +%Y-%m-%dT%H:%M:%S) | tee "$logfile"
+  echo Running tests at $(date +%Y-%m-%dT%H:%M:%S)
   start=$(date +%s)
 
   # Determine the environment variable to define for test scripts
@@ -205,9 +203,9 @@ urchin_go() {
     echo "# Took $elapsed $(plural second $elapsed)."
   else
     echo "Done, took $elapsed $(plural second $elapsed)."
-    passed=$(grep -c 'passed$' "$logfile")
-    failed=$(grep -c 'failed$' "$logfile")
-    skipped=$(grep -c 'skipped$' "$logfile")
+    passed=$(grep -c '^success' "$logfile")
+    failed=$(grep -c '^fail' "$logfile")
+    skipped=$(grep -c '^skip' "$logfile")
 
     printf '%s\n' "$passed $(plural test "$passed") passed."
     printf '%s\n' "$skipped $(plural test "$skipped") skipped."
@@ -215,6 +213,7 @@ urchin_go() {
     printf '%s\n' "$failed $(plural test "$failed") failed."
     printf '\033[m'
   fi
+  rm -f "$logfile"
   test -z "$failed" || test "$failed" -eq '0'
 }
 
