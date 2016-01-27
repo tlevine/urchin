@@ -64,7 +64,7 @@ recurse() {
         [ -f teardown ] && [ -x teardown ] && ./teardown >> "$stdout_file"
       done
       [ -f teardown_dir ] && [ -x teardown_dir ] && ./teardown_dir >> "$stdout_file"
-      echo
+      if ! $tap_format; then echo; fi
     )
   elif [ -x "$potential_test" ]
     then
@@ -103,7 +103,7 @@ recurse() {
         printf '%s\n' "${potential_test}"
         printf '%s\n' "${potential_test} failed" >> "$logfile"
         printf '\033[31m' # Print output captured from failed test in red.
-        cat "$stdout_file"
+        sed 's/^/# /' "$stdout_file"
         printf '\033[0m'
       fi
     fi
