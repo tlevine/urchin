@@ -1,5 +1,3 @@
-#!/usr/bin/awk -f
-
-# This script will only succeed if it is indeed processed by awk.
-
-BEGIN { print "ok" }
+#!/usr/bin/env true
+true will processed the contents of this script, but that
+means that nothing will happen and the script will exit 0 
