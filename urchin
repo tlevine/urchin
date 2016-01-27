@@ -168,7 +168,7 @@ urchin_go() {
     printf '%s\n' "$2 $(plural test "$2") failed."
     printf '\033[m'
   fi
-  test "$2" -eq '0'
+  test -z "$2" || test "$2" -eq '0'
 }
 
 urchin_molly_guard() {
