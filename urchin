@@ -111,6 +111,11 @@ recurse() {
       fi
       echo "${not}ok $((n + 1)) - ${skip}${potential_test}"
       echo "${result} ${potential_test}" >> "$logfile"
+      if [ "$result" == fail ]; then
+        echo '# ------------ Begin output ------------'
+        sed 's/^/# /' "$stdout_file"
+        echo '# ------------ End output ------------'
+      fi
     else
       indent $indent_level
       case "$result" in
@@ -126,7 +131,7 @@ recurse() {
           printf '%s\n' "${potential_test}"
           printf '%s\n' "${potential_test} failed" >> "$logfile"
           printf '\033[31m' # Print output captured from failed test in red.
-          sed 's/^/# /' "$stdout_file"
+          cat "$stdout_file"
           printf '\033[0m'
         ;;
         skip)
