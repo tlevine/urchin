@@ -33,7 +33,7 @@ recurse() {
 
     if $tap_format; then
       indent $indent_level | sed 's/  /#/g'
-      echo "# Begin ${potential_test}"
+      echo "# Begin - ${potential_test}"
     else
       indent $indent_level
       echo "  ${potential_test}"
@@ -61,7 +61,7 @@ recurse() {
     )
     if $tap_format; then
       indent $indent_level | sed 's/  /#/g'
-      echo "# End   ${potential_test}"
+      echo "# End - ${potential_test}"
     else
       echo
     fi
@@ -199,14 +199,14 @@ urchin_go() {
   finish=$(date +%s)
   elapsed=$(($finish - $start))
 
+  passed=$(grep -c '^success' "$logfile")
+  failed=$(grep -c '^fail' "$logfile")
+  skipped=$(grep -c '^skip' "$logfile")
   if $tap_format; then
     echo "# Took $elapsed $(plural second $elapsed)."
+    echo 1..$(($passed + $failed + $skipped))
   else
     echo "Done, took $elapsed $(plural second $elapsed)."
-    passed=$(grep -c '^success' "$logfile")
-    failed=$(grep -c '^fail' "$logfile")
-    skipped=$(grep -c '^skip' "$logfile")
-
     printf '%s\n' "$passed $(plural test "$passed") passed."
     printf '%s\n' "$skipped $(plural test "$skipped") skipped."
     [ $failed -gt 0 ] && printf '\033[31m' || printf '\033[32m' # If tests failed, print the message in red, otherwise in green.
