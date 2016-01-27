@@ -83,7 +83,12 @@ recurse() {
     [ -f teardown ] && [ -x teardown ] && ./teardown >> "$stdout_file"
 
     if $tap_format; then
-      sleep 0s
+      if [ $exit_code -eq 0 ]; then
+        result=ok
+      else
+        result=not\ ok
+      fi
+      echo "${result} - ${potential_test}"
     else
       indent $indent_level
       if [ $exit_code -eq 0 ]
