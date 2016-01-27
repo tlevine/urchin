@@ -30,15 +30,16 @@ recurse() {
 
   if [ -d "$potential_test" ]
     then
-    (
-      if $tap_format; then
-        indent $indent_level | sed 's/  /#/g'
-        echo "# ${potential_test}"
-      else
-        indent $indent_level
-        echo "  ${potential_test}"
-      fi
 
+    if $tap_format; then
+      indent $indent_level | sed 's/  /#/g'
+      echo "# Begin ${potential_test}"
+    else
+      indent $indent_level
+      echo "  ${potential_test}"
+    fi
+
+    (
       cd -- "$potential_test"
       [ -f setup_dir ] && [ -x setup_dir ] && ./setup_dir >> "$stdout_file"
 
@@ -57,50 +58,77 @@ recurse() {
         [ -f teardown ] && [ -x teardown ] && ./teardown >> "$stdout_file"
       done
       [ -f teardown_dir ] && [ -x teardown_dir ] && ./teardown_dir >> "$stdout_file"
-      if ! $tap_format; then echo; fi
     )
-  elif [ -x "$potential_test" ]
-    then
-
-    [ -f setup ] && [ -x setup ] && ./setup >> "$stdout_file"
-
-    # Run the test
-    if [ -n "$shell_for_sh_tests" ] && has_sh_or_no_shebang_line ./"$potential_test"
-      then    
-      TEST_SHELL="$TEST_SHELL" "$shell_for_sh_tests" ./"$potential_test" > "$stdout_file" 2>&1
+    if $tap_format; then
+      indent $indent_level | sed 's/  /#/g'
+      echo "# End   ${potential_test}"
     else
-      TEST_SHELL="$TEST_SHELL" ./"$potential_test" > "$stdout_file" 2>&1
+      echo
     fi
-    exit_code="$?"
+  else
+    if [ -x "$potential_test" ]
+      then
+
+      [ -f setup ] && [ -x setup ] && ./setup >> "$stdout_file"
+
+      # Run the test
+      if [ -n "$shell_for_sh_tests" ] && has_sh_or_no_shebang_line ./"$potential_test"
+        then    
+        TEST_SHELL="$TEST_SHELL" "$shell_for_sh_tests" ./"$potential_test" > "$stdout_file" 2>&1
+      else
+        TEST_SHELL="$TEST_SHELL" ./"$potential_test" > "$stdout_file" 2>&1
+      fi
+      exit_code="$?"
 
 
-    [ -f teardown ] && [ -x teardown ] && ./teardown >> "$stdout_file"
+      [ -f teardown ] && [ -x teardown ] && ./teardown >> "$stdout_file"
+      if [ $exit_code -eq 0 ]; then
+        result=success
+      else
+        result=fail
+      fi
+    else
+      result=skip
+    fi
 
     if $tap_format; then
-      if [ $exit_code -eq 0 ]; then
-        result=ok
+      n=$(grep -ce '^\(success\|fail\|skip\)' "$logfile")
+
+      if [ "$result" == fail ]; then
+        not='not '
       else
-        result=not\ ok
+        not=''
       fi
-      n=$(grep -ce  '^\(?:not \)\?ok' "$logfile")
-      echo "${result} $((n + 1)) - ${potential_test}" | tee --append "$logfile"
+      if [ "$result" == skip ]; then
+        skip='# SKIP '
+      else
+        skip=''
+      fi
+      echo "${not}ok $((n + 1)) - ${skip}${potential_test}"
+      echo "${result} ${potential_test}" >> "$logfile"
     else
       indent $indent_level
-      if [ $exit_code -eq 0 ]
-        then
-        # On success, print a green '✓'
-        printf '\033[32m✓ \033[0m'
-        printf '%s\n' "${potential_test}"
-        printf '%s\n' "${potential_test} passed" >> "$logfile"
-      else
-        # On fail, print a red '✗'
-        printf '\033[31m✗ \033[0m'
-        printf '%s\n' "${potential_test}"
-        printf '%s\n' "${potential_test} failed" >> "$logfile"
-        printf '\033[31m' # Print output captured from failed test in red.
-        sed 's/^/# /' "$stdout_file"
-        printf '\033[0m'
-      fi
+      case "$result" in
+        success)
+          # On success, print a green '✓'
+          printf '\033[32m✓ \033[0m'
+          printf '%s\n' "${potential_test}"
+          printf '%s\n' "${potential_test} passed" >> "$logfile"
+        ;;
+        fail)
+          # On fail, print a red '✗'
+          printf '\033[31m✗ \033[0m'
+          printf '%s\n' "${potential_test}"
+          printf '%s\n' "${potential_test} failed" >> "$logfile"
+          printf '\033[31m' # Print output captured from failed test in red.
+          sed 's/^/# /' "$stdout_file"
+          printf '\033[0m'
+        ;;
+        skip)
+          printf '  %s\n' "${potential_test}"
+          printf '%s\n' "${potential_test} skipped" >> "$logfile"
+        ;;
+      esac
     fi
   fi
   [ $indent_level -eq 0 ] && rm "$stdout_file"
@@ -144,6 +172,9 @@ plural () {
 }
 
 urchin_go() {
+  if "$tap_format"; then
+    printf \#\ 
+  fi
   echo Running tests at $(date +%Y-%m-%dT%H:%M:%S) | tee "$logfile"
   start=$(date +%s)
 
