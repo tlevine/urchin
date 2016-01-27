@@ -206,10 +206,14 @@ urchin_go() {
     echo "# Took $elapsed $(plural second $elapsed)."
   else
     echo "Done, took $elapsed $(plural second $elapsed)."
-    set -- $(grep -e 'passed$' "$logfile"|wc -l) $(grep -e 'failed$' "$logfile"|wc -l)
-    printf '%s\n' "$1 $(plural test "$1") passed."
-    [ $2 -gt 0 ] && printf '\033[31m' || printf '\033[32m' # If tests failed, print the message in red, otherwise in green.
-    printf '%s\n' "$2 $(plural test "$2") failed."
+    passed=$(grep -c 'passed$' "$logfile")
+    failed=$(grep -c 'failed$' "$logfile")
+    skipped=$(grep -c 'skipped$' "$logfile")
+
+    printf '%s\n' "$passed $(plural test "$passed") passed."
+    printf '%s\n' "$skipped $(plural test "$skipped") skipped."
+    [ $failed -gt 0 ] && printf '\033[31m' || printf '\033[32m' # If tests failed, print the message in red, otherwise in green.
+    printf '%s\n' "$failed $(plural test "$failed") failed."
     printf '\033[m'
   fi
   test -z "$2" || test "$2" -eq '0'
