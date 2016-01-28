@@ -13,6 +13,10 @@ Version 0.0.6
 * Pass the -e flag to exit urchin if any single test fails.
 * Remove the undocumented, experimental -x flag now that shall exists.
 
+These changes are made somewhat separately in the branches "exit-on-fail",
+"remove-urchin-x", "tap", and "update-readme". They are rebased into one
+branch, "tlevine-2016-02", for merging into "master".
+
 Version 0.0.5
 ---------------------
 * urchin now unsets `CDPATH`.
