@@ -1,6 +1,15 @@
 HISTORY
 -------
 
+Version 0.0.6
+---------------------
+
+* Produce TAP output with the -t flag.
+* Correct some things in the documentation.
+* Rearrange things in the documentation to be more clear.
+* Pass the -e flag to exit urchin if any single test fails.
+* Remove the undocumented, experimental -x flag now that shall exists.
+
 Version 0.0.5
 ---------------------
 * urchin now unsets `CDPATH`.
