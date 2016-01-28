@@ -36,7 +36,7 @@ recurse() {
       echo "# Begin - ${potential_test}"
     else
       indent $indent_level
-      echo "  ${potential_test}"
+      echo "+ ${potential_test}"
     fi
 
     (
