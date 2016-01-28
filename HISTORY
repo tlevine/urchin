@@ -1,10 +1,13 @@
 HISTORY
--------
+=======
 
 Version 0.0.6
 ---------------------
 
 * Produce TAP output with the -t flag.
+* Add a + sign in front of directories in the normal output so that they
+  line up with non-directories.
+* Display skipped tests in the normal output and in the TAP output.
 * Correct some things in the documentation.
 * Rearrange things in the documentation to be more clear.
 * Pass the -e flag to exit urchin if any single test fails.
