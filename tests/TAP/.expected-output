@@ -1,6 +1,8 @@
 # Begin - .testsuite/
 not ok 1 - a
 # ------------ Begin output ------------
+# This is stderr from a.
+# This is stdout from a.
 # ------------ End output ------------
 ok 2 - b
 ok 3 - # SKIP c

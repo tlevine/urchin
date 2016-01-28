@@ -1,1 +1,4 @@
+#!/bin/sh
+echo This is stderr from a. > /dev/stderr
+echo This is stdout from a. > /dev/stdout
 false
