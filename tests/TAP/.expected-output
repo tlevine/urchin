@@ -1,0 +1,9 @@
+# Begin - .testsuite/
+not ok 1 - a
+# ------------ Begin output ------------
+# ------------ End output ------------
+ok 2 - b
+ok 3 - # SKIP c
+# End - .testsuite/
+# Took 0 seconds.
+1..3
