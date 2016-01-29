@@ -40,3 +40,9 @@ https://github.com/creationix/nvm/issues/589
 
 Documenting that people should run "env" when their tests fail might be good
 enough.
+
+Licensing and copyright
+------------------------
+* Reference all owners and years in the Copyright file
+* Consider copyleft licenses
+* Add license notices to other files if necessary
