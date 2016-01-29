@@ -4,6 +4,9 @@
 # which breaks fullpath().
 unset CDPATH
 
+# Urchin version number
+VERSION=0.0.6
+
 fullpath() {
   (
     cd -- "$1"
@@ -259,6 +262,8 @@ do
         -t) tap_format=true;;
         -h|--help) urchin_help
           exit 0;;
+        -v) echo "$VERSION"
+            exit;;
         -*) urchin_help >&2
             exit 1;;
         *)  break;;
