@@ -30,3 +30,13 @@ Options
 -------------
 I want long options. For example, there's presently -f and -e.
 I want to make them -f|--force and -e|--exit.
+
+Environment variables
+-------------
+Do something to make it easier to debug environment variables, because that is
+often confusing.
+https://github.com/creationix/nvm/issues/719
+https://github.com/creationix/nvm/issues/589
+
+Documenting that people should run "env" when their tests fail might be good
+enough.
