@@ -167,6 +167,7 @@ $USAGE
             contain the word "test".
 -t          Format output in Test Anything Protocol (TAP)
 -h          This help.
+-v          Display the version number.
 
 Go to https://github.com/tlevine/urchin for documentation on writing tests.
 
