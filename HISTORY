@@ -12,6 +12,7 @@ Version 0.0.6
 * Rearrange things in the documentation to be more clear.
 * Pass the -e flag to exit urchin if any single test fails.
 * Remove the undocumented, experimental -x flag now that shall exists.
+* Display version number with the -v flag.
 
 These changes are made somewhat separately in the branches "exit-on-fail",
 "remove-urchin-x", "tap", and "update-readme". They are rebased into one
