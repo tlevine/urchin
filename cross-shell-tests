@@ -2,7 +2,7 @@
 # Run urchin in a bunch of different shells,
 # including a shell that isn't quite POSIX-compatible (zsh)
 
-for shell in dash bash ksh zsh; do
+for shell in dash bash mksh ksh zsh; do
   if which $shell > /dev/null 2> /dev/null; then
     echo
     echo Running urchin tests in $shell
