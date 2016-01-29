@@ -8,6 +8,10 @@ Urchin is a file-based test harness, normally used for testing shell programs.
 It is written in portable shell and should thus work on GNU/Linux, BSD
 (including Mac OS X), and other Unix-like platforms.
 
+Urchin is called "Urchin" because
+[sea urchins](https://en.wikipedia.org/wiki/Sea_urchin)
+have shells called "tests".
+
 ## Try it out
 Urchin's tests are written in Urchin, so you can run them to see what Urchin
 is like. Clone the repository
