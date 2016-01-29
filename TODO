@@ -1,0 +1,32 @@
+Things I want
+=============
+
+Molly guard
+-------------
+The Molly-guard should be more accepting so that people don't have to use it
+all the time and thus get used to using it. For example, you shouldn't need to
+pass -f in this case.
+https://github.com/creationix/nvm/issues/357
+
+Test speed
+-------------
+Make tests run faster.
+https://github.com/bike-barn/hermit/issues/62
+
+First, easier thing is probably to run tests in parallel.
+
+Second, also easier thing is to tell people to save things to RAM rather than
+disk whenever they can.
+
+Third, harder thing is to put the test suite in RAM automatically. Maybe the
+whole test directory, which includes fixtures, gets copied to a tmpfs if one
+exists.
+
+Hmm or maybe there's a compromise: Tell people to mount /tmp as a tmpfs so
+that temp files are fast. Maybe allow people to set some other directory as
+the temporary file place, in case they want a different tmpfs location.
+
+Options
+-------------
+I want long options. For example, there's presently -f and -e.
+I want to make them -f|--force and -e|--exit.
