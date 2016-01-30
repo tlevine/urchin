@@ -46,3 +46,15 @@ Licensing and copyright
 * Reference all owners and years in the Copyright file
 * Consider copyleft licenses
 * Add license notices to other files if necessary
+
+Packaging
+------------
+Package for package managers.
+
+* I want NixOS, of course.
+* Debian is probably the big one.
+
+Other interesting package managers
+
+* Update the npm package
+* Homebrew (for Mac)
