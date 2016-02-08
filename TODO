@@ -109,3 +109,9 @@ in the case of Urchin.
 This is as far as I have gotten with contemplating license changes. For now
 we're sticking with the original MIT-style license, but it's easy to change
 licenses later.
+
+Nagios plugins
+-----------------
+It would be cool to run Nagios plugins with Urchin. This is already possible,
+actually, but it might be worth giving some special thought to it.
+https://nagios-plugins.org/doc/guidelines.html
