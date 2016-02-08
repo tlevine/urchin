@@ -5,8 +5,8 @@
 # No part of urchin, including this file, may be copied, modified, propagated,
 # or distributed except according to the terms contained in the COPYING file.
 
-# Make sure that CDPATH isn't set, as it causes `cd` to behave unpredictably - notably, it can produce output,
-# which breaks fullpath().
+# Make sure that CDPATH isn't set, as it causes `cd` to behave unpredictably -
+# notably, it can produce output, which breaks fullpath().
 unset CDPATH
 
 # Urchin version number
@@ -138,7 +138,10 @@ recurse() {
           # On fail, print a red '✗'
           printf '\033[31m✗ \033[0m'
           printf '%s\n' "${potential_test}"
-          printf '\033[31m' # Print output captured from failed test in red.
+
+          # Print output captured from failed test in red.
+          printf '\033[31m'
+
           cat "$stdout_file"
           printf '\033[0m'
         ;;
@@ -156,8 +159,13 @@ recurse() {
 }
 
 has_sh_or_no_shebang_line() {
-  head -n 1 "$1" | grep -vqE '^#!' && return 0 # no shebang line at all
-  head -n 1 "$1" | grep -qE '^#![[:blank:]]*/bin/sh($|[[:blank:]])' && return 0  # shebang line is '#!/bin/sh' or legal variations thereof
+  # no shebang line at all
+  head -n 1 "$1" | grep -vqE '^#!' && return 0
+
+  # shebang line is '#!/bin/sh' or legal variations thereof
+  head -n 1 "$1" | grep -qE '^#![[:blank:]]*/bin/sh($|[[:blank:]])' &&
+    return 0  
+
   return 1
 }
 
@@ -232,7 +240,10 @@ urchin_go() {
     echo "Done, took $elapsed $(plural second $elapsed)."
     printf '%s\n' "$passed $(plural test "$passed") passed."
     printf '%s\n' "$skipped $(plural test "$skipped") skipped."
-    [ $failed -gt 0 ] && printf '\033[31m' || printf '\033[32m' # If tests failed, print the message in red, otherwise in green.
+
+    # If tests failed, print the message in red, otherwise in green.
+    [ $failed -gt 0 ] && printf '\033[31m' || printf '\033[32m'
+
     printf '%s\n' "$failed $(plural test "$failed") failed."
     printf '\033[m'
   fi
@@ -264,8 +275,11 @@ do
         -s)
           shift
           shell_for_sh_tests=$1
-          which "$shell_for_sh_tests" >/dev/null || { echo "Cannot find specified shell: '$shell_for_sh_tests'" >&2; urchin_help >&2; exit 2; }
-          ;;
+          which "$shell_for_sh_tests" > /dev/null || {
+            echo "Cannot find specified shell: '$shell_for_sh_tests'" >&2
+            urchin_help >&2
+            exit 2
+          } ;;
         -t) tap_format=true;;
         -h|--help) urchin_help
           exit 0;;
