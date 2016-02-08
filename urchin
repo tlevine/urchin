@@ -16,7 +16,9 @@ fullpath() {
 
 indent() {
   level="$1"
-  printf "%$((2 * ${level}))s"
+  if test "$level" -gt 0; then
+    printf "%$((2 * ${level}))s"
+  fi
 }
 
 recurse() {
