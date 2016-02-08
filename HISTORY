@@ -16,6 +16,7 @@ Version 0.0.6
 * Document why Urchin is called "Urchin"
 * Update TODO
 * Support mksh (Change a printf command.)
+* Make long lines shorter.
 
 These changes are made somewhat separately in the branches "exit-on-fail",
 "remove-urchin-x", "tap", and "update-readme". They are rebased into one
