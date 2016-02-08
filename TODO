@@ -61,7 +61,13 @@ Other interesting package managers
 
 Windows
 ----------
-Try running Urchin in Windows somehow. I guess CygWin.
+Try running Urchin in Windows somehow. Interpreters include
+
+* CygWin (https://www.cygwin.com/)
+* MSYS (http://mingw.org/wiki/msys)
+* GNU on Windows (https://github.com/bmatzelle/gow/wiki)
+* Git for Windows (https://git-scm.com/download/win)
+* win-bash (http://win-bash.sourceforge.net/)
 
 Consider copyleft licenses
 ----------
