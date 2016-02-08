@@ -1,5 +1,10 @@
 #!/bin/sh
 
+# This file is part of urchin. It is subject to the license terms in the
+# COPYING file found in the top-level directory of this distribution.
+# No part of urchin, including this file, may be copied, modified, propagated,
+# or distributed except according to the terms contained in the COPYING file.
+
 # Make sure that CDPATH isn't set, as it causes `cd` to behave unpredictably - notably, it can produce output,
 # which breaks fullpath().
 unset CDPATH
