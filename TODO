@@ -115,3 +115,17 @@ Nagios plugins
 It would be cool to run Nagios plugins with Urchin. This is already possible,
 actually, but it might be worth giving some special thought to it.
 https://nagios-plugins.org/doc/guidelines.html
+
+Source setup and teardown
+--------------------
+If setup and teardown are sourced instead of executed, maybe we can more
+cleanly create and teardown temporary files.
+
+    (
+      . ./setup
+      ./$thetestfile
+      . ./teardown
+    )
+
+On the other hand, this could just be sourced explicitly in the test file,
+without the special setup and teardown feature.
