@@ -1,0 +1,4 @@
+tmp=$(mktemp)
+echo "Using temp file $tmp"
+../../urchin .wrappers > $tmp
+diff $tmp .wrapper-expectation

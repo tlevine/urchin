@@ -1,0 +1,2 @@
+echo thetest
+exit 1
