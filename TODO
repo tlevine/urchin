@@ -19,6 +19,11 @@ Hmm or maybe there's a compromise: Tell people to mount /tmp as a tmpfs so
 that temp files are fast. Maybe allow people to set some other directory as
 the temporary file place, in case they want a different tmpfs location.
 
+In order to run things in parallel, we have to change how we do the
+stdout_file. I think it's easiest to create separate files for each test and
+to save them in testroot/.urchin/stdout/$filename. The test root would be
+defined as the closest ancestor containing a .urchin directory.
+
 Options
 -------------
 I want long options. For example, there's presently -f and -e.
