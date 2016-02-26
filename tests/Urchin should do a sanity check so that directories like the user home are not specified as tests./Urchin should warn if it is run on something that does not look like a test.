@@ -1,3 +1,5 @@
 #!/bin/sh
 
-! ../../urchin ./.chainsaw
+tmp=$(mktemp -d)/blah
+echo '#!/usr/bin/env true' > $tmp
+! ../../urchin $tmp

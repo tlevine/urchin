@@ -309,7 +309,7 @@ logfile=$(fullpath "$1")/.urchin.log
 stdout_file=$(fullpath "$1")/.urchin_stdout
 
 # Run or present the Molly guard.
-if basename "$(fullpath "$1")" | grep -Fi 'test' > /dev/null || $force
+if fullpath "$1" | grep -Fi 'test' > /dev/null || $force
   then
   urchin_go "$1" "$shell_for_sh_tests"
 else
