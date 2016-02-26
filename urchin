@@ -103,6 +103,8 @@ recurse() {
       [ -f teardown ] && [ -x teardown ] && ./teardown >> "$stdout_file"
       if [ $exit_code -eq 0 ]; then
         result=success
+      elif [ $exit_code -eq 3 ]; then
+        result=skip
       else
         result=fail
       fi
@@ -282,7 +284,7 @@ do
           which "$shell_for_sh_tests" > /dev/null || {
             echo "Cannot find specified shell: '$shell_for_sh_tests'" >&2
             urchin_help >&2
-            exit 2
+            exit 11
           } ;;
         -t) tap_format=true;;
         -h|--help) urchin_help
@@ -301,7 +303,7 @@ if [ "$#" != '1' ] || [ ! -d "$1" ]
   then
   [ -n "$1" ] && [ ! -d "$1" ] && echo "Not a directory: '$1'" >&2
   echo "$USAGE" >&2
-  exit 2
+  exit 11
 fi
 
 # Constants
