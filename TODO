@@ -139,6 +139,13 @@ on the nvm tests. I wound up running this instead.
 The Molly guard would be assessed, and the corresponding setup, setup_dir,
 teardown, and teardown_dir files would be run in the appropriate order.
 
+In order to know how far up the tree to evaluate the setup, &c. files,
+I think it would make sense to require that a ".urchin" file be placed in the
+root of the tests. Urchin would keep going up until it sees this file, and it
+would evaluate the appropriate setup, &c. files from there down to the
+particular test file of interest. We would also use this for testing
+directtories more correctly.
+
 Running automated tasks
 -------------------------
 Urchin might be appropriate for if you have lots of tasks that you want to run
