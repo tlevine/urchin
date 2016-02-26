@@ -67,20 +67,23 @@ recurse() {
         [ -f setup ] && [ -x setup ] && ./setup >> "$stdout_file"
 
         # $2 instead of $indent_level so it doesn't clash
-        recurse "${test}" $(( $2 + 1 )) "$shell_for_sh_tests" &
-
-      # if $single_process; then wait; fi
-        wait $!
-        exit_code=$?
-
-        if $exit_on_fail && test $exit_code -ne 0; then
+        (
+          recurse "${test}" $(( $2 + 1 )) "$shell_for_sh_tests"
+          exit_code=$?
           [ -f teardown ] && [ -x teardown ] && ./teardown >> "$stdout_file"
-          [ -f teardown_dir ] && [ -x teardown_dir ] && ./teardown_dir >> "$stdout_file"
-          return 1
-        fi
+          exit $exit_code
+        ) &
 
-        [ -f teardown ] && [ -x teardown ] && ./teardown >> "$stdout_file"
+        if $single_process; then
+          wait $!
+          exit_code=$?
+          if $exit_on_fail && test $exit_code -ne 0; then
+            [ -f teardown_dir ] && [ -x teardown_dir ] && ./teardown_dir >> "$stdout_file"
+            return 1
+          fi
+        fi
       done
+      wait
       [ -f teardown_dir ] && [ -x teardown_dir ] && ./teardown_dir >> "$stdout_file"
     )
     if $tap_format; then
@@ -290,7 +293,7 @@ do
           which "$shell_for_sh_tests" > /dev/null || {
             echo "Cannot find specified shell: '$shell_for_sh_tests'" >&2
             urchin_help >&2
-            exit 2
+            exit 3
           } ;;
         -t) tap_format=true;;
         -h|--help) urchin_help
@@ -309,7 +312,12 @@ if [ "$#" != '1' ] || [ ! -d "$1" ]
   then
   [ -n "$1" ] && [ ! -d "$1" ] && echo "Not a directory: '$1'" >&2
   echo "$USAGE" >&2
-  exit 2
+  exit 3
+fi
+
+if $exit_on_fail && ! $single_process; then
+  echo 'You must specify -b/--series in order to use -e.' >&2
+  exit 3
 fi
 
 # Constants

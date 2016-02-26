@@ -1,5 +1,5 @@
 tmp=$(mktemp)
-../urchin -e -f ./.die-on-fail > $tmp
+../urchin -e -b -f ./.die-on-fail > $tmp
 result=$?
 
 grep '1 should run.' $tmp
