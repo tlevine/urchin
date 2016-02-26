@@ -1,13 +1,6 @@
 Things I want
 =============
 
-Molly guard
--------------
-The Molly-guard should be more accepting so that people don't have to use it
-all the time and thus get used to using it. For example, you shouldn't need to
-pass -f in this case.
-https://github.com/creationix/nvm/issues/357
-
 Test speed
 -------------
 Make tests run faster.
