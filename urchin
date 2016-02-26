@@ -89,8 +89,7 @@ recurse() {
         then    
         TEST_SHELL="$TEST_SHELL" "$shell_for_sh_tests" ./"$potential_test" > "$stdout_file" 2>&1
       else
-        dotslash=$(echo "$potential_test" | grep '^/' > /dev/null || echo ./)
-        TEST_SHELL="$TEST_SHELL" $dotslash"$potential_test" > "$stdout_file" 2>&1
+        TEST_SHELL="$TEST_SHELL" ./"$potential_test" > "$stdout_file" 2>&1
       fi
       exit_code="$?"
 
@@ -296,15 +295,14 @@ done
 thetest=$(readlink -f "$1")
 if echo "$thetest" | grep -Fi 'test' > /dev/null || $force; then
   if test -d "$1"; then
-    logfile="$thetest/.urchin.log"
-    stdout_file="$thetest/.urchin_stdout"
+    d="$thetest"
   else
     d=$(echo "$thetest" | sed 's/\/[^\/]\{1,\}$//')
-    logfile="$d/.urchin.log"
-    stdout_file="$d/.urchin_stdout"
     cd "$d"
   fi
-  urchin_go "$thetest" "$shell_for_sh_tests"
+  logfile="$d/.urchin.log"
+  stdout_file="$d/.urchin_stdout"
+  urchin_go "$1" "$shell_for_sh_tests"
 else
   urchin_molly_guard
 fi
