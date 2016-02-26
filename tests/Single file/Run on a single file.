@@ -1,0 +1,3 @@
+#!/bin/sh
+../../urchin .test
+# This will exit 0 if it worked.
