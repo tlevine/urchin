@@ -19,6 +19,11 @@ It might look like this.
     fi
     inkscape blah blah ...
 
+I chose status code 3 sort of arbitrarily at first, but it turns out that it
+would the appropriate status code if these tests were Nagios plugins, as the
+concept of skipping a test is similar to the Nagios concept of unknown service
+status (https://nagios-plugins.org/doc/guidelines.html#AEN78).
+
 Version 0.0.6
 ---------------------
 
