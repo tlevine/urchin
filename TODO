@@ -1,18 +1,6 @@
 Things I want
 =============
 
-Skip tests
--------------
-I want tests to be able to decide to skip themselves. For example, if a test
-requires some dependancy, it might look for the dependency and then skip if it
-does not see the dependency. It might look like this.
-
-    #!/bin/sh
-    if which parallel > /dev/null; then
-      exit 3 # status code 3 for skip
-    fi
-    parallel blah blah ...
-
 Test speed
 -------------
 Make tests run faster.

@@ -7,6 +7,17 @@ Version 0.0.7
 The Molly-guard is now more accepting. For example, you no longer need to
 pass -f in this case: https://github.com/creationix/nvm/issues/357
 
+Previously, tests were run if they were executable and were otherwise marked
+as skipped. Now, an executable script can indicate that it is skipped by
+exiting with code 3.  For example, if a test requires some dependancy, it
+might look for the dependency and then skip if it does not see the dependency.
+It might look like this.
+
+    #!/bin/sh
+    if which inkscape; then
+      exit 3 # status code 3 for skip
+    fi
+    inkscape blah blah ...
 
 Version 0.0.6
 ---------------------
