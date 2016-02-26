@@ -55,7 +55,7 @@ recurse() {
 
     (
       cd -- "$potential_test"
-      [ -f setup_dir ] && [ -x setup_dir ] && ./setup_dir >> "$stdout_file"
+      [ -f setup_dir ] && [ -x setup_dir ] && . ./setup_dir >> "$stdout_file"
 
       if [ -n "$ZSH_VERSION" ]; then
         # avoid "no matches found: *" error when directories are empty
@@ -64,21 +64,21 @@ recurse() {
 
       for test in *
         do
-        [ -f setup ] && [ -x setup ] && ./setup >> "$stdout_file"
+        [ -f setup ] && [ -x setup ] && . ./setup >> "$stdout_file"
 
         # $2 instead of $indent_level so it doesn't clash
         recurse "${test}" $(( $2 + 1 )) "$shell_for_sh_tests"
         exit_code=$?
 
         if $exit_on_fail && test $exit_code -ne 0; then
-          [ -f teardown ] && [ -x teardown ] && ./teardown >> "$stdout_file"
-          [ -f teardown_dir ] && [ -x teardown_dir ] && ./teardown_dir >> "$stdout_file"
+          [ -f teardown ] && [ -x teardown ] && . ./teardown >> "$stdout_file"
+          [ -f teardown_dir ] && [ -x teardown_dir ] && . ./teardown_dir >> "$stdout_file"
           return 1
         fi
 
-        [ -f teardown ] && [ -x teardown ] && ./teardown >> "$stdout_file"
+        [ -f teardown ] && [ -x teardown ] && . ./teardown >> "$stdout_file"
       done
-      [ -f teardown_dir ] && [ -x teardown_dir ] && ./teardown_dir >> "$stdout_file"
+      [ -f teardown_dir ] && [ -x teardown_dir ] && . ./teardown_dir >> "$stdout_file"
     )
     if $tap_format; then
       indent $indent_level | sed 's/  /#/g'
@@ -89,7 +89,7 @@ recurse() {
   else
     if [ -x "$potential_test" ]
       then
-      [ -f setup ] && [ -x setup ] && ./setup >> "$stdout_file"
+      [ -f setup ] && [ -x setup ] && . ./setup >> "$stdout_file"
 
       # Run the test
       if [ -n "$shell_for_sh_tests" ] && has_sh_or_no_shebang_line ./"$potential_test"
@@ -100,7 +100,7 @@ recurse() {
       fi
       exit_code="$?"
 
-      [ -f teardown ] && [ -x teardown ] && ./teardown >> "$stdout_file"
+      [ -f teardown ] && [ -x teardown ] && . ./teardown >> "$stdout_file"
       if [ $exit_code -eq 0 ]; then
         result=success
       else
