@@ -123,22 +123,6 @@ cleanly create and teardown temporary files.
 On the other hand, this could just be sourced explicitly in the test file,
 without the special setup and teardown feature.
 
-Run on a file
-----------------
-Presently you can run urchin only on a directory.
-It would be neat if you could run it on a file as well.
-
-This occurred to me when I wanted to run
-
-    urchin test/fast/Unit\ tests/nvm_ls_current
-
-on the nvm tests. I wound up running this instead.
-
-    urchin test/fast/Unit\ tests/ | grep nvm_ls_current
-
-The Molly guard would be assessed, and the corresponding setup, setup_dir,
-teardown, and teardown_dir files would be run in the appropriate order.
-
 Running automated tasks
 -------------------------
 Urchin might be appropriate for if you have lots of tasks that you want to run

@@ -4,9 +4,11 @@ HISTORY
 Version 0.0.7
 ---------------------
 
+### Molly-guard
 The Molly-guard is now more accepting. For example, you no longer need to
 pass -f in this case: https://github.com/creationix/nvm/issues/357
 
+### Skipping tests
 Previously, tests were run if they were executable and were otherwise marked
 as skipped. Now, an executable script can indicate that it is skipped by
 exiting with code 3.  For example, if a test requires some dependancy, it
@@ -23,6 +25,19 @@ I chose status code 3 sort of arbitrarily at first, but it turns out that it
 would the appropriate status code if these tests were Nagios plugins, as the
 concept of skipping a test is similar to the Nagios concept of unknown service
 status (https://nagios-plugins.org/doc/guidelines.html#AEN78).
+
+### Run on a file
+It is now possible to run urchin on a single file.
+This occurred to me when I wanted to run
+
+    urchin test/fast/Unit\ tests/nvm_ls_current
+
+on the nvm tests. I wound up running this instead.
+
+    urchin test/fast/Unit\ tests/ | grep nvm_ls_current
+
+The Molly guard is assessed, and the corresponding setup, setup_dir,
+teardown, and teardown_dir files are run in the appropriate order.
 
 Version 0.0.6
 ---------------------
