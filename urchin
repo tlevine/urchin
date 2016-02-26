@@ -67,7 +67,10 @@ recurse() {
         [ -f setup ] && [ -x setup ] && ./setup >> "$stdout_file"
 
         # $2 instead of $indent_level so it doesn't clash
-        recurse "${test}" $(( $2 + 1 )) "$shell_for_sh_tests"
+        recurse "${test}" $(( $2 + 1 )) "$shell_for_sh_tests" &
+
+      # if $single_process; then wait; fi
+        wait $!
         exit_code=$?
 
         if $exit_on_fail && test $exit_code -ne 0; then
@@ -98,6 +101,7 @@ recurse() {
       else
         TEST_SHELL="$TEST_SHELL" ./"$potential_test" > "$stdout_file" 2>&1
       fi
+
       exit_code="$?"
 
       [ -f teardown ] && [ -x teardown ] && ./teardown >> "$stdout_file"
@@ -269,7 +273,7 @@ urchin_molly_guard() {
   exit 1
 }
 
-parallel=true
+single_process=false
 shell_for_sh_tests=
 force=false
 exit_on_fail=false
@@ -277,7 +281,7 @@ tap_format=false
 while [ $# -gt 0 ]
 do
     case "$1" in
-        -b|--series) parallel=false;;
+        -b|--series) single_process=true;;
         -e) exit_on_fail=true;;
         -f) force=true;;
         -s)
