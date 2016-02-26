@@ -182,6 +182,8 @@ $USAGE
 
 -s <shell>  Invoke test scripts that either have no shebang line at all or
             have shebang line "#!/bin/sh" with the specified shell.
+-b, --series   Run all tests in series in a single process. The default
+               is to run tests from the same directory in parallel.
 -e          Stop running if any single test fails. This is helpful if you want
             to use Urchin to run things other than tests, such as a set of
             configuration scripts.
@@ -267,6 +269,7 @@ urchin_molly_guard() {
   exit 1
 }
 
+parallel=true
 shell_for_sh_tests=
 force=false
 exit_on_fail=false
@@ -274,6 +277,7 @@ tap_format=false
 while [ $# -gt 0 ]
 do
     case "$1" in
+        -b|--series) parallel=false;;
         -e) exit_on_fail=true;;
         -f) force=true;;
         -s)
