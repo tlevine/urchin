@@ -16,6 +16,29 @@ unset CDPATH
 # Urchin version number
 VERSION=0.0.6
 
+urchin_root() {
+  (
+    set -e
+    if test -f "$1"; then
+      set -- $(dirname "$1")
+    fi
+    cd "$1"
+    if test -d .urchin; then
+      echo "$1"
+    elif test "$(readlink -f $1)" = /; then
+      guess=$(readlink -f "$1"|sed s+\(/tests?/\).*+/tests/+)
+      echo "You need to create the .urchin directory in the root of your tests,
+maybe like this:
+
+  mkdir '$guess'/.urchin
+" >&2
+    else
+      cd - > /dev/null
+      urchin_root "$1"/..
+    fi
+  )
+}
+
 fullpath() {
   (
     cd -- "$1"
@@ -191,6 +214,7 @@ $USAGE
             contain the word "test".
 -t          Format output in Test Anything Protocol (TAP)
 -h, --help  This help.
+-r, --root  Print the Urchin root for a particular file or directory.
 -v          Display the version number.
 
 Go to https://github.com/tlevine/urchin for documentation on writing tests.
@@ -278,6 +302,10 @@ do
     case "$1" in
         -e) exit_on_fail=true;;
         -f) force=true;;
+        -r|--root)
+          shift
+          urchin_root "$1"
+          exit;;
         -s)
           shift
           shell_for_sh_tests=$1
