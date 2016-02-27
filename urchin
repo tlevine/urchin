@@ -34,7 +34,9 @@ urchin_root() {
   elif test -d "$current"/.urchin; then
     remove_trailing_slash "$current"
   elif test "$(readlink -f "$current")" = / ||
-    echo "$current" | grep '^\.' ; then
+    echo "$current" | grep '^\.' > /dev/null; then
+    echo oeoeuoeu
+    exit
     # Stop traversing upwards at / and at hidden directories.
     if test -d "$orig"; then
       origdir="$orig"
@@ -364,8 +366,6 @@ if test -z "$I_AM_SOURCING_URCHIN_IN_A_TEST"; then
   fi
 
   # Run or present the Molly guard.
-  urchin_root "$1"
-  exit
   if ! urchin_root "$1" > /dev/null; then
     exit 1
   elif basename "$(readlink -f "$(urchin_root "$1")")" |
