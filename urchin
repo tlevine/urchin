@@ -7,8 +7,8 @@
 # No part of urchin, including this file, may be copied, modified, propagated,
 # or distributed except according to the terms contained in the COPYING file.
 
-# Stop on error.
-set -e
+# Continue on error.
+set +e
 
 # Make sure that CDPATH isn't set, as it causes `cd` to behave unpredictably -
 # notably, it can produce output, which breaks fullpath().
