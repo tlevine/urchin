@@ -8,6 +8,9 @@
 # or distributed except according to the terms contained in the COPYING file.
 
 
+logfile=/tmp/log # sloppy for now
+
+set -e
 
 # Make sure that CDPATH isn't set, as it causes `cd` to behave unpredictably -
 # notably, it can produce output, which breaks fullpath().
@@ -35,12 +38,16 @@ urchin_root() {
       urchin_root $(dirname "$current") "$orig"
     elif test -d "$current"/.urchin; then
       echo "$current"
-    elif test "$(readlink -f $current)" = /; then
-      guess=$(readlink -f "$orig"|sed s+\(/tests?/\).*+/tests/+)
+    elif test "$(readlink -f "$current")" = /; then
+      if test -d "$orig"; then
+        origdir="$orig"
+      else
+        origdir=$(dirname "$orig")
+      fi
       echo "You need to create the .urchin directory in the root of your tests,
 maybe like this:
 
-  mkdir '$guess/.urchin'
+  mkdir '$origdir/.urchin'
 " >&2
     else
       urchin_root "$current"/.. "$orig"
@@ -48,17 +55,26 @@ maybe like this:
   )
 }
 
-fullpath() {
-  (
-    cd -- "$1"
-    pwd
-  )
-}
-
 indent() {
   level="$1"
   if test "$level" -gt 0; then
     printf "%$((2 * ${level}))s"
+  fi
+}
+
+escape_slashes() {
+  echo "$1" | sed s+/+\\\\/+g
+}
+
+get_stdout_file() {
+  root=$(readlink -f $(urchin_root "$1"))
+  test_file=$(readlink -f "$1")
+  eroot=$(escape_slashes "$root")
+  base=$(echo "$test_file" | sed "s/^$eroot/$eroot\/.urchin/")
+  if test -d "$1"; then
+    echo "$base"/.index
+  else
+    echo "$base"
   fi
 }
 
@@ -71,6 +87,9 @@ recurse() {
   [ "$potential_test" = 'teardown_dir' ] && return
   [ "$potential_test" = 'setup' ] && return
   [ "$potential_test" = 'teardown' ] && return
+
+  stdout_file="$(get_stdout_file "$potential_test")"
+  mkdir -p "$(dirname "$stdout_file")"
 
   [ $indent_level -eq 0 ] && : > "$stdout_file"
 
@@ -193,7 +212,6 @@ recurse() {
       return 1
     fi
   fi
-  [ $indent_level -eq 0 ] && rm "$stdout_file"
 }
 
 has_sh_or_no_shebang_line() {
@@ -343,13 +361,9 @@ if [ "$#" != '1' ] || [ ! -d "$1" ]
   exit 11
 fi
 
-# Constants
-logfile=$(fullpath "$1")/.urchin.log
-stdout_file=$(fullpath "$1")/.urchin_stdout
-
 # Run or present the Molly guard.
-if fullpath "$1" | grep -Fi 'test' > /dev/null || $force
-  then
+if dirname $(readlink -f $(urchin_root "$1")) |
+  grep -Fi 'test' > /dev/null || $force; then
   urchin_go "$1" "$shell_for_sh_tests"
 else
   urchin_molly_guard
