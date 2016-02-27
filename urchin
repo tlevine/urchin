@@ -286,7 +286,10 @@ urchin_go() {
     TEST_SHELL='/bin/sh'
   fi
 
-  recurse "$1" 0 "$2"  # test folder -- indentation level -- [shell to invoke test scripts with]
+  # 1 test folder
+  # 2 indentation level
+  # 3 shell to invoke test scripts with
+  recurse "$1" 0 "$2"
 
   finish=$(date +%s)
   elapsed=$(($finish - $start))
