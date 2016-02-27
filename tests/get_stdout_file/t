@@ -1,0 +1,4 @@
+#!/bin/sh
+
+I_AM_SOURCING_URCHIN_IN_A_TEST=true . ../../urchin
+test $(get_stdout_file t) = aoeu

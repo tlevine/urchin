@@ -19,7 +19,7 @@ VERSION=0.0.6
 
 urchin_root() {
   # Call recursively but remember the original argument.
-  current="$1"
+  current="$(remove_trailing_slash "$1")"
   if test -n "$2"; then
     orig="$2"
   else
@@ -32,7 +32,7 @@ urchin_root() {
   elif test -f "$current"; then
     urchin_root "$(dirname "$current")" "$orig"
   elif test -d "$current"/.urchin; then
-    echo "$current"
+    remove_trailing_slash "$current"
   elif test "$(readlink -f "$current")" = / ||
     echo "$current" | grep '^\.' ; then
     # Stop traversing upwards at / and at hidden directories.
@@ -44,7 +44,7 @@ urchin_root() {
     echo "You need to create the .urchin directory in the root of your tests,
 maybe like this:
 
-  mkdir '$(echo "$origdir" | sed s/\\/$//)/.urchin'
+  mkdir '$(remove_trailing_slash "$origdir")/.urchin'
 " >&2
     return 1
   else
@@ -57,6 +57,10 @@ indent() {
   if test "$level" -gt 0; then
     printf "%$((2 * ${level}))s"
   fi
+}
+
+remove_trailing_slash() {
+  echo "$1" | sed s/\\/$//
 }
 
 escape_slashes() {
@@ -360,6 +364,8 @@ if test -z "$I_AM_SOURCING_URCHIN_IN_A_TEST"; then
   fi
 
   # Run or present the Molly guard.
+  urchin_root "$1"
+  exit
   if ! urchin_root "$1" > /dev/null; then
     exit 1
   elif basename "$(readlink -f "$(urchin_root "$1")")" |
