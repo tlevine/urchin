@@ -26,31 +26,28 @@ urchin_root() {
     orig="$1"
   fi
 
-  (
-    set -e
-    
-    if ! test -e "$current"; then
-      echo "$current: No such file or directory">&2
-      exit 1
-    elif test -f "$current"; then
-      urchin_root "$(dirname "$current")" "$orig"
-    elif test -d "$current"/.urchin; then
-      echo "$current"
-    elif test "$(readlink -f "$current")" = /; then
-      if test -d "$orig"; then
-        origdir="$orig"
-      else
-        origdir=$(dirname "$orig")
-      fi
-      echo "You need to create the .urchin directory in the root of your tests,
+  if ! test -e "$current"; then
+    echo "$current: No such file or directory">&2
+    exit 1
+  elif test -f "$current"; then
+    urchin_root "$(dirname "$current")" "$orig"
+  elif test -d "$current"/.urchin; then
+    echo "$current"
+  elif test "$(readlink -f "$current")" = /; then
+    if test -d "$orig"; then
+      origdir="$orig"
+    else
+      origdir=$(dirname "$orig")
+    fi
+    echo "You need to create the .urchin directory in the root of your tests,
 maybe like this:
 
-  mkdir '$origdir/.urchin'
+  mkdir '$(echo "$origdir" | sed s/\\/$//)/.urchin'
 " >&2
-    else
-      urchin_root "$current"/.. "$orig"
-    fi
-  )
+    return 1
+  else
+    urchin_root "$current"/.. "$orig"
+  fi
 }
 
 indent() {
@@ -359,7 +356,9 @@ if [ "$#" != '1' ] || [ ! -d "$1" ]
 fi
 
 # Run or present the Molly guard.
-if dirname "$(readlink -f "$(urchin_root "$1")")" |
+if ! urchin_root "$1" > /dev/null; then
+  exit 1
+elif basename "$(readlink -f "$(urchin_root "$1")")" |
   grep -Fi 'test' > /dev/null || $force; then
   logfile="$(readlink -f "$(urchin_root "$1")/.urchin/.log")"
   echo > "$logfile"
