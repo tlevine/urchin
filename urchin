@@ -25,14 +25,7 @@ urchin_root() {
     orig="$1"
   fi
 
-  if ! test -e "$current"; then
-    echo "$current: No such file or directory">&2
-    return 1
-  elif test -f "$current"; then
-    urchin_root "$(dirname "$current")" "$orig"
-  elif test -d "$current"/.urchin; then
-    remove_trailing_slash "$current"
-  elif test "$(readlink -f "$current")" = /; then
+  if test "$(readlink -f "$1")" = /; then
     # Stop traversing upwards at /
     if test -d "$orig"; then
       origdir="$orig"
@@ -45,6 +38,13 @@ maybe like this:
   mkdir '$(readlink -f "$(remove_trailing_slash "$origdir")")/.urchin'
 " >&2
     return 1
+  elif ! test -e "$current"; then
+    echo "$current: No such file or directory">&2
+    return 1
+  elif test -f "$current"; then
+    urchin_root "$(dirname "$current")" "$orig"
+  elif test -d "$current"/.urchin; then
+    remove_trailing_slash "$current"
   elif test "$current" != . && test "$current" != .. &&
     echo "$current" | grep '^\.' && > /dev/null; then
     # Stop traversing upwards at hidden directories.
