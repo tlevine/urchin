@@ -17,25 +17,33 @@ unset CDPATH
 VERSION=0.0.6
 
 urchin_root() {
+  # Call recursively but remember the original argument.
+  current="$1"
+  if test -n "$2"; then
+    orig="$2"
+  else
+    orig="$1"
+  fi
+
   (
     set -e
     
-    if ! test -e "$1"; then
-      echo "$1: No such file or directory">&2
+    if ! test -e "$current"; then
+      echo "$current: No such file or directory">&2
       exit 1
-    elif test -f "$1"; then
-      urchin_root $(dirname "$1")
-    elif test -d "$1"/.urchin; then
-      echo "$1"
-    elif test "$(readlink -f $1)" = /; then
-      guess=$(readlink -f "$1"|sed s+\(/tests?/\).*+/tests/+)
+    elif test -f "$current"; then
+      urchin_root $(dirname "$current") "$orig"
+    elif test -d "$current"/.urchin; then
+      echo "$current"
+    elif test "$(readlink -f $current)" = /; then
+      guess=$(readlink -f "$orig"|sed s+\(/tests?/\).*+/tests/+)
       echo "You need to create the .urchin directory in the root of your tests,
 maybe like this:
 
-  mkdir '$guess'/.urchin
+  mkdir '$guess/.urchin'
 " >&2
     else
-      urchin_root "$1"/..
+      urchin_root "$current"/.. "$orig"
     fi
   )
 }
