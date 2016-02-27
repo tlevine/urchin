@@ -298,7 +298,7 @@ urchin_go() {
     printf '%s\n' "$failed $(plural test "$failed") failed."
     printf '\033[m'
   fi
-  rm -f "$logfile"
+# rm -f "$logfile"
   test -z "$failed" || test "$failed" -eq '0'
 }
 
@@ -361,7 +361,7 @@ if ! urchin_root "$1" > /dev/null; then
 elif basename "$(readlink -f "$(urchin_root "$1")")" |
   grep -Fi 'test' > /dev/null || $force; then
   logfile="$(readlink -f "$(urchin_root "$1")/.urchin/.log")"
-  echo > "$logfile"
+  printf '' > "$logfile"
   urchin_go "$1" "$shell_for_sh_tests"
 else
   urchin_molly_guard
