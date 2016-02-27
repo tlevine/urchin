@@ -7,7 +7,7 @@
 # No part of urchin, including this file, may be copied, modified, propagated,
 # or distributed except according to the terms contained in the COPYING file.
 
-set -e
+set +e
 
 # Make sure that CDPATH isn't set, as it causes `cd` to behave unpredictably -
 # notably, it can produce output, which breaks fullpath().
@@ -36,7 +36,6 @@ urchin_root() {
     { echo "$current" | grep '^\.' &&
       test "$current" != . && test "$current" != ..
     } > /dev/null; then
-  echo "$current" > /tmp/aaa
     # Stop traversing upwards at / and at hidden directories.
     if test -d "$orig"; then
       origdir="$orig"
