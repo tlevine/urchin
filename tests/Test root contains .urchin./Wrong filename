@@ -1,2 +1,2 @@
 #!/bin/sh
-../../urchin --root .testsuite/a/not-a-file
+! ../../urchin --root .testsuite/a/not-a-file
