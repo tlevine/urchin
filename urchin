@@ -35,7 +35,7 @@ urchin_root() {
       echo "$current: No such file or directory">&2
       exit 1
     elif test -f "$current"; then
-      urchin_root $(dirname "$current") "$orig"
+      urchin_root "$(dirname "$current")" "$orig"
     elif test -d "$current"/.urchin; then
       echo "$current"
     elif test "$(readlink -f "$current")" = /; then
@@ -67,10 +67,10 @@ escape_slashes() {
 }
 
 get_stdout_file() {
-  root=$(readlink -f $(urchin_root "$1"))
-  test_file=$(readlink -f "$1")
-  eroot=$(escape_slashes "$root")
-  base=$(echo "$test_file" | sed "s/^$eroot/$eroot\/.urchin/")
+  root="$(readlink -f "$(urchin_root "$1")")"
+  test_file="$(readlink -f "$1")"
+  eroot="$(escape_slashes "$root")"
+  base="$(echo "$test_file" | sed "s/^$eroot/$eroot\/.urchin/")"
   if test -d "$1"; then
     echo "$base"/.index
   else
@@ -118,7 +118,7 @@ recurse() {
         [ -f setup ] && [ -x setup ] && ./setup >> "$stdout_file"
 
         # $2 instead of $indent_level so it doesn't clash
-        recurse "${test}" $(( $2 + 1 )) "$shell_for_sh_tests"
+        recurse "${test}" "$(( $2 + 1 ))" "$shell_for_sh_tests"
         exit_code=$?
 
         if $exit_on_fail && test $exit_code -ne 0; then
@@ -267,7 +267,7 @@ urchin_go() {
     printf \#\ 
   fi
   echo Running tests at $(date +%Y-%m-%dT%H:%M:%S)
-  start=$(date +%s)
+  start="$(date +%s)"
 
   # Determine the environment variable to define for test scripts
   # that reflects the specified or implied shell to use for shell-code tests.
@@ -362,7 +362,7 @@ if [ "$#" != '1' ] || [ ! -d "$1" ]
 fi
 
 # Run or present the Molly guard.
-if dirname $(readlink -f $(urchin_root "$1")) |
+if dirname "$(readlink -f "$(urchin_root "$1")")" |
   grep -Fi 'test' > /dev/null || $force; then
   urchin_go "$1" "$shell_for_sh_tests"
 else
