@@ -317,7 +317,7 @@ urchin_molly_guard() {
   exit 1
 }
 
-main() {
+if test -z "$I_AM_SOURCING_URCHIN_IN_A_TEST"; then
   shell_for_sh_tests=
   force=false
   exit_on_fail=false
@@ -370,6 +370,4 @@ main() {
   else
     urchin_molly_guard
   fi
-}
-
-${I_AM_SOURCING_URCHIN_IN_A_TEST:-main}
+fi
