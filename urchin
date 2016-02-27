@@ -22,8 +22,7 @@ urchin_root() {
     if test -f "$1"; then
       set -- $(dirname "$1")
     fi
-    cd "$1"
-    if test -d .urchin; then
+    if test -d "$1"/.urchin; then
       echo "$1"
     elif test "$(readlink -f $1)" = /; then
       guess=$(readlink -f "$1"|sed s+\(/tests?/\).*+/tests/+)
@@ -33,7 +32,6 @@ maybe like this:
   mkdir '$guess'/.urchin
 " >&2
     else
-      cd - > /dev/null
       urchin_root "$1"/..
     fi
   )

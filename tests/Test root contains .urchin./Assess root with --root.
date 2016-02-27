@@ -1,6 +1,2 @@
 #!/bin/sh
-
-observed=$(../../urchin --root .testsuite/a/b)
-expected=.testsuite/a/b/../..
-
-test "$observed" = "$expected"
+./.meta-assess --root

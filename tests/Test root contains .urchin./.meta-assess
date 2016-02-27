@@ -1,0 +1,6 @@
+#!/bin/sh
+
+observed=$(../../urchin "$1" .testsuite/a/b)
+expected=.testsuite/a/b/../..
+
+test "$observed" = "$expected"
