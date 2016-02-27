@@ -39,16 +39,12 @@ urchin_root() {
     else
       origdir=$(dirname "$orig")
     fi
-    echo "We use the following directory as root because no root is explicly set.
+    echo "You must create a .urchin directory to specify the urchin root.
+Run something like this, and then run urchin again.
 
-$origdir
-
-To suppress this message, create the .urchin directory in the root of your
-tests, maybe like this:
-
-mkdir '$origdir/.urchin'
+  mkdir '$origdir/.urchin'
 " >&2
-    echo "$origdir"
+    exit 1
   else
     urchin_root "$current"/.. "$orig"
   fi
@@ -319,7 +315,6 @@ root="$(urchin_root "$1")"
 if dirname "$(readlink -f "$root")" |
   grep -Fi 'test' > /dev/null || $force; then
   logfile="$(readlink -f "$root")/.urchin/.log"
-  mkdir -p "$(dirname "$logfile")"
   echo > "$logfile"
 
   if "$tap_format"; then
