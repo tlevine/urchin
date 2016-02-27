@@ -19,10 +19,13 @@ VERSION=0.0.6
 urchin_root() {
   (
     set -e
-    if test -f "$1"; then
-      set -- $(dirname "$1")
-    fi
-    if test -d "$1"/.urchin; then
+    
+    if ! test -e "$1"; then
+      echo "$1: No such file or directory">&2
+      exit 1
+    elif test -f "$1"; then
+      urchin_root $(dirname "$1")
+    elif test -d "$1"/.urchin; then
       echo "$1"
     elif test "$(readlink -f $1)" = /; then
       guess=$(readlink -f "$1"|sed s+\(/tests?/\).*+/tests/+)
