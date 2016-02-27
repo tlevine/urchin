@@ -33,7 +33,9 @@ urchin_root() {
   elif test -d "$current"/.urchin; then
     remove_trailing_slash "$current"
   elif test "$(readlink -f "$current")" = / ||
-    echo "$current" | grep '^\.[^.]' > /dev/null; then
+    { echo "$current" | grep '^\.' &&
+      test "$current" != . && test "$current" != ..
+    } > /dev/null; then
   echo "$current" > /tmp/aaa
     # Stop traversing upwards at / and at hidden directories.
     if test -d "$orig"; then
