@@ -80,12 +80,17 @@ recurse() {
   indent_level="$2"
   shell_for_sh_tests="$3"
 
+  [ "$potential_test" = '.urchin' ] && return
   [ "$potential_test" = 'setup_dir' ] && return
   [ "$potential_test" = 'teardown_dir' ] && return
   [ "$potential_test" = 'setup' ] && return
   [ "$potential_test" = 'teardown' ] && return
 
   stdout_file="$(get_stdout_file "$potential_test")"
+  if dirname "$stdout_file" | grep '^/\.'; then
+    exit
+  fi
+  dirname "$stdout_file" > /dev/stderr
   mkdir -p "$(dirname "$stdout_file")"
 
   [ $indent_level -eq 0 ] && : > "$stdout_file"
@@ -316,55 +321,59 @@ urchin_molly_guard() {
   exit 1
 }
 
-shell_for_sh_tests=
-force=false
-exit_on_fail=false
-tap_format=false
-while [ $# -gt 0 ]
-do
-    case "$1" in
-        -e) exit_on_fail=true;;
-        -f) force=true;;
-        -r|--root)
-          shift
-          urchin_root "$1"
-          exit;;
-        -s)
-          shift
-          shell_for_sh_tests=$1
-          which "$shell_for_sh_tests" > /dev/null || {
-            echo "Cannot find specified shell: '$shell_for_sh_tests'" >&2
-            urchin_help >&2
-            exit 11
-          } ;;
-        -t) tap_format=true;;
-        -h|--help) urchin_help
-          exit 0;;
-        -v) echo "$VERSION"
+main() {
+  shell_for_sh_tests=
+  force=false
+  exit_on_fail=false
+  tap_format=false
+  while [ $# -gt 0 ]
+  do
+      case "$1" in
+          -e) exit_on_fail=true;;
+          -f) force=true;;
+          -r|--root)
+            shift
+            urchin_root "$1"
             exit;;
-        -*) urchin_help >&2
-            exit 1;;
-        *)  break;;
-    esac
-    shift
-done
+          -s)
+            shift
+            shell_for_sh_tests=$1
+            which "$shell_for_sh_tests" > /dev/null || {
+              echo "Cannot find specified shell: '$shell_for_sh_tests'" >&2
+              urchin_help >&2
+              exit 11
+            } ;;
+          -t) tap_format=true;;
+          -h|--help) urchin_help
+            exit 0;;
+          -v) echo "$VERSION"
+              exit;;
+          -*) urchin_help >&2
+              exit 1;;
+          *)  break;;
+      esac
+      shift
+  done
 
-# Verify argument for main stuff
-if [ "$#" != '1' ] || [ ! -d "$1" ]
-  then
-  [ -n "$1" ] && [ ! -d "$1" ] && echo "Not a directory: '$1'" >&2
-  echo "$USAGE" >&2
-  exit 11
-fi
+  # Verify argument for main stuff
+  if [ "$#" != '1' ] || [ ! -d "$1" ]
+    then
+    [ -n "$1" ] && [ ! -d "$1" ] && echo "Not a directory: '$1'" >&2
+    echo "$USAGE" >&2
+    exit 11
+  fi
 
-# Run or present the Molly guard.
-if ! urchin_root "$1" > /dev/null; then
-  exit 1
-elif basename "$(readlink -f "$(urchin_root "$1")")" |
-  grep -Fi 'test' > /dev/null || $force; then
-  logfile="$(readlink -f "$(urchin_root "$1")/.urchin/.log")"
-  printf '' > "$logfile"
-  urchin_go "$1" "$shell_for_sh_tests"
-else
-  urchin_molly_guard
-fi
+  # Run or present the Molly guard.
+  if ! urchin_root "$1" > /dev/null; then
+    exit 1
+  elif basename "$(readlink -f "$(urchin_root "$1")")" |
+    grep -Fi 'test' > /dev/null || $force; then
+    logfile="$(readlink -f "$(urchin_root "$1")/.urchin/.log")"
+    printf '' > "$logfile"
+    urchin_go "$1" "$shell_for_sh_tests"
+  else
+    urchin_molly_guard
+  fi
+}
+
+${I_AM_SOURCING_URCHIN_IN_A_TEST:-main}
