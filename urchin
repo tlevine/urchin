@@ -28,12 +28,14 @@ urchin_root() {
 
   if ! test -e "$current"; then
     echo "$current: No such file or directory">&2
-    exit 1
+    return 1
   elif test -f "$current"; then
     urchin_root "$(dirname "$current")" "$orig"
   elif test -d "$current"/.urchin; then
     echo "$current"
-  elif test "$(readlink -f "$current")" = /; then
+  elif test "$(readlink -f "$current")" = / ||
+    echo "$current" | grep '^\.' ; then
+    # Stop traversing upwards at / and at hidden directories.
     if test -d "$orig"; then
       origdir="$orig"
     else
