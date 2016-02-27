@@ -7,9 +7,7 @@
 # No part of urchin, including this file, may be copied, modified, propagated,
 # or distributed except according to the terms contained in the COPYING file.
 
-
-logfile=/tmp/log # sloppy for now
-
+# Stop on error.
 set -e
 
 # Make sure that CDPATH isn't set, as it causes `cd` to behave unpredictably -
@@ -262,7 +260,6 @@ plural () {
 }
 
 urchin_go() {
-  rm -f "$logfile"
   if "$tap_format"; then
     printf \#\ 
   fi
@@ -364,6 +361,8 @@ fi
 # Run or present the Molly guard.
 if dirname "$(readlink -f "$(urchin_root "$1")")" |
   grep -Fi 'test' > /dev/null || $force; then
+  logfile="$(readlink -f "$(urchin_root "$1")/.urchin/.log")"
+  echo > "$logfile"
   urchin_go "$1" "$shell_for_sh_tests"
 else
   urchin_molly_guard
