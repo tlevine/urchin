@@ -7,8 +7,7 @@
 # No part of urchin, including this file, may be copied, modified, propagated,
 # or distributed except according to the terms contained in the COPYING file.
 
-# Continue on error.
-set +e
+set -e
 
 # Make sure that CDPATH isn't set, as it causes `cd` to behave unpredictably -
 # notably, it can produce output, which breaks fullpath().
@@ -34,9 +33,8 @@ urchin_root() {
   elif test -d "$current"/.urchin; then
     remove_trailing_slash "$current"
   elif test "$(readlink -f "$current")" = / ||
-    echo "$current" | grep '^\.' > /dev/null; then
-    echo oeoeuoeu
-    exit
+    echo "$current" | grep '^\.[^.]' > /dev/null; then
+  echo "$current" > /tmp/aaa
     # Stop traversing upwards at / and at hidden directories.
     if test -d "$orig"; then
       origdir="$orig"
@@ -122,8 +120,10 @@ recurse() {
         [ -f setup ] && [ -x setup ] && ./setup >> "$stdout_file"
 
         # $2 instead of $indent_level so it doesn't clash
+        set +e
         recurse "${test}" "$(( $2 + 1 ))" "$shell_for_sh_tests"
         exit_code=$?
+        set -e
 
         if $exit_on_fail && test $exit_code -ne 0; then
           [ -f teardown ] && [ -x teardown ] && ./teardown >> "$stdout_file"
