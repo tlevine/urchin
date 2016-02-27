@@ -312,7 +312,7 @@ fi
 
 # Run or present the Molly guard.
 root="$(urchin_root "$1")"
-if dirname "$(readlink -f "$root")" |
+if basename "$(readlink -f "$root")" |
   grep -Fi 'test' > /dev/null || $force; then
   logfile="$(readlink -f "$root")/.urchin/.log"
   echo > "$logfile"
