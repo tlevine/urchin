@@ -32,11 +32,8 @@ urchin_root() {
     urchin_root "$(dirname "$current")" "$orig"
   elif test -d "$current"/.urchin; then
     remove_trailing_slash "$current"
-  elif test "$(readlink -f "$current")" = / ||
-    { echo "$current" | grep '^\.' &&
-      test "$current" != . && test "$current" != ..
-    } > /dev/null; then
-    # Stop traversing upwards at / and at hidden directories.
+  elif test "$(readlink -f "$current")" = /; then
+    # Stop traversing upwards at /
     if test -d "$orig"; then
       origdir="$orig"
     else
@@ -45,9 +42,13 @@ urchin_root() {
     echo "You need to create the .urchin directory in the root of your tests,
 maybe like this:
 
-  mkdir '$(remove_trailing_slash "$origdir")/.urchin'
+  mkdir '$(readlink -f "$(remove_trailing_slash "$origdir")")/.urchin'
 " >&2
     return 1
+  elif test "$current" != . && test "$current" != .. &&
+    echo "$current" | grep '^\.' && > /dev/null; then
+    # Stop traversing upwards at hidden directories.
+    urchin_root / "$orig"
   else
     urchin_root "$current"/.. "$orig"
   fi
