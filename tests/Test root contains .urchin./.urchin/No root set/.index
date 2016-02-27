@@ -1,0 +1,12 @@
+To suppress this message, create the .urchin directory in the root of your
+mkdir '/tmp/tmp.DkrDJbxJYc/.urchin'
+We use the following directory as root because no root is explicly set.
+
+/tmp/tmp.DkrDJbxJYc
+
+To suppress this message, create the .urchin directory in the root of your
+tests, maybe like this:
+
+mkdir '/tmp/tmp.DkrDJbxJYc/.urchin'
+
+/tmp/tmp.DkrDJbxJYc

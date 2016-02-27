@@ -1,2 +1,8 @@
 #!/bin/sh
-../../urchin --root /bin 2>&1 | grep "'/bin/.urchin'"
+set -e
+
+tmp=$(mktemp -d)
+../../urchin --root $tmp 2>&1 | grep suppress
+../../urchin --root $tmp 2>&1 | grep "'$tmp/.urchin'"
+../../urchin --root $tmp
+rm -R "$tmp"

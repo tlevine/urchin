@@ -26,31 +26,32 @@ urchin_root() {
     orig="$1"
   fi
 
-  (
-    set -e
-    
-    if ! test -e "$current"; then
-      echo "$current: No such file or directory">&2
-      exit 1
-    elif test -f "$current"; then
-      urchin_root "$(dirname "$current")" "$orig"
-    elif test -d "$current"/.urchin; then
-      echo "$current"
-    elif test "$(readlink -f "$current")" = /; then
-      if test -d "$orig"; then
-        origdir="$orig"
-      else
-        origdir=$(dirname "$orig")
-      fi
-      echo "You need to create the .urchin directory in the root of your tests,
-maybe like this:
-
-  mkdir '$origdir/.urchin'
-" >&2
+  if ! test -e "$current"; then
+    echo "$current: No such file or directory">&2
+    exit 1
+  elif test -f "$current"; then
+    urchin_root "$(dirname "$current")" "$orig"
+  elif test -d "$current"/.urchin; then
+    echo "$current"
+  elif test "$(readlink -f "$current")" = /; then
+    if test -d "$orig"; then
+      origdir="$orig"
     else
-      urchin_root "$current"/.. "$orig"
+      origdir=$(dirname "$orig")
     fi
-  )
+    echo "We use the following directory as root because no root is explicly set.
+
+$origdir
+
+To suppress this message, create the .urchin directory in the root of your
+tests, maybe like this:
+
+mkdir '$origdir/.urchin'
+" >&2
+    echo "$origdir"
+  else
+    urchin_root "$current"/.. "$orig"
+  fi
 }
 
 indent() {
@@ -65,8 +66,8 @@ escape_slashes() {
 }
 
 get_stdout_file() {
-  root="$(readlink -f "$(urchin_root "$1")")"
-  test_file="$(readlink -f "$1")"
+  root="$(readlink -f "$1")"
+  test_file="$(readlink -f "$2")"
   eroot="$(escape_slashes "$root")"
   base="$(echo "$test_file" | sed "s/^$eroot/$eroot\/.urchin/")"
   if test -d "$1"; then
@@ -80,13 +81,14 @@ recurse() {
   potential_test="$1"
   indent_level="$2"
   shell_for_sh_tests="$3"
+  root="$4"
 
   [ "$potential_test" = 'setup_dir' ] && return
   [ "$potential_test" = 'teardown_dir' ] && return
   [ "$potential_test" = 'setup' ] && return
   [ "$potential_test" = 'teardown' ] && return
 
-  stdout_file="$(get_stdout_file "$potential_test")"
+  stdout_file="$(get_stdout_file "$root" "$potential_test")"
   mkdir -p "$(dirname "$stdout_file")"
 
   [ $indent_level -eq 0 ] && : > "$stdout_file"
@@ -116,7 +118,7 @@ recurse() {
         [ -f setup ] && [ -x setup ] && ./setup >> "$stdout_file"
 
         # $2 instead of $indent_level so it doesn't clash
-        recurse "${test}" "$(( $2 + 1 ))" "$shell_for_sh_tests"
+        recurse "${test}" "$(( $2 + 1 ))" "$shell_for_sh_tests" "$root"
         exit_code=$?
 
         if $exit_on_fail && test $exit_code -ne 0; then
@@ -259,52 +261,6 @@ plural () {
   fi
 }
 
-urchin_go() {
-  if "$tap_format"; then
-    printf \#\ 
-  fi
-  echo Running tests at $(date +%Y-%m-%dT%H:%M:%S)
-  start="$(date +%s)"
-
-  # Determine the environment variable to define for test scripts
-  # that reflects the specified or implied shell to use for shell-code tests.
-  #  - Set it to the shell specified via -s, if any.
-  #  - Otherwise, use its present value, if non-empty.
-  #  - Otherwise, default to '/bin/sh'.
-  if [ -n "$2" ]
-    then
-    TEST_SHELL="$2"
-  elif [ -z "$TEST_SHELL" ]
-    then
-    TEST_SHELL='/bin/sh'
-  fi
-
-  recurse "$1" 0 "$2"  # test folder -- indentation level -- [shell to invoke test scripts with]
-
-  finish=$(date +%s)
-  elapsed=$(($finish - $start))
-
-  passed=$(grep -c '^success' "$logfile")
-  failed=$(grep -c '^fail' "$logfile")
-  skipped=$(grep -c '^skip' "$logfile")
-  if $tap_format; then
-    echo "# Took $elapsed $(plural second $elapsed)."
-    echo 1..$(($passed + $failed + $skipped))
-  else
-    echo "Done, took $elapsed $(plural second $elapsed)."
-    printf '%s\n' "$passed $(plural test "$passed") passed."
-    printf '%s\n' "$skipped $(plural test "$skipped") skipped."
-
-    # If tests failed, print the message in red, otherwise in green.
-    [ $failed -gt 0 ] && printf '\033[31m' || printf '\033[32m'
-
-    printf '%s\n' "$failed $(plural test "$failed") failed."
-    printf '\033[m'
-  fi
-  rm -f "$logfile"
-  test -z "$failed" || test "$failed" -eq '0'
-}
-
 urchin_molly_guard() {
   {
     echo
@@ -359,11 +315,59 @@ if [ "$#" != '1' ] || [ ! -d "$1" ]
 fi
 
 # Run or present the Molly guard.
-if dirname "$(readlink -f "$(urchin_root "$1")")" |
+root="$(urchin_root "$1")"
+if dirname "$(readlink -f "$root")" |
   grep -Fi 'test' > /dev/null || $force; then
-  logfile="$(readlink -f "$(urchin_root "$1")/.urchin/.log")"
+  logfile="$(readlink -f "$root")/.urchin/.log"
+  mkdir -p "$(dirname "$logfile")"
   echo > "$logfile"
-  urchin_go "$1" "$shell_for_sh_tests"
+
+  if "$tap_format"; then
+    printf \#\ 
+  fi
+  echo Running tests at $(date +%Y-%m-%dT%H:%M:%S)
+  start="$(date +%s)"
+
+  # Determine the environment variable to define for test scripts
+  # that reflects the specified or implied shell to use for shell-code tests.
+  #  - Set it to the shell specified via -s, if any.
+  #  - Otherwise, use its present value, if non-empty.
+  #  - Otherwise, default to '/bin/sh'.
+  if [ -n "$shell_for_sh_tests" ]; then
+    TEST_SHELL="$shell_for_sh_tests"
+  elif [ -z "$TEST_SHELL" ]; then
+    TEST_SHELL='/bin/sh'
+  fi
+
+  # 1 test folder
+  # 2 indentation level
+  # 3 shell to invoke test scripts with
+  # 4 urchin root
+  recurse "$1" 0 "$shell_for_sh_tests" "$root"
+
+  finish=$(date +%s)
+  elapsed=$(($finish - $start))
+
+  passed=$(grep -c '^success' "$logfile")
+  failed=$(grep -c '^fail' "$logfile")
+  skipped=$(grep -c '^skip' "$logfile")
+  if $tap_format; then
+    echo "# Took $elapsed $(plural second $elapsed)."
+    echo 1..$(($passed + $failed + $skipped))
+  else
+    echo "Done, took $elapsed $(plural second $elapsed)."
+    printf '%s\n' "$passed $(plural test "$passed") passed."
+    printf '%s\n' "$skipped $(plural test "$skipped") skipped."
+
+    # If tests failed, print the message in red, otherwise in green.
+    [ $failed -gt 0 ] && printf '\033[31m' || printf '\033[32m'
+
+    printf '%s\n' "$failed $(plural test "$failed") failed."
+    printf '\033[m'
+  fi
+  rm -f "$logfile"
+  test -z "$failed" || test "$failed" -eq '0'
+
 else
   urchin_molly_guard
 fi
