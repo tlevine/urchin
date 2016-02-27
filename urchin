@@ -87,10 +87,6 @@ recurse() {
   [ "$potential_test" = 'teardown' ] && return
 
   stdout_file="$(get_stdout_file "$potential_test")"
-  if dirname "$stdout_file" | grep '^/\.'; then
-    exit
-  fi
-  dirname "$stdout_file" > /dev/stderr
   mkdir -p "$(dirname "$stdout_file")"
 
   [ $indent_level -eq 0 ] && : > "$stdout_file"
