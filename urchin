@@ -260,7 +260,7 @@ report_outcome() {
         the_shell='File is not executable.'
       fi
       echo "${not}ok $n - ${path} ($the_shell) ${skip}"
-      if [ "$result" = not_ok ]; then
+      if $verbose || [ "$result" = not_ok ]; then
         echo '# ------------ Begin output ------------'
         sed 's/^/# /' "$(stdout_file "$abspath" "$the_shell")"
         echo '# ------------ End output ------------'
@@ -283,12 +283,6 @@ report_outcome() {
           # On not_ok, print a red '✗'
           printf '\033[31m✗ \033[0m'
           echo "${the_shell} ($file_elapsed $(plural second $file_elapsed))"
-
-          # Print output captured from not_ok test in red.
-          printf '\033[31m'
-
-          sed 's/^/  # /' "$(stdout_file "$abspath" "$the_shell")"
-          printf '\033[0m'
         ;;
         skip)
           if test -z "$the_shell"; then
@@ -298,6 +292,9 @@ report_outcome() {
           fi
         ;;
       esac
+      if $verbose || test "$result" = not_ok; then
+        sed 's/^/  # /' "$(stdout_file "$abspath" "$the_shell")"
+      fi
     fi
 
   prevpath="$path"
@@ -417,6 +414,7 @@ run_in_series=false
 force=false
 exit_on_not_ok=false
 tap_format=false
+verbose=false
 while [ $# -gt 0 ]
 do
     case "$1" in
@@ -443,6 +441,7 @@ you don't need to quote the TEST_SHELL variable." > /dev/stderr
           ;;
         -n|--disable-cycling) cycle_shell=false;; 
         -t|--tap) tap_format=true;;
+        -v|--verbose) verbose=true;;
         -h|--help) urchin_help
           exit 0;;
         --version) echo "$VERSION"
