@@ -492,7 +492,7 @@ fi
 # Run or present the Molly guard.
 root="$(urchin_root "$1")"
 if basename "$(fullpath "$root")" |
-  grep -Fi 'test' > /dev/null || $force; then
+  grep -i 'test' > /dev/null || $force; then
 
   start=$(date +%s)
   set +e
