@@ -124,7 +124,7 @@ recurse() {
 
       urchin_source teardown
       if [ $exit_code -eq 0 ]; then
-        result=success
+        result=ok
       elif [ $exit_code -eq 3 ]; then
         result=skip
       else
@@ -158,12 +158,17 @@ report_outcome() {
     eval "$number=0"
   done
   sort "$log_file" | while read line; do
-    regex='^\(.*\): \(ok|skip\|not_ok\) \([0-9]*\) seconds$'
+    regex='^\(.*\): \(ok\|skip\|not_ok\) \([0-9]*\) seconds$'
     path=$(echo "$line" | sed "s/$regex/\1/")
     result=$(echo "$line" | sed "s/$regex/\2/")
     file_elapsed=$(echo "$line" | sed "s/$regex/\3/")
+
+    # Number of files that have run, including this one
     n=$(($n + 1))
-    eval "$result=$((\$$result + 1))"
+
+    # Number of files that have been ok, not ok, and skipped
+    eval "old_count=${result}s"
+    eval "${result}s=$(($old_count+1))"
 
   # if $tap_format; then
   #   indent $indent_level | sed 's/  /#/g'
