@@ -1,0 +1,2 @@
+#!/bin/sh
+../../urchin --version | grep '[0-9.]\{3,\}'
