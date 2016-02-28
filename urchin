@@ -177,11 +177,11 @@ report_outcome() {
         not=''
       fi
       if [ "$result" == skip ]; then
-        skip='SKIP '
+        skip='# SKIP'
       else
         skip=''
       fi
-      echo "${not}ok $n ${path} # ${skip}"
+      echo "${not}ok $n ${path}${skip}"
       if [ "$result" == fail ]; then
         echo '# ------------ Begin output ------------'
       # sed 's/^/# /' "$stdout_file"
