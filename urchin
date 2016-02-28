@@ -59,7 +59,7 @@ urchin_root() {
     return 1
   elif test -f "$current"; then
     urchin_root "$(dirname "$current")" "$orig"
-  elif test -d "$current"/.urchin; then
+  elif test -f "$current"/.urchin; then
     remove_trailing_slash "$current"
   else
     urchin_root "$current"/.. "$orig"
@@ -375,7 +375,7 @@ if [ "$#" != '1' ] || [ ! -d "$1" ]
 fi
 
 # Run or present the Molly guard.
-if basename "$(urchin_root "$1")" |
+if basename "$(fullpath "$(urchin_root "$1")")" |
   grep -Fi 'test' > /dev/null || $force; then
   # Determine the environment variable to define for test scripts
   # that reflects the specified or implied shell to use for shell-code tests.
