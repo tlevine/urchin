@@ -242,18 +242,17 @@ report_outcome() {
       if test "$prevdir" != "$currentdir"; then
         echo
       fi
-      pretty_path="$(dirname -- "$path")/
-    $(basename -- "$path")"
+      pretty_path="%s$(dirname -- "$path")/\n  $(basename -- "$path")\n"
       case "$result" in
         ok)
           # On success, print a green '✓'
           printf '\033[32m✓ \033[0m'
-          printf '%s\n' "${pretty_path}"
+          printf "${pretty_path}"
         ;;
         not_ok)
           # On not_ok, print a red '✗'
           printf '\033[31m✗ \033[0m'
-          printf '%s\n' "${pretty_path}"
+          printf "${pretty_path}"
 
           # Print output captured from not_ok test in red.
           printf '\033[31m'
@@ -262,7 +261,7 @@ report_outcome() {
           printf '\033[0m'
         ;;
         skip)
-          printf '%s\n' "${pretty_path}"
+          printf "${pretty_path}"
         ;;
       esac
     fi
