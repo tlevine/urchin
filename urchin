@@ -29,7 +29,6 @@ urchin_source() {
 
 # Expand relative paths
 alias fullpath='readlink -f --'
-DEFAULT_URCHIN_ROOT="$PWD"
 urchin_path() {
   # XXX Change this to be relative the urchin root
   fullpath "$1"
@@ -376,8 +375,8 @@ if [ "$#" != '1' ] || [ ! -d "$1" ]
 fi
 
 # Run or present the Molly guard.
-if fullpath "$1" | grep -Fi 'test' > /dev/null || $force
-  then
+if basename "$(urchin_root "$1")" |
+  grep -Fi 'test' > /dev/null || $force; then
   # Determine the environment variable to define for test scripts
   # that reflects the specified or implied shell to use for shell-code tests.
   #  - Set it to the shell specified via -s, if any.
