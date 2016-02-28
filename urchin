@@ -448,7 +448,7 @@ you don't need to quote the TEST_SHELL variable." > /dev/stderr
         --version) echo "$VERSION"
             urchin_exit;;
         -*) urchin_help >&2
-            exit 1;;
+            exit 11;;
         *)  break;;
     esac
     shift
