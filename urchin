@@ -16,22 +16,15 @@ DEFAULT_SHELLS='sh bash dash mksh zsh'
 unset CDPATH
 
 # All temporary files go here
-tmp=$(mktemp -d)
-> $tmp/log
+urchin_tmp=$(mktemp -d)
+> $urchin_tmp/log
 urchin_exit() {
-  rm -Rf "$tmp"
+  rm -Rf "$urchin_tmp"
   exit "$@"
 }
 
-# Source a setup or teardown file
-urchin_source() {
-  if test -f "$1"; then
-    . ./"$1" > /dev/null
-  fi
-}
-
 stdout_file() {
-  x="$tmp/stdout$(fullpath "$1")"
+  x="$urchin_tmp/stdout$(fullpath "$1")"
   mkdir -p "$(dirname -- "$x")"
   echo "$x"
 }
@@ -103,7 +96,7 @@ recurse() {
   if [ -d "$potential_test" ]; then
     (
       cd -- "$potential_test" > /dev/null
-      urchin_source setup_dir
+      if test -f setup_dir; then . ./setup_dir; fi
 
       if [ -n "$ZSH_VERSION" ]; then
         # avoid "no matches found: *" error when directories are empty
@@ -117,12 +110,12 @@ recurse() {
         fi
 
         (
-          urchin_source setup
+          if test -f setup; then . ./setup; fi
           set +e
           recurse "$requested_path" "$test" "$cycle_shell" "$TEST_SHELL"
           exit_code=$?
           set -e
-          urchin_source teardown
+          if test -f teardown; then . ./teardown; fi
           exit $exit_code
         ) &
 
@@ -130,13 +123,13 @@ recurse() {
           wait $!
           exit_code=$?
           if $exit_on_not_ok && test $exit_code -ne 0; then
-            urchin_source teardown_dir
+            if test -f teardown_dir; then . ./teardown_dir; fi
             urchin_exit 1
           fi
         fi
       done
       wait
-      urchin_source teardown_dir
+      if test -f teardown_dir; then . ./teardown_dir; fi
     )
   else
     if [ -x "$potential_test" ]; then
@@ -155,7 +148,7 @@ recurse() {
           fi
         fi
         (
-          urchin_source setup
+          if test -f setup; then . ./setup; fi
 
           # Run the test
           start=$(date +%s)
@@ -173,7 +166,7 @@ recurse() {
           set -e
           finish=$(date +%s)
 
-          urchin_source teardown
+          if test -f teardown; then . ./setup; fi
 
           if [ $exit_code -eq 0 ]; then
             result=ok
@@ -185,7 +178,7 @@ recurse() {
 
           elapsed=$(($finish - $start))
           printf "${potential_test}\t${the_test_shell}\t${result}\t${elapsed}\n" \
-            >> $tmp/log
+            >> $urchin_tmp/log
           exit "$exit_code"
         ) &
 
@@ -193,7 +186,7 @@ recurse() {
           wait $!
           exit_code=$?
           if $exit_on_not_ok && test $exit_code -ne 0; then
-            urchin_source teardown_dir
+            if test -f teardown_dir; then . ./teardown_dir; fi
             return 1
           fi
         fi
@@ -201,7 +194,7 @@ recurse() {
       wait
     else
       # Shell is ''
-      printf "${potential_test}\t\tskip\t0\n" >> $tmp/log
+      printf "${potential_test}\t\tskip\t0\n" >> $urchin_tmp/log
     fi
   fi
 }
@@ -426,7 +419,7 @@ validate_strings() {
 }
 
 cycle_shell=true
-shell_list=$tmp/shell_list
+shell_list=$urchin_tmp/shell_list
 run_in_series=false
 force=false
 exit_on_not_ok=false
@@ -514,7 +507,7 @@ if basename "$(fullpath "$root")" |
   set -e
   finish=$(date +%s)
 
-  report_outcome "$root" $tap_format $tmp/log $start $finish
+  report_outcome "$root" $tap_format $urchin_tmp/log $start $finish
 
   urchin_exit $exit_code
 else

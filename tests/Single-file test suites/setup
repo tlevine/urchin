@@ -1,23 +1,2 @@
-tmp=$(mktemp -d)
-testdir=$tmp/tests
-touch "$testdir/.urchin"
-testcase=$testdir/testcase
-
-test_testsuite() {
-  contents="$1"
-  expectation="$2"
-
-  # Set up the test suite.
-  echo "$contents" > "$testcase"
-
-  chmod +x $testcase
-  case "$expectation" in ok) regex='^ok 1 - testcase';;
-                         not\ ok) regex='^not ok 1 - testcase';;
-                         skip) regex='^ok 1 - testcase # SKIP';;
-                         *) chmod -x $testcase;;
-  esac
-
-  # Run the test suite
-  echo "#!/bin/sh
-../../urchin -n -t '$testdir' | grep '$regex'"
-}
+export tmp=$(mktemp -d)
+export PATH="$PWD:$PATH"
