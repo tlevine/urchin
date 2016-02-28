@@ -1,6 +1,7 @@
 #!/bin/sh
 
-../../urchin -e ./.test_-e,--exit-on-fail > $tmp
+../../urchin --run-in-series --exit-on-fail \
+  ./.test_-e,--exit-on-fail > $tmp
 result=$?
 
 set -e

@@ -427,8 +427,8 @@ tap_format=false
 while [ $# -gt 0 ]
 do
     case "$1" in
-        -b) run_in_series=true;;
-        -e) exit_on_not_ok=true;;
+        -b|--run-in-series) run_in_series=true;;
+        -e|--exit-on-fail) exit_on_not_ok=true;;
         -f) force=true;;
         -s)
           shift
