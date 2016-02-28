@@ -162,3 +162,9 @@ this sort of thing.
 * Optionally kill tests/jobs after a specific timeout threshold
 * Send output of different tests/jobs to different files for each file
   descriptor (STDOUT, STDERR)
+
+sorting
+-------
+How do sort properly?
+
+  printf '- a\n-- a\n--- a\n- b\n-- b\n--- b\n'|sor
