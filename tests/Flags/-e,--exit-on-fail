@@ -1,6 +1,6 @@
 #!/bin/sh
 
-../../urchin --run-in-series --exit-on-fail \
+$TEST_SHELL ../../urchin --run-in-series --exit-on-fail \
   ./.test_-e,--exit-on-fail > $tmp
 result=$?
 

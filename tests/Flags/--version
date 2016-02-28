@@ -1,2 +1,2 @@
 #!/bin/sh
-../../urchin --version | grep '[0-9.]\{3,\}'
+$TEST_SHELL ../../urchin --version | grep '[0-9.]\{3,\}'
