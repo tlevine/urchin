@@ -1,1 +1,0 @@
-test $(../../urchin -t .test/ | grep -c SKIP) -eq 1
