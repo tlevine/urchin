@@ -9,8 +9,15 @@
 
 set -e
 
-logfile=$(mktemp)
-> $logfile
+# Parse output
+log=$(mktemp -u)
+mkfifo "$log"
+print_log() {
+  while read line; do
+    case "$line" in
+    esac
+  done
+}
 
 # Make sure that CDPATH isn't set, as it causes `cd` to behave unpredictably -
 # notably, it can produce output.
