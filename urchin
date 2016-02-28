@@ -165,8 +165,7 @@ recurse() {
           fi
 
           elapsed=$(($finish - $start))
-          printf "${potential_test}\t${the_test_shell}\t${result}\t${elapsed}" \
-
+          printf "${potential_test}\t${the_test_shell}\t${result}\t${elapsed}\n" \
             >> $tmp/log
           if $exit_on_not_ok && test 0 -ne $exit_code; then
             return 1
