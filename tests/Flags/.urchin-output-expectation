@@ -1,0 +1,17 @@
+
+./
+> a
+[31m✗ [0msh (1 second)
+[31m  # This is stdout from a.
+[0m./
+> b
+[32m✓ [0msh (1 second)
+./
+> c
+  (File is not executable.)
+
+Done, took 1 second.
+1 test passed.
+1 test skipped.
+[31m1 test failed.
+[m

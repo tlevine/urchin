@@ -1,4 +1,0 @@
-tmp=$(mktemp)
-
-../../urchin -t .testsuite/ | sed 1d > $tmp
-diff $tmp .expected-output

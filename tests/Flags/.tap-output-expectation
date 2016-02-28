@@ -1,0 +1,7 @@
+not ok 1 - a (sh) 
+# ------------ Begin output ------------
+# This is stdout from a.
+# ------------ End output ------------
+ok 2 - b (sh) 
+ok 3 - c (File is not executable.) # SKIP
+1..3

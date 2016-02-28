@@ -1,0 +1,3 @@
+$TEST_SHELL ../../urchin -s sh -t .testsuite/ |
+  sed -e 1d -e /second/d > $tmp
+diff $tmp .tap-output-expectation

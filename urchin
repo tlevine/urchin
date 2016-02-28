@@ -314,7 +314,7 @@ report_outcome() {
       printf '\033[31m'
     fi
     printf '%s\n' "$not_oks $(plural test "$not_oks") failed."
-    printf '\033[m'
+    printf '\033[m\n'
   fi
   test "$not_oks" -eq '0'
 }
@@ -457,7 +457,7 @@ do
     shift
 done
 
-if $cycle_shell && test -f "$shell_list"; then
+if ! $cycle_shell && test -f "$shell_list"; then
   echo "The -n/--disable-cycling and -s/--shell options clash with each other." >&2
   urchin_exit 11
 fi
