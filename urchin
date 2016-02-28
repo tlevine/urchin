@@ -352,6 +352,8 @@ The following flags affect how this multiple-shell testing is handled.
 
 The following flags affect how Urchin processes tests.
 
+-b, --run-in-series      Run tests in series. The default is to run tests
+                         in parallel where possible.
 -e, --exit-on-fail       Stop running if any single test fails.
                          This is useful if you are running something
                          configuration files with Urchin.
@@ -411,12 +413,14 @@ validate_strings() {
 
 cycle_shell=true
 shell_list=$tmp/shell_list
+run_in_series=false
 force=false
 exit_on_not_ok=false
 tap_format=false
 while [ $# -gt 0 ]
 do
     case "$1" in
+        -b) run_in_series=true;;
         -e) exit_on_not_ok=true;;
         -f) force=true;;
         -s)
