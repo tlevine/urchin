@@ -52,6 +52,11 @@ recurse() {
   shell_for_sh_tests="$2"
   TEST_SHELL="$3"
 
+  if test $(echo "$potential_test" | wc -l) -ne 1; then
+    echo 'Test file names may not contain newline characters.' >&2
+    exit 1
+  fi
+
   for ignore in setup_dir teardown_dir setup teardown; do
     if test "$potential_test" = 'setup_dir'; then
       return
@@ -130,7 +135,7 @@ recurse() {
       result=skip
     fi
 
-    printf "${potential_test}\t${result}\n" >> "$tmp"/log
+    printf "${potential_test}: ${result}\n" >> "$tmp"/log
     if $exit_on_fail && test 0 -ne $exit_code; then
       return 1
     fi
@@ -148,14 +153,12 @@ report_outcome() {
   echo Running tests at $(date +%Y-%m-%dT%H:%M:%S)
   start=$(date +%s)
 
+  n=0
   sort "$log_file" | while read line; do
-    while ! echo "$line" | grep '^[^\t\n]\{1,\}\t\(success|fail|skip\)'; do
-      read moreline
-      line="$line$moreline"
-    done
-    path=$(echo "$line" | cut -f 1)
-    result=$(echo "$line" | cut -f 2)
-  done
+    regex='^\(.*\): \(success\|skip\|fail\)$'
+    path=$(echo "$line" | sed "s/$regex/\1/")
+    result=$(echo "$line" | sed "s/$regex/\2/")
+    n=$(($n + 1))
 
 # if $tap_format; then
 #   indent $indent_level | sed 's/  /#/g'
@@ -165,23 +168,23 @@ report_outcome() {
 #   echo "+ ${path}"
 # fi
 
-  if $tap_format; then
-    if [ "$result" == fail ]; then
-      not='not '
-    else
-      not=''
-    fi
-    if [ "$result" == skip ]; then
-      skip='# SKIP '
-    else
-      skip=''
-    fi
-    echo "${not}ok $n - ${skip}${path}"
-    if [ "$result" == fail ]; then
-      echo '# ------------ Begin output ------------'
-    # sed 's/^/# /' "$stdout_file"
-      echo '# ------------ End output ------------'
-    fi
+    if $tap_format; then
+      if [ "$result" == fail ]; then
+        not='not '
+      else
+        not=''
+      fi
+      if [ "$result" == skip ]; then
+        skip='# SKIP '
+      else
+        skip=''
+      fi
+      echo "${not}ok $n - ${skip}${path}"
+      if [ "$result" == fail ]; then
+        echo '# ------------ Begin output ------------'
+      # sed 's/^/# /' "$stdout_file"
+        echo '# ------------ End output ------------'
+      fi
 # else
 #   indent $indent_level
 #   case "$result" in
@@ -205,7 +208,7 @@ report_outcome() {
 #       printf '  %s\n' "${potential_test}"
 #     ;;
 #   esac
-  fi
+    fi
 
 # if $tap_format; then
 #   indent $indent_level | sed 's/  /#/g'
@@ -216,6 +219,7 @@ report_outcome() {
 
 
 
+  done
   return
 
 
