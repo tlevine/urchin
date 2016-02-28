@@ -15,9 +15,8 @@ unset CDPATH
 
 # All temporary files go here
 tmp=$(mktemp -d)
-echo $tmp
 urchin_exit() {
-# rm -f "$tmp"
+  rm -Rf "$tmp"
   exit "$@"
 }
 
@@ -182,7 +181,7 @@ report_outcome() {
       else
         skip=''
       fi
-      echo "${not}ok $n - # ${skip}${path}"
+      echo "${not}ok $n ${path} # ${skip}"
       if [ "$result" == fail ]; then
         echo '# ------------ Begin output ------------'
       # sed 's/^/# /' "$stdout_file"
