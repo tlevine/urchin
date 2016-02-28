@@ -17,7 +17,6 @@ unset CDPATH
 tmp=$(mktemp -d)
 echo $tmp
 urchin_exit() {
-  echo rm -f "$tmp"
 # rm -f "$tmp"
   exit "$@"
 }
@@ -140,6 +139,7 @@ recurse() {
 
 report_outcome() {
   tap_format="$1"
+  log_file="$2"
 
   # XXX just copied from elsewhere and thus broken
   if "$tap_format"; then
@@ -148,28 +148,24 @@ report_outcome() {
   echo Running tests at $(date +%Y-%m-%dT%H:%M:%S)
   start=$(date +%s)
 
+  sort "$log_file" | while read line; do
+    while ! echo "$line" | grep '^[^\t\n]\{1,\}\t\(success|fail|skip\)'; do
+      read moreline
+      line="$line$moreline"
+    done
+    path=$(echo "$line" | cut -f 1)
+    result=$(echo "$line" | cut -f 2)
+  done
+
+# if $tap_format; then
+#   indent $indent_level | sed 's/  /#/g'
+#   echo "# Begin - ${path}"
+# else
+#   indent $indent_level
+#   echo "+ ${path}"
+# fi
 
   if $tap_format; then
-    indent $indent_level | sed 's/  /#/g'
-    echo "# Begin - ${potential_test}"
-  else
-    indent $indent_level
-    echo "+ ${potential_test}"
-  fi
-
-
-  if $tap_format; then
-    indent $indent_level | sed 's/  /#/g'
-    echo "# End - ${potential_test}"
-  else
-    echo
-  fi
-
-
-
-  if $tap_format; then
-    n=$(grep -ce '^\(success\|fail\|skip\)' "$logfile")
-
     if [ "$result" == fail ]; then
       not='not '
     else
@@ -180,38 +176,47 @@ report_outcome() {
     else
       skip=''
     fi
-    echo "${not}ok $n - ${skip}${potential_test}"
+    echo "${not}ok $n - ${skip}${path}"
     if [ "$result" == fail ]; then
       echo '# ------------ Begin output ------------'
-      sed 's/^/# /' "$stdout_file"
+    # sed 's/^/# /' "$stdout_file"
       echo '# ------------ End output ------------'
     fi
-  else
-    indent $indent_level
-    case "$result" in
-      success)
-        # On success, print a green '✓'
-        printf '\033[32m✓ \033[0m'
-        printf '%s\n' "${potential_test}"
-      ;;
-      fail)
-        # On fail, print a red '✗'
-        printf '\033[31m✗ \033[0m'
-        printf '%s\n' "${potential_test}"
+# else
+#   indent $indent_level
+#   case "$result" in
+#     success)
+#       # On success, print a green '✓'
+#       printf '\033[32m✓ \033[0m'
+#       printf '%s\n' "${potential_test}"
+#     ;;
+#     fail)
+#       # On fail, print a red '✗'
+#       printf '\033[31m✗ \033[0m'
+#       printf '%s\n' "${potential_test}"
 
-        # Print output captured from failed test in red.
-        printf '\033[31m'
+#       # Print output captured from failed test in red.
+#       printf '\033[31m'
 
-        cat "$stdout_file"
-        printf '\033[0m'
-      ;;
-      skip)
-        printf '  %s\n' "${potential_test}"
-      ;;
-    esac
+#       cat "$stdout_file"
+#       printf '\033[0m'
+#     ;;
+#     skip)
+#       printf '  %s\n' "${potential_test}"
+#     ;;
+#   esac
   fi
-  rm $stdout_file
 
+# if $tap_format; then
+#   indent $indent_level | sed 's/  /#/g'
+#   echo "# End - ${potential_test}"
+# else
+#   echo
+# fi
+
+
+
+  return
 
 
 
@@ -357,6 +362,9 @@ if fullpath "$1" | grep -Fi 'test' > /dev/null || $force
   recurse "$1" "$shell_for_sh_tests" "$TEST_SHELL"
   exit_code=$?
   set -e
+
+  report_outcome true $tmp/log
+
   urchin_exit $exit_code
 else
   urchin_molly_guard
