@@ -35,8 +35,36 @@ urchin_path() {
   fullpath "$1"
 }
 
-urchin_root() {
+remove_trailing_slash() {
+  echo "$1" | sed s/\\/$//
+}
 
+urchin_root() {
+  # Call recursively but remember the original argument.
+  current="$(remove_trailing_slash "$1")"
+  if test -n "$2"; then
+    orig="$2"
+  else
+    orig="$1"
+  fi
+
+  if test "$(readlink -f -- "$1")" = /; then
+    # Stop traversing upwards at /
+    if test -d "$orig"; then
+      echo "$orig"
+    else
+      dirname "$orig"
+    fi
+  elif ! test -e "$current"; then
+    echo "$current: No such file or directory">&2
+    return 1
+  elif test -f "$current"; then
+    urchin_root "$(dirname "$current")" "$orig"
+  elif test -d "$current"/.urchin; then
+    remove_trailing_slash "$current"
+  else
+    urchin_root "$current"/.. "$orig"
+  fi
 }
 
 # Urchin version number
