@@ -1,4 +1,0 @@
-rm -R "$tmp"
-if ls | grep '^[0-9]' > /dev/null; then
-  rm [0-9]*
-fi
