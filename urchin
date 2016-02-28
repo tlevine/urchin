@@ -33,7 +33,9 @@ stdout_file() {
 }
 
 # Expand relative paths
-alias fullpath='readlink -f --'
+fullpath() {
+  readlink -f -- "$1"
+}
 
 remove_trailing_slash() {
   echo "$1" | sed s/\\/$//
