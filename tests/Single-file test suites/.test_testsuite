@@ -15,7 +15,7 @@ echo "$contents" > $testcase
 chmod +x $testcase
 case "$expectation" in ok) regex='^ok 1 - testcase';;
                        not\ ok) regex='^not ok 1 - testcase';;
-                       skip) regex='^ok 1 - testcase ([)]*) # SKIP';;
+                       skip) regex='^ok 1 - testcase ([^)]*) # SKIP';;
                        *) exit 3;; # skip malformed test
 esac
 
