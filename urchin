@@ -130,10 +130,7 @@ recurse() {
     )
   else
     stdout_file="$tmp/stdout$(fullpath "$potential_test")"
-    time_file="$tmp/time$(fullpath "$potential_test")"
-
     mkdir -p "$(dirname "$stdout_file")"
-    mkdir -p "$(dirname "$time_file")"
 
     if [ -x "$potential_test" ]; then
       cd -- "$(dirname "$potential_test")"
@@ -217,11 +214,6 @@ report_outcome() {
     # Number of files that have been ok, not ok, and skipped
     eval "old_count=${result}s"
     eval "${result}s=$(($old_count+1))"
-
-  # if ! $tap_format; then
-  #   indent $indent_level
-  #   echo "+ ${path}"
-  # fi
 
     if $tap_format; then
       if [ "$result" == not_ok ]; then
