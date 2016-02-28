@@ -80,7 +80,7 @@ recurse() {
         exit_code=$?
         set -e
 
-        if $exit_on_fail && test $exit_code -ne 0; then
+        if $exit_on_not_ok && test $exit_code -ne 0; then
           urchin_source teardown
           urchin_source teardown_dir
           urchin_exit 1
@@ -128,7 +128,7 @@ recurse() {
       elif [ $exit_code -eq 3 ]; then
         result=skip
       else
-        result=fail
+        result=not_ok
       fi
     else
       result=skip
@@ -136,7 +136,7 @@ recurse() {
 
     elapsed=$(($finish - $start))
     printf "${potential_test}: ${result} ${elapsed} seconds\n" >> "$tmp"/log
-    if $exit_on_fail && test 0 -ne $exit_code; then
+    if $exit_on_not_ok && test 0 -ne $exit_code; then
       return 1
     fi
   fi
@@ -154,13 +154,16 @@ report_outcome() {
 # fi
 # echo Running tests at $(date +%Y-%m-%dT%H:%M:%S)
 
-  n=0
+  for number in n oks skips not_oks; do
+    eval "$number=0"
+  done
   sort "$log_file" | while read line; do
-    regex='^\(.*\): \(success\|skip\|fail\) \([0-9]*\) seconds$'
+    regex='^\(.*\): \(ok|skip\|not_ok\) \([0-9]*\) seconds$'
     path=$(echo "$line" | sed "s/$regex/\1/")
     result=$(echo "$line" | sed "s/$regex/\2/")
     file_elapsed=$(echo "$line" | sed "s/$regex/\3/")
     n=$(($n + 1))
+    eval "$result=$((\$$result + 1))"
 
   # if $tap_format; then
   #   indent $indent_level | sed 's/  /#/g'
@@ -171,7 +174,7 @@ report_outcome() {
   # fi
 
     if $tap_format; then
-      if [ "$result" == fail ]; then
+      if [ "$result" == not_ok ]; then
         not='not '
       else
         not=''
@@ -182,7 +185,7 @@ report_outcome() {
         skip=''
       fi
       echo "${not}ok $n ${path}${skip}"
-      if [ "$result" == fail ]; then
+      if [ "$result" == not_ok ]; then
         echo '# ------------ Begin output ------------'
       # sed 's/^/# /' "$stdout_file"
         echo '# ------------ End output ------------'
@@ -196,12 +199,12 @@ report_outcome() {
   #       printf '\033[32m✓ \033[0m'
   #       printf '%s\n' "${potential_test}"
   #     ;;
-  #     fail)
-  #       # On fail, print a red '✗'
+  #     not_ok)
+  #       # On not_ok, print a red '✗'
   #       printf '\033[31m✗ \033[0m'
   #       printf '%s\n' "${potential_test}"
 
-  #       # Print output captured from failed test in red.
+  #       # Print output captured from not_oked test in red.
   #       printf '\033[31m'
 
   #       cat "$stdout_file"
@@ -223,24 +226,22 @@ report_outcome() {
   return
 
   set +e
-  passed=$(grep -c '^success' "$logfile")
-  failed=$(grep -c '^fail' "$logfile")
-  skipped=$(grep -c '^skip' "$logfile")
   if $tap_format; then
     echo "# Took $elapsed $(plural second $elapsed)."
-    echo 1..$(($passed + $failed + $skipped))
+    echo 1..$(($oks + $not_oks + $skips))
   else
     echo "Done, took $elapsed $(plural second $elapsed)."
-    printf '%s\n' "$passed $(plural test "$passed") passed."
-    printf '%s\n' "$skipped $(plural test "$skipped") skipped."
+    printf '%s\n' "$oks $(plural test "$oks") oks."
+    printf '%s\n' "$skips $(plural test "$skips") skips."
 
-    # If tests failed, print the message in red, otherwise in green.
-    [ $failed -gt 0 ] && printf '\033[31m' || printf '\033[32m'
-
-    printf '%s\n' "$failed $(plural test "$failed") failed."
+    # If any tests are not ok, print the message in red.
+    if [ $not_oks -gt 0 ] ; then
+      printf '\033[31m'
+    fi
+    printf '%s\n' "$not_ok $(plural test "$not_oks") failed."
     printf '\033[m'
   fi
-  test -z "$failed" || test "$failed" -eq '0'
+  test "$not_oks" -eq '0'
 }
 
 has_sh_or_no_shebang_line() {
@@ -303,12 +304,12 @@ urchin_molly_guard() {
 
 shell_for_sh_tests=
 force=false
-exit_on_fail=false
+exit_on_not_ok=false
 tap_format=false
 while [ $# -gt 0 ]
 do
     case "$1" in
-        -e) exit_on_fail=true;;
+        -e) exit_on_not_ok=true;;
         -f) force=true;;
         -s)
           shift
