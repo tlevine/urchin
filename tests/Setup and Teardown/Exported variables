@@ -1,0 +1,2 @@
+#!/bin/sh
+[ "$variable_set_in_setup" = aoeuhtns ]
