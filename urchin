@@ -44,10 +44,8 @@ recurse() {
     fi
 
     (
-      stdout_file=$(mktemp)
       cd -- "$potential_test"
-
-      [ -f setup_dir ] && [ -x setup_dir ] && ./setup_dir >> "$stdout_file"
+      [ -f setup_dir ] && . ./setup_dir > /dev/null
 
       if [ -n "$ZSH_VERSION" ]; then
         # avoid "no matches found: *" error when directories are empty
@@ -55,7 +53,7 @@ recurse() {
       fi
 
       for test in *; do
-        [ -f setup ] && [ -x setup ] && ./setup
+        [ -f setup ] && . ./setup > /dev/null
 
         set +e
         # $2 instead of $indent_level so it doesn't clash
@@ -64,17 +62,14 @@ recurse() {
         set -e
 
         if $exit_on_fail && test $exit_code -ne 0; then
-          [ -f teardown ] && [ -x teardown ] && ./teardown >> "$stdout_file"
-          [ -f teardown_dir ] && [ -x teardown_dir ] && ./teardown_dir >> "$stdout_file"
+          [ -f teardown ] && . ./teardown > /dev/null
+          [ -f teardown_dir ] && . ./teardown_dir > /dev/null
           return 1
         fi
 
-        [ -f teardown ] && [ -x teardown ] && ./teardown >> "$stdout_file"
+        [ -f teardown ] && . ./teardown > /dev/null
       done
-      [ -f teardown_dir ] && [ -x teardown_dir ] && ./teardown_dir >> "$stdout_file"
-
-      cd ..
-      rm $stdout_file
+      [ -f teardown_dir ] && . ./teardown_dir > /dev/null
     )
     if $tap_format; then
       indent $indent_level | sed 's/  /#/g'
@@ -83,20 +78,22 @@ recurse() {
       echo
     fi
   else
-    if [ -x "$potential_test" ]
-      then
-      [ -f setup ] && [ -x setup ] && ./setup >> "$stdout_file"
+    stdout_file=$(mktemp)
+    > $stdout_file
+    if [ -x "$potential_test" ]; then
+      [ -f setup ] && . ./setup > /dev/null
 
       # Run the test
-      if [ -n "$shell_for_sh_tests" ] && has_sh_or_no_shebang_line ./"$potential_test"
-        then    
+      set +e
+      if [ -n "$shell_for_sh_tests" ] && has_sh_or_no_shebang_line ./"$potential_test"; then
         TEST_SHELL="$TEST_SHELL" "$shell_for_sh_tests" ./"$potential_test" > "$stdout_file" 2>&1
       else
         TEST_SHELL="$TEST_SHELL" ./"$potential_test" > "$stdout_file" 2>&1
       fi
       exit_code="$?"
+      set -e
 
-      [ -f teardown ] && [ -x teardown ] && ./teardown >> "$stdout_file"
+      [ -f teardown ] && . ./teardown > /dev/null
       if [ $exit_code -eq 0 ]; then
         result=success
       elif [ $exit_code -eq 3 ]; then
@@ -152,12 +149,12 @@ recurse() {
         ;;
       esac
     fi
+    rm $stdout_file
 
     if $exit_on_fail && test 0 -ne $exit_code; then
       return 1
     fi
   fi
-  [ $indent_level -eq 0 ] && rm "$stdout_file"
 }
 
 has_sh_or_no_shebang_line() {
@@ -304,7 +301,6 @@ fi
 
 # Constants
 logfile=$(fullpath "$1")/.urchin.log
-stdout_file=$(fullpath "$1")/.urchin_stdout
 
 # Run or present the Molly guard.
 if fullpath "$1" | grep -Fi 'test' > /dev/null || $force
