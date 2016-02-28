@@ -135,8 +135,6 @@ recurse() {
     mkdir -p "$(dirname "$stdout_file")"
     mkdir -p "$(dirname "$time_file")"
 
-    > $stdout_file
-
     if [ -x "$potential_test" ]; then
       cd -- "$(dirname "$potential_test")"
       urchin_source setup
@@ -191,10 +189,10 @@ report_outcome() {
   escaped_root="$(fullpath "$root" | sed 's/\//\\\//g')"
   elapsed=$(($finish - $start))
 
-# if "$tap_format"; then
-#   printf \#\ 
-# fi
-# echo Running tests at $(date +%Y-%m-%dT%H:%M:%S)
+  if "$tap_format"; then
+    printf \#\ 
+  fi
+  echo Running tests at $(date +%Y-%m-%dT%H:%M:%S)
 
   for number in n oks skips not_oks; do
     eval "$number=0"
@@ -209,6 +207,9 @@ report_outcome() {
     path=$(echo "$line" | sed "s/$regex/\1/" | sed "s/$escaped_root\/\?//")
     result=$(echo "$line" | sed "s/$regex/\2/")
     file_elapsed=$(echo "$line" | sed "s/$regex/\3/")
+
+    prevdir=$currentdir
+    currentdir="$(dirname "$path")"
 
     # Number of files that have run, including this one
     n=$(($n + 1))
@@ -241,6 +242,9 @@ report_outcome() {
       fi
       echo "# Previous test took $file_elapsed seconds."
     else
+      if test "$prevdir" != "$currentdir"; then
+        echo
+      fi
       case "$result" in
         ok)
           # On success, print a green '✓'
@@ -255,7 +259,9 @@ report_outcome() {
           # Print output captured from not_oked test in red.
           printf '\033[31m'
 
-          cat "$stdout_file"
+          if test -f "$stdout_file"; then
+            cat "$stdout_file"
+          fi
           printf '\033[0m'
         ;;
         skip)
@@ -264,9 +270,6 @@ report_outcome() {
       esac
     fi
 
-  if ! $tap_format; then
-    echo
-  fi
   done < $sorted_log_file
   rm $sorted_log_file
 
@@ -275,6 +278,7 @@ report_outcome() {
     echo "# Full test suite took $elapsed $(plural second $elapsed)."
     echo 1..$n
   else
+    echo
     echo "Done, took $elapsed $(plural second $elapsed)."
     printf '%s\n' "$oks $(plural test "$oks") passed."
     printf '%s\n' "$skips $(plural test "$skips") skip."
