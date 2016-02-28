@@ -442,7 +442,7 @@ you don't need to quote the TEST_SHELL variable." > /dev/stderr
           echo "$shell_for_sh_tests" >> "$shell_list"
           ;;
         -n) cycle_shell=false;; 
-        -t) tap_format=true;;
+        -t|--tap) tap_format=true;;
         -h|--help) urchin_help
           exit 0;;
         --version) echo "$VERSION"
