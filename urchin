@@ -126,7 +126,7 @@ recurse() {
           exit $exit_code
         ) &
 
-        if $single_process; then
+        if $run_in_series; then
           wait $!
           exit_code=$?
           if $exit_on_not_ok && test $exit_code -ne 0; then
@@ -147,37 +147,45 @@ recurse() {
       if $cycle_shell && has_sh_or_no_shebang_line "$potential_test"; then
         # Set it to the shell specified via -s.
         while read the_test_shell; do
-          urchin_source setup
+          (
+            urchin_source setup
 
-          # Run the test
-          start=$(date +%s)
-          set +e
-          TEST_SHELL="$the_test_shell" "$the_test_shell" \
-            "$potential_test" >> \
-            "$(stdout_file "$potential_test")" 2>&1
-          exit_code="$?"
-          set -e
-          finish=$(date +%s)
+            # Run the test
+            start=$(date +%s)
+            set +e
+            TEST_SHELL="$the_test_shell" "$the_test_shell" \
+              "$potential_test" >> \
+              "$(stdout_file "$potential_test")" 2>&1
+            exit_code="$?"
+            set -e
+            finish=$(date +%s)
 
-          urchin_source teardown
+            urchin_source teardown
 
-          if [ $exit_code -eq 0 ]; then
-            result=ok
-          elif [ $exit_code -eq 3 ]; then
-            result=skip
-          else
-            result=not_ok
+            if [ $exit_code -eq 0 ]; then
+              result=ok
+            elif [ $exit_code -eq 3 ]; then
+              result=skip
+            else
+              result=not_ok
+            fi
+
+            elapsed=$(($finish - $start))
+            printf "${potential_test}\t${the_test_shell}\t${result}\t${elapsed}\n" \
+              >> $tmp/log
+            exit "$exit_code"
+          ) &
+
+          if $run_in_series; then
+            wait $!
+            exit_code=$?
+            if $exit_on_not_ok && test $exit_code -ne 0; then
+              urchin_source teardown_dir
+              return 1
+            fi
           fi
-
-          elapsed=$(($finish - $start))
-          printf "${potential_test}\t${the_test_shell}\t${result}\t${elapsed}\n" \
-            >> $tmp/log
-          if $exit_on_not_ok && test 0 -ne $exit_code; then
-            return 1
-          fi
-
         done < $shell_list
-
+        wait
       else
         echo 'The -n flag is not implemented' > /dev/stderr
         exit 1
@@ -473,7 +481,7 @@ if [ "$#" != '1' ] || [ ! -e "$1" ]; then
   urchin_exit 11
 fi
 
-if $exit_on_not_ok && ! $single_process; then
+if $exit_on_not_ok && ! $run_in_series; then
   echo 'You must also pass -b/--series in order to use -e/--exit-on-fail.' >&2
   urchin_exit 11
 fi
