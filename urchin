@@ -92,11 +92,7 @@ recurse() {
 
   if echo "$requested_path" | grep "^$potential_test" > /dev/null ||
      echo "$potential_test" | grep "^$requested_path" > /dev/null; then
-    echo Considering $potential_test
   else
-    if echo "$potential_test" | grep Command; then
-      echo $potential_test
-    fi
     return 0
   fi
 
