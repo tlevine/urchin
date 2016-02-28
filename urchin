@@ -9,6 +9,12 @@
 
 set -e
 
+DEFAULT_SHELLS='sh
+bash
+dash
+mksh
+zsh'
+
 # Make sure that CDPATH isn't set, as it causes `cd` to behave unpredictably -
 # notably, it can produce output.
 unset CDPATH
@@ -83,7 +89,7 @@ recurse() {
   set -e
   requested_path="$1"
   potential_test="$(fullpath "$2")"
-  shell_for_sh_tests="$3"
+  cycle_shell="$3"
   TEST_SHELL="$4"
 
   for ignore in setup_dir teardown_dir setup teardown; do
@@ -119,7 +125,7 @@ recurse() {
         urchin_source setup
 
         set +e
-        recurse "$requested_path" "$test" "$shell_for_sh_tests" "$TEST_SHELL"
+        recurse "$requested_path" "$test" "$cycle_shell" "$TEST_SHELL"
        
         exit_code=$?
         set -e
@@ -139,21 +145,29 @@ recurse() {
       cd -- "$(dirname -- "$potential_test")"
       urchin_source setup
 
-      if [ -n "$shell_for_sh_tests" ] &&
-        has_sh_or_no_shebang_line ./"$potential_test"; then
-        cycle_shell=true
-      else
-        cycle_shell=false
-      fi
-
       # Run the test
       start=$(date +%s)
       set +e
-      if $cycle_shell; then
-        TEST_SHELL="$TEST_SHELL" "$shell_for_sh_tests" "$potential_test" > \
-          "$(stdout_file "$potential_test")" 2>&1
+
+      # Determine the environment variable to define for test scripts
+      # that reflects the specified or implied shell to use for shell-code tests.
+      if $cycle_shell && has_sh_or_no_shebang_line "$potential_test"; then
+        # Set it to the shell specified via -s.
+        while read the_test_shell; do
+          TEST_SHELL="$the_test_shell" "$the_test_shell" \
+            "$potential_test" >> \
+            "$(stdout_file "$potential_test")" 2>&1
+        done < $shells_list
+
       else
-        TEST_SHELL="$TEST_SHELL" "$potential_test" > \
+        # Shell cycling is disabled with -n; use the present value of
+        # TEST_SHELL or default to /bin/sh
+        if [ -n "$TEST_SHELL" ]; then
+          the_test_shell="$TEST_SHELL"
+        else
+          the_test_shell='/bin/sh'
+        fi
+        TEST_SHELL="$the_test_shell" "$the_test_shell" > \
           "$(stdout_file "$potential_test")" 2>&1
       fi
       exit_code="$?"
@@ -307,8 +321,22 @@ urchin_help() {
 
 $USAGE
 
--s <shell>  Invoke test scripts that either have no shebang line at all or
-            have shebang line "#!/bin/sh" with the specified shell.
+By default, Urchin checks for the following shells and runs every
+particular test file once per shell.
+
+$(echo "$DEFAULT_SHELLS" | sed 's/^/  /')
+
+On each run,
+
+1. The TEST_SHELL environment variable is set to the particular shell.
+2. If the test file has a shebang line of "#!/bin/sh" or no shebang
+   line at all, the test script is also executed in that shell.
+
+-s <shell>  Specify which shells Urchin should test in rather than using the
+            default list.
+-n          Disable the cycling of shells; Urchin will execute test files
+            directly, and it will not manipulate the TEST_SHELL environment
+            variable.
 -e          Stop running if any single test fails. This is helpful if you want
             to use Urchin to run things other than tests, such as a set of
             configuration scripts.
@@ -347,7 +375,8 @@ urchin_molly_guard() {
   urchin_exit 1
 }
 
-shell_for_sh_tests=
+cycle_shell=true
+shell_list=$tmp/shell_list
 force=false
 exit_on_not_ok=false
 tap_format=false
@@ -359,11 +388,23 @@ do
         -s)
           shift
           shell_for_sh_tests=$1
+         
           which "$shell_for_sh_tests" > /dev/null || {
             echo "Cannot find specified shell: '$shell_for_sh_tests'" >&2
             urchin_help >&2
             urchin_exit 11
-          } ;;
+          }
+
+          test $(echo "$potential_test" | wc -l) -eq 1 || {
+            echo 'Test file names may not contain newline characters.' >&2
+            echo 'If this is really a problem, I will fix it.' >&2
+            urchin_exit 11
+          }
+
+          echo "$shell_for_sh_tests" > "$shell_list"
+
+          ;;
+        -n) cycle_shell=false;; 
         -t) tap_format=true;;
         -h|--help) urchin_help
           exit 0;;
@@ -389,27 +430,15 @@ fi
 root="$(urchin_root "$1")"
 if basename "$(fullpath "$root")" |
   grep -Fi 'test' > /dev/null || $force; then
-  # Determine the environment variable to define for test scripts
-  # that reflects the specified or implied shell to use for shell-code tests.
-  #  - Set it to the shell specified via -s, if any.
-  #  - Otherwise, use its present value, if non-empty.
-  #  - Otherwise, default to '/bin/sh'.
-  if [ -n "$shell_for_sh_tests" ]; then
-    TEST_SHELL="$shell_for_sh_tests"
-  elif [ -n "$TEST_SHELL" ]; then
-    :
-  else
-    TEST_SHELL='/bin/sh'
-  fi
 
   start=$(date +%s)
   set +e
 
   # 1 test file or folder to run
   # 2 urchin root
-  # 3 shell to invoke test scripts with
+  # 3 Should we cycle shells?
   # 4 TEST_SHELL
-  recurse "$(fullpath "$1")" "$root" "$shell_for_sh_tests" "$TEST_SHELL"
+  recurse "$(fullpath "$1")" "$root" "$cycle_shell" "$TEST_SHELL"
   exit_code=$?
 
   set -e
