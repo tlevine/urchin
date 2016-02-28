@@ -157,7 +157,7 @@ recurse() {
           TEST_SHELL="$the_test_shell" "$the_test_shell" \
             "$potential_test" >> \
             "$(stdout_file "$potential_test")" 2>&1
-        done < $shells_list
+        done < $shell_list
 
       else
         # Shell cycling is disabled with -n; use the present value of
@@ -415,8 +415,7 @@ do
             urchin_exit 11
           }
 
-          echo "$shell_for_sh_tests" > "$shell_list"
-
+          echo "$shell_for_sh_tests" >> "$shell_list"
           ;;
         -n) cycle_shell=false;; 
         -t) tap_format=true;;
@@ -430,6 +429,11 @@ do
     esac
     shift
 done
+
+# If -s was not passed, used the default shells.
+if ! test -f "$shell_list"; then
+  echo "$DEFAULT_SHELLS" > "$shell_list"
+fi
 
 # Verify argument for main stuff
 if [ "$#" != '1' ] || [ ! -e "$1" ]; then
