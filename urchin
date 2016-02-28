@@ -9,19 +9,16 @@
 
 set -e
 
-# Parse output
-log=$(mktemp -u)
-mkfifo "$log"
-print_log() {
-  while read line; do
-    case "$line" in
-    esac
-  done
-}
-
 # Make sure that CDPATH isn't set, as it causes `cd` to behave unpredictably -
 # notably, it can produce output.
 unset CDPATH
+
+# All temporary files go here
+tmp=$(mktemp -d)
+urchin_exit() {
+  rm -f "$tmp"
+  exit "$@"
+}
 
 # Urchin version number
 VERSION=0.1.0-rc1
@@ -115,56 +112,59 @@ recurse() {
       result=skip
     fi
 
-    echo "${result}" >> "$logfile"
-    if $tap_format; then
-      n=$(grep -ce '^\(success\|fail\|skip\)' "$logfile")
-
-      if [ "$result" == fail ]; then
-        not='not '
-      else
-        not=''
-      fi
-      if [ "$result" == skip ]; then
-        skip='# SKIP '
-      else
-        skip=''
-      fi
-      echo "${not}ok $n - ${skip}${potential_test}"
-      if [ "$result" == fail ]; then
-        echo '# ------------ Begin output ------------'
-        sed 's/^/# /' "$stdout_file"
-        echo '# ------------ End output ------------'
-      fi
-    else
-      indent $indent_level
-      case "$result" in
-        success)
-          # On success, print a green '✓'
-          printf '\033[32m✓ \033[0m'
-          printf '%s\n' "${potential_test}"
-        ;;
-        fail)
-          # On fail, print a red '✗'
-          printf '\033[31m✗ \033[0m'
-          printf '%s\n' "${potential_test}"
-
-          # Print output captured from failed test in red.
-          printf '\033[31m'
-
-          cat "$stdout_file"
-          printf '\033[0m'
-        ;;
-        skip)
-          printf '  %s\n' "${potential_test}"
-        ;;
-      esac
-    fi
-    rm $stdout_file
-
+    echo "${potential_test} ${result}" >> "$tmp"/log
     if $exit_on_fail && test 0 -ne $exit_code; then
       return 1
     fi
   fi
+}
+
+report_outcome() {
+  # XXX just copied from elsewhere and thus broken
+  if $tap_format; then
+    n=$(grep -ce '^\(success\|fail\|skip\)' "$logfile")
+
+    if [ "$result" == fail ]; then
+      not='not '
+    else
+      not=''
+    fi
+    if [ "$result" == skip ]; then
+      skip='# SKIP '
+    else
+      skip=''
+    fi
+    echo "${not}ok $n - ${skip}${potential_test}"
+    if [ "$result" == fail ]; then
+      echo '# ------------ Begin output ------------'
+      sed 's/^/# /' "$stdout_file"
+      echo '# ------------ End output ------------'
+    fi
+  else
+    indent $indent_level
+    case "$result" in
+      success)
+        # On success, print a green '✓'
+        printf '\033[32m✓ \033[0m'
+        printf '%s\n' "${potential_test}"
+      ;;
+      fail)
+        # On fail, print a red '✗'
+        printf '\033[31m✗ \033[0m'
+        printf '%s\n' "${potential_test}"
+
+        # Print output captured from failed test in red.
+        printf '\033[31m'
+
+        cat "$stdout_file"
+        printf '\033[0m'
+      ;;
+      skip)
+        printf '  %s\n' "${potential_test}"
+      ;;
+    esac
+  fi
+  rm $stdout_file
 }
 
 has_sh_or_no_shebang_line() {
@@ -272,7 +272,7 @@ urchin_molly_guard() {
     echo 'want to run urchin on that directory.'
     echo
   } >&2
-  exit 1
+  urchin_exit 1
 }
 
 shell_for_sh_tests=
@@ -290,13 +290,13 @@ do
           which "$shell_for_sh_tests" > /dev/null || {
             echo "Cannot find specified shell: '$shell_for_sh_tests'" >&2
             urchin_help >&2
-            exit 11
+            urchin_exit 11
           } ;;
         -t) tap_format=true;;
         -h|--help) urchin_help
           exit 0;;
         -v) echo "$VERSION"
-            exit;;
+            urchin_exit;;
         -*) urchin_help >&2
             exit 1;;
         *)  break;;
@@ -309,7 +309,7 @@ if [ "$#" != '1' ] || [ ! -d "$1" ]
   then
   [ -n "$1" ] && [ ! -d "$1" ] && echo "Not a directory: '$1'" >&2
   echo "$USAGE" >&2
-  exit 11
+  urchin_exit 11
 fi
 
 # Constants
@@ -322,3 +322,4 @@ if fullpath "$1" | grep -Fi 'test' > /dev/null || $force
 else
   urchin_molly_guard
 fi
+urchin_exit
