@@ -216,11 +216,11 @@ urchin_go() {
   #  - Set it to the shell specified via -s, if any.
   #  - Otherwise, use its present value, if non-empty.
   #  - Otherwise, default to '/bin/sh'.
-  if [ -n "$2" ]
-    then
+  if [ -n "$2" ]; then
     TEST_SHELL="$2"
-  elif [ -z "$TEST_SHELL" ]
-    then
+  elif [ -n "$TEST_SHELL" ]; then
+    :
+  else
     TEST_SHELL='/bin/sh'
   fi
 
@@ -300,6 +300,7 @@ if [ "$#" != '1' ] || [ ! -d "$1" ]
 fi
 
 # Constants
+alias fullpath='readlink -f --'
 logfile=$(fullpath "$1")/.urchin.log
 
 # Run or present the Molly guard.
