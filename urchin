@@ -187,8 +187,8 @@ recurse() {
           "$(stdout_file "$potential_test")" 2>&1
       fi
     else
-      # Shell is '(File is not executable.)'
-      printf "${potential_test}\t(File is not executable.)\tskip\t0\n" >> $tmp/log
+      # Shell is ''
+      printf "${potential_test}\t\tskip\t0\n" >> $tmp/log
     fi
   fi
 }
@@ -244,7 +244,11 @@ report_outcome() {
       else
         skip=''
       fi
-      echo "${not}ok $n - ${path}${skip}"
+
+      if test -z "$the_shell"; then
+        the_shell='File is not executable.'
+      fi
+      echo "${not}ok $n - ${path} ($the_shell) ${skip}"
       if [ "$result" == not_ok ]; then
         echo '# ------------ Begin output ------------'
         sed 's/^/# /' "$(stdout_file "$abspath")"
@@ -276,6 +280,9 @@ report_outcome() {
           printf '\033[0m'
         ;;
         skip)
+          if test -z "$the_shell"; then
+            the_shell='(File is not executable.)'
+          fi
           echo "  $the_shell"
         ;;
       esac
