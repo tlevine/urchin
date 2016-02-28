@@ -75,6 +75,7 @@ recurse() {
     )
   else
     stdout_file="$tmp/stdout$(fullpath "$potential_test")"
+    mkdir -p "$(dirname "$stdout_file")"
     > $stdout_file
     if [ -x "$potential_test" ]; then
       [ -f setup ] && . ./setup > /dev/null
@@ -101,7 +102,7 @@ recurse() {
       result=skip
     fi
 
-    echo "${potential_test} ${result}" >> "$tmp"/log
+    printf "${potential_test}\t${result}\n" >> "$tmp"/log
     if $exit_on_fail && test 0 -ne $exit_code; then
       return 1
     fi
@@ -173,6 +174,33 @@ report_outcome() {
     esac
   fi
   rm $stdout_file
+
+
+
+
+  finish=$(date +%s)
+  elapsed=$(($finish - $start))
+
+  set +e
+  passed=$(grep -c '^success' "$logfile")
+  failed=$(grep -c '^fail' "$logfile")
+  skipped=$(grep -c '^skip' "$logfile")
+  if $tap_format; then
+    echo "# Took $elapsed $(plural second $elapsed)."
+    echo 1..$(($passed + $failed + $skipped))
+  else
+    echo "Done, took $elapsed $(plural second $elapsed)."
+    printf '%s\n' "$passed $(plural test "$passed") passed."
+    printf '%s\n' "$skipped $(plural test "$skipped") skipped."
+
+    # If tests failed, print the message in red, otherwise in green.
+    [ $failed -gt 0 ] && printf '\033[31m' || printf '\033[32m'
+
+    printf '%s\n' "$failed $(plural test "$failed") failed."
+    printf '\033[m'
+  fi
+  rm -f "$logfile"
+  test -z "$failed" || test "$failed" -eq '0'
 }
 
 has_sh_or_no_shebang_line() {
@@ -245,30 +273,6 @@ urchin_go() {
   # 2 indentation level
   # 3 shell to invoke test scripts with
   recurse "$1" 0 "$2" || :
-
-  finish=$(date +%s)
-  elapsed=$(($finish - $start))
-
-  set +e
-  passed=$(grep -c '^success' "$logfile")
-  failed=$(grep -c '^fail' "$logfile")
-  skipped=$(grep -c '^skip' "$logfile")
-  if $tap_format; then
-    echo "# Took $elapsed $(plural second $elapsed)."
-    echo 1..$(($passed + $failed + $skipped))
-  else
-    echo "Done, took $elapsed $(plural second $elapsed)."
-    printf '%s\n' "$passed $(plural test "$passed") passed."
-    printf '%s\n' "$skipped $(plural test "$skipped") skipped."
-
-    # If tests failed, print the message in red, otherwise in green.
-    [ $failed -gt 0 ] && printf '\033[31m' || printf '\033[32m'
-
-    printf '%s\n' "$failed $(plural test "$failed") failed."
-    printf '\033[m'
-  fi
-  rm -f "$logfile"
-  test -z "$failed" || test "$failed" -eq '0'
 }
 
 urchin_molly_guard() {
