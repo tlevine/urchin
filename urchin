@@ -23,6 +23,11 @@ urchin_exit() {
 
 # Expand relative paths
 alias fullpath='readlink -f --'
+URCHIN_ROOT="$PWD"
+urchin_path() {
+  # XXX Change this to be relative the urchin root
+  fullpath "$1"
+}
 
 # Urchin version number
 VERSION=0.1.0-rc1
@@ -36,8 +41,8 @@ indent() {
 
 recurse() {
   potential_test="$1"
-  indent_level="$2"
-  shell_for_sh_tests="$3"
+  shell_for_sh_tests="$2"
+  TEST_SHELL="$3"
 
   [ "$potential_test" = 'setup_dir' ] && return
   [ "$potential_test" = 'teardown_dir' ] && return
@@ -58,8 +63,7 @@ recurse() {
         [ -f setup ] && . ./setup > /dev/null
 
         set +e
-        # $2 instead of $indent_level so it doesn't clash
-        recurse "${test}" $(( $2 + 1 )) "$shell_for_sh_tests"
+        recurse "${test}" "$shell_for_sh_tests" "$TEST_SHELL"
         exit_code=$?
         set -e
 
@@ -74,7 +78,7 @@ recurse() {
       [ -f teardown_dir ] && . ./teardown_dir > /dev/null
     )
   else
-    stdout_file="$tmp/stdout$(fullpath "$potential_test")"
+    stdout_file="$tmp/stdout$(urchin_path "$potential_test")"
     mkdir -p "$(dirname "$stdout_file")"
     > $stdout_file
     if [ -x "$potential_test" ]; then
@@ -111,6 +115,12 @@ recurse() {
 
 report_outcome() {
   # XXX just copied from elsewhere and thus broken
+  if "$tap_format"; then
+    printf \#\ 
+  fi
+  echo Running tests at $(date +%Y-%m-%dT%H:%M:%S)
+  start=$(date +%s)
+
 
   if $tap_format; then
     indent $indent_level | sed 's/  /#/g'
@@ -249,32 +259,6 @@ plural () {
   fi
 }
 
-urchin_go() {
-  if "$tap_format"; then
-    printf \#\ 
-  fi
-  echo Running tests at $(date +%Y-%m-%dT%H:%M:%S)
-  start=$(date +%s)
-
-  # Determine the environment variable to define for test scripts
-  # that reflects the specified or implied shell to use for shell-code tests.
-  #  - Set it to the shell specified via -s, if any.
-  #  - Otherwise, use its present value, if non-empty.
-  #  - Otherwise, default to '/bin/sh'.
-  if [ -n "$2" ]; then
-    TEST_SHELL="$2"
-  elif [ -n "$TEST_SHELL" ]; then
-    :
-  else
-    TEST_SHELL='/bin/sh'
-  fi
-
-  # 1 test folder
-  # 2 indentation level
-  # 3 shell to invoke test scripts with
-  recurse "$1" 0 "$2" || :
-}
-
 urchin_molly_guard() {
   {
     echo
@@ -327,7 +311,24 @@ fi
 # Run or present the Molly guard.
 if fullpath "$1" | grep -Fi 'test' > /dev/null || $force
   then
-  urchin_go "$1" "$shell_for_sh_tests"
+  # Determine the environment variable to define for test scripts
+  # that reflects the specified or implied shell to use for shell-code tests.
+  #  - Set it to the shell specified via -s, if any.
+  #  - Otherwise, use its present value, if non-empty.
+  #  - Otherwise, default to '/bin/sh'.
+  if [ -n "$shell_for_sh_tests" ]; then
+    TEST_SHELL="$shell_for_sh_tests"
+  elif [ -n "$TEST_SHELL" ]; then
+    :
+  else
+    TEST_SHELL='/bin/sh'
+  fi
+
+  # 1 test folder
+  # 2 shell to invoke test scripts with
+  # 3 TEST_SHELL
+  recurse "$1" "$shell_for_sh_tests" "$TEST_SHELL" || :
+
 else
   urchin_molly_guard
 fi
