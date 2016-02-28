@@ -1,1 +1,1 @@
-echo teardown has run >> .log
+echo teardown has run >> $log
