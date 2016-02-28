@@ -401,18 +401,6 @@ plural () {
   fi
 }
 
-urchin_molly_guard() {
-  {
-    echo
-    echo 'The name of the directory on which you are running urchin'
-    echo 'does not contain the word "test", so I am not running,'
-    echo 'in case that was an accident. Use the -f flag if you really'
-    echo 'want to run urchin on that directory.'
-    echo
-  } >&2
-  urchin_exit 1
-}
-
 validate_strings() {
   test $(echo "$1" | wc -l) -eq 1 || {
     echo '$1 may not contain tab or newline characters.' >&2
@@ -518,5 +506,10 @@ if basename "$(fullpath "$root")" |
 
   urchin_exit $exit_code
 else
-  urchin_molly_guard
+  echo 'The name of the directory on which you are running urchin
+does not contain the word "test", so I am not running,
+in case that was an accident. Use the -f flag if you really
+want to run urchin on that directory.' >&2
+  exit_code=1
 fi
+urchin_exit $exit_code
