@@ -240,12 +240,12 @@ report_outcome() {
     eval "${result}s=$(($old_count+1))"
 
     if $tap_format; then
-      if [ "$result" == not_ok ]; then
+      if [ "$result" = not_ok ]; then
         not='not '
       else
         not=''
       fi
-      if [ "$result" == skip ]; then
+      if [ "$result" = skip ]; then
         skip='# SKIP'
       else
         skip=''
@@ -255,7 +255,7 @@ report_outcome() {
         the_shell='File is not executable.'
       fi
       echo "${not}ok $n - ${path} ($the_shell) ${skip}"
-      if [ "$result" == not_ok ]; then
+      if [ "$result" = not_ok ]; then
         echo '# ------------ Begin output ------------'
         sed 's/^/# /' "$(stdout_file "$abspath")"
         echo '# ------------ End output ------------'
