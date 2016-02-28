@@ -9,11 +9,7 @@
 
 set -e
 
-DEFAULT_SHELLS='sh
-bash
-dash
-mksh
-zsh'
+DEFAULT_SHELLS='sh bash dash mksh zsh'
 
 # Make sure that CDPATH isn't set, as it causes `cd` to behave unpredictably -
 # notably, it can produce output.
@@ -327,7 +323,7 @@ $USAGE
 By default, Urchin checks for the following shells and runs every
 particular test file once per shell.
 
-$(echo "$DEFAULT_SHELLS" | sed 's/^/  /')
+  $(echo "$DEFAULT_SHELLS" | sed 's/ /\n  /g')
 
 On each run,
 
@@ -439,9 +435,13 @@ do
     shift
 done
 
-# If -s was not passed, used the default shells.
+# If -s was not passed, used the available default shells.
 if ! test -f "$shell_list"; then
-  echo "$DEFAULT_SHELLS" > "$shell_list"
+  for shell in $DEFAULT_SHELLS; do
+    if which $shell > /dev/null; then
+      echo $shell >> "$shell_list"
+    fi
+  done
 fi
 
 # Verify argument for main stuff
