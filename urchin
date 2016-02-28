@@ -191,7 +191,7 @@ report_outcome() {
       else
         skip=''
       fi
-      echo "${not}ok $n ${path}${skip}"
+      echo "${not}ok $n - ${path}${skip}"
       if [ "$result" == not_ok ]; then
         echo '# ------------ Begin output ------------'
       # sed 's/^/# /' "$stdout_file"
