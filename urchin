@@ -344,11 +344,13 @@ The following flags affect how this multiple-shell testing is handled.
                          test files directly, and it will not manipulate the
                          TEST_SHELL environment variable.
 
-Urchin can run any Unix-style programs for any purpose, not just for testing.
-If you are using Urchin for automatally running periodic jobs or for running
-lots of configuration files, you may find these options helpful.
+The following flags affect how Urchin processes tests.
 
 -e, --exit-on-fail       Stop running if any single test fails.
+                         This is useful if you are running something
+                         configuration files with Urchin.
+-T, --timeout <seconds>  Kill a test if it runs for longer than the
+                         specified duration. The default is no timeout.
 -f, --force              Force running even if the test directory's name
                          does not contain the word "test".
 
