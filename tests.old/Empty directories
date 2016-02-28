@@ -1,8 +1,0 @@
-#!/bin/sh
-
-tmp=$(mktemp -d)
-mkdir -p $tmp/test
-../urchin $tmp/test
-exit_code=$?
-rm -R $tmp
-exit $exit_code
