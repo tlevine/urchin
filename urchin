@@ -505,7 +505,7 @@ if basename "$(fullpath "$root")" |
   report_outcome "$root" $tap_format $urchin_tmp/log $start $finish
   urchin_exit $?
 else
-  echo 'The name of the directory on which you are running urchin
+  echo 'The root directory of the tests that you are running urchin on
 does not contain the word "test", so I am not running,
 in case that was an accident. Use the -f flag if you really
 want to run urchin on that directory.' >&2
