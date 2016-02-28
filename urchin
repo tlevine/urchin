@@ -15,10 +15,18 @@ unset CDPATH
 
 # All temporary files go here
 tmp=$(mktemp -d)
+echo $tmp
 urchin_exit() {
   echo rm -f "$tmp"
 # rm -f "$tmp"
   exit "$@"
+}
+
+# Source a setup or teardown file
+urchin_source() {
+  if test -f "$1"; then
+    . ./"$1" > /dev/null
+  fi
 }
 
 # Expand relative paths
@@ -39,22 +47,22 @@ indent() {
   fi
 }
 
-# Recurse prints its exit code to stdout so that we don't have to
-# set +e to read it.
 recurse() {
+  set -e
   potential_test="$1"
   shell_for_sh_tests="$2"
   TEST_SHELL="$3"
 
-  [ "$potential_test" = 'setup_dir' ] && return
-  [ "$potential_test" = 'teardown_dir' ] && return
-  [ "$potential_test" = 'setup' ] && return
-  [ "$potential_test" = 'teardown' ] && return
+  for ignore in setup_dir teardown_dir setup teardown; do
+    if test "$potential_test" = 'setup_dir'; then
+      return
+    fi
+  done
 
   if [ -d "$potential_test" ]; then
     (
       cd -- "$potential_test" > /dev/null
-      [ -f setup_dir ] && . ./setup_dir > /dev/null
+      urchin_source setup_dir
 
       if [ -n "$ZSH_VERSION" ]; then
         # avoid "no matches found: *" error when directories are empty
@@ -62,20 +70,23 @@ recurse() {
       fi
 
       for test in *; do
-        [ -f setup ] && . ./setup > /dev/null
+        urchin_source setup
 
-        exit_code=$(recurse "${test}" "$shell_for_sh_tests" "$TEST_SHELL")
+        set +e
+        recurse "${test}" "$shell_for_sh_tests" "$TEST_SHELL"
+        exit_code=$?
+        set -e
 
         if $exit_on_fail && test $exit_code -ne 0; then
-          [ -f teardown ] && . ./teardown > /dev/null
-          [ -f teardown_dir ] && . ./teardown_dir > /dev/null
-          exit 1 # Exit the sub-shell
+          urchin_source teardown
+          urchin_source teardown_dir
+          urchin_exit 1
         fi
 
-        [ -f teardown ] && . ./teardown > /dev/null
+        urchin_source teardown
       done
-      [ -f teardown_dir ] && . ./teardown_dir > /dev/null
-    ) || ( echo 1 && return; )
+      urchin_source teardown_dir
+    )
   else
     stdout_file="$tmp/stdout$(urchin_path "$potential_test")"
     mkdir -p "$(dirname "$stdout_file")"
@@ -107,10 +118,9 @@ recurse() {
 
     printf "${potential_test}\t${result}\n" >> "$tmp"/log
     if $exit_on_fail && test 0 -ne $exit_code; then
-      echo 1 && return
+      return 1
     fi
   fi
-  echo 0
 }
 
 report_outcome() {
@@ -209,7 +219,6 @@ report_outcome() {
     printf '%s\n' "$failed $(plural test "$failed") failed."
     printf '\033[m'
   fi
-  rm -f "$logfile"
   test -z "$failed" || test "$failed" -eq '0'
 }
 
@@ -327,7 +336,10 @@ if fullpath "$1" | grep -Fi 'test' > /dev/null || $force
   # 1 test folder
   # 2 shell to invoke test scripts with
   # 3 TEST_SHELL
-  exit_code=$(recurse "$1" "$shell_for_sh_tests" "$TEST_SHELL")
+  set +e
+  recurse "$1" "$shell_for_sh_tests" "$TEST_SHELL"
+  exit_code=$?
+  set -e
   urchin_exit $exit_code
 else
   urchin_molly_guard
