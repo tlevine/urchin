@@ -5,5 +5,7 @@
 
 # Test if $TEST_SHELL - if *undefined* - is exported with value '/bin/sh' by urchin
 # and thus has that value inside test scripts.
+
+s="$TEST_SHELL"
 unset -v TEST_SHELL
-../../urchin ./.test-TEST_SHELL-undefined_or_empty
+"$s" ../../urchin ./.test-TEST_SHELL-undefined_or_empty

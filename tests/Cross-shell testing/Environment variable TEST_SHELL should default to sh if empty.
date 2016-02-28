@@ -5,4 +5,5 @@
 
 # Test if $TEST_SHELL - if *defined, but empty* - is exported with value '/bin/sh' by urchin
 # and thus has that value inside the scripts.
-TEST_SHELL= ../../urchin ./.test-TEST_SHELL-undefined_or_empty
+TEST_SHELL="$PWD/.special-shell" $TEST_SHELL \
+  ../../urchin ./.test-TEST_SHELL-undefined_or_empty

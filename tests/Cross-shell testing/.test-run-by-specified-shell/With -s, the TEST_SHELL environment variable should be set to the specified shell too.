@@ -6,4 +6,4 @@ echo "Running shell: $(ps -o comm= -p $$ && :)"
 
 echo "\$TEST_SHELL: $TEST_SHELL"
 
-[  "$TEST_SHELL" = 'bash' ]
+[ "$(basename "$this_shell")" = '.special-shell' ]
