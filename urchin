@@ -9,6 +9,9 @@
 
 set -e
 
+logfile=$(mktemp)
+> $logfile
+
 # Make sure that CDPATH isn't set, as it causes `cd` to behave unpredictably -
 # notably, it can produce output.
 unset CDPATH
@@ -204,7 +207,6 @@ plural () {
 }
 
 urchin_go() {
-  rm -f "$logfile"
   if "$tap_format"; then
     printf \#\ 
   fi
@@ -224,11 +226,15 @@ urchin_go() {
     TEST_SHELL='/bin/sh'
   fi
 
-  recurse "$1" 0 "$2"  # test folder -- indentation level -- [shell to invoke test scripts with]
+  # 1 test folder
+  # 2 indentation level
+  # 3 shell to invoke test scripts with
+  recurse "$1" 0 "$2" || :
 
   finish=$(date +%s)
   elapsed=$(($finish - $start))
 
+  set +e
   passed=$(grep -c '^success' "$logfile")
   failed=$(grep -c '^fail' "$logfile")
   skipped=$(grep -c '^skip' "$logfile")
@@ -301,7 +307,6 @@ fi
 
 # Constants
 alias fullpath='readlink -f --'
-logfile=$(fullpath "$1")/.urchin.log
 
 # Run or present the Molly guard.
 if fullpath "$1" | grep -Fi 'test' > /dev/null || $force
