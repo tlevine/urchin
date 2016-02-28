@@ -106,6 +106,10 @@ recurse() {
       fi
 
       for test in *; do
+        if test "$test" = '*' && ! test -e $test; then
+          # The directory is empty.
+          break
+        fi
         urchin_source setup
 
         set +e
