@@ -15,6 +15,7 @@ unset CDPATH
 
 # All temporary files go here
 tmp=$(mktemp -d)
+> $tmp/log
 urchin_exit() {
   rm -Rf "$tmp"
   exit "$@"
@@ -78,20 +79,35 @@ indent() {
 
 recurse() {
   set -e
-  potential_test="$1"
-  shell_for_sh_tests="$2"
-  TEST_SHELL="$3"
+  root="$1"
+  requested_path="$2"
+  potential_test="$3"
+  shell_for_sh_tests="$4"
+  TEST_SHELL="$5"
+
+  for ignore in setup_dir teardown_dir setup teardown; do
+    if test "$potential_test" = $ignore; then
+      return
+    fi
+  done
+
+  pwd
+  echo $potential_test
+  fullpath "$potential_test"
+  echo $requested_path
+  if ! fullpath "$requested_path" |
+    grep "^$(fullpath "$potential_test")" > /dev/null; then
+    if fullpath "$requested_path" |grep Command > /dev/null; then
+      echo "echo '$(fullpath "$potential_test")' |
+grep '^$(fullpath "$requested_path")' > /dev/null"
+fi
+    return
+  fi
 
   if test $(echo "$potential_test" | wc -l) -ne 1; then
     echo 'Test file names may not contain newline characters.' >&2
     exit 1
   fi
-
-  for ignore in setup_dir teardown_dir setup teardown; do
-    if test "$potential_test" = 'setup_dir'; then
-      return
-    fi
-  done
 
   if [ -d "$potential_test" ]; then
     (
@@ -107,7 +123,8 @@ recurse() {
         urchin_source setup
 
         set +e
-        recurse "${test}" "$shell_for_sh_tests" "$TEST_SHELL"
+        recurse "$root" "$requested_path" \
+          "${test}" "$shell_for_sh_tests" "$TEST_SHELL"
         exit_code=$?
         set -e
 
@@ -367,15 +384,17 @@ do
 done
 
 # Verify argument for main stuff
-if [ "$#" != '1' ] || [ ! -d "$1" ]
-  then
-  [ -n "$1" ] && [ ! -d "$1" ] && echo "Not a directory: '$1'" >&2
+if [ "$#" != '1' ] || [ ! -e "$1" ]; then
+  if [ -n "$1" ] && [ ! -e "$1" ]; then
+    echo "No such file or directory: '$1'" >&2
+  fi
   echo "$USAGE" >&2
   urchin_exit 11
 fi
 
 # Run or present the Molly guard.
-if basename "$(fullpath "$(urchin_root "$1")")" |
+root="$(urchin_root "$1")"
+if basename "$(fullpath "$root")" |
   grep -Fi 'test' > /dev/null || $force; then
   # Determine the environment variable to define for test scripts
   # that reflects the specified or implied shell to use for shell-code tests.
@@ -393,10 +412,13 @@ if basename "$(fullpath "$(urchin_root "$1")")" |
   start=$(date +%s)
   set +e
 
-  # 1 test folder
-  # 2 shell to invoke test scripts with
-  # 3 TEST_SHELL
-  recurse "$1" "$shell_for_sh_tests" "$TEST_SHELL"
+  # 1 urchin root
+  # 2 test file or folder to run
+  # 3 urchin root again (this changes later)
+  # 4 shell to invoke test scripts with
+  # 5 TEST_SHELL
+  recurse "$root" "$(fullpath "$1")" \
+    "$root" "$shell_for_sh_tests" "$TEST_SHELL"
   exit_code=$?
 
   set -e
