@@ -187,7 +187,8 @@ recurse() {
           "$(stdout_file "$potential_test")" 2>&1
       fi
     else
-      result=skip
+      # Shell is '(File is not executable.)'
+      printf "${potential_test}\t(File is not executable.)\tskip\t0\n" >> $tmp/log
     fi
   fi
 }
@@ -275,7 +276,7 @@ report_outcome() {
           printf '\033[0m'
         ;;
         skip)
-          :
+          echo "  $the_shell"
         ;;
       esac
     fi
