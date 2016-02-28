@@ -90,11 +90,9 @@ recurse() {
     fi
   done
 
-  if echo "$requested_path" | grep "^$potential_test" > /dev/null ||
-     echo "$potential_test" | grep "^$requested_path" > /dev/null; then
-  else
+  echo "$requested_path" | grep "^$potential_test" > /dev/null ||
+    echo "$potential_test" | grep "^$requested_path" > /dev/null ||
     return 0
-  fi
 
   if test $(echo "$potential_test" | wc -l) -ne 1; then
     echo 'Test file names may not contain newline characters.' >&2
