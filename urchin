@@ -89,7 +89,7 @@ recurse() {
   TEST_SHELL="$4"
 
   for ignore in setup_dir teardown_dir setup teardown; do
-    if test "$potential_test" = $ignore; then
+    if test "$(basename "$potential_test")" = $ignore; then
       return
     fi
   done
@@ -294,9 +294,10 @@ report_outcome() {
         ;;
         skip)
           if test -z "$the_shell"; then
-            the_shell='(File is not executable.)'
+            echo '  (File is not executable.)'
+          else
+            echo "  ${the_shell} ($file_elapsed $(plural second $file_elapsed))"
           fi
-          echo "  ${the_shell} ($file_elapsed $(plural second $file_elapsed))"
         ;;
       esac
     fi
