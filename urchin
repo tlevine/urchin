@@ -49,13 +49,13 @@ urchin_root() {
     if test -d "$orig"; then
       echo "$orig"
     else
-      dirname "$orig"
+      dirname -- "$orig"
     fi
   elif ! test -e "$current"; then
     echo "$current: No such file or directory">&2
     return 1
   elif test -f "$current"; then
-    urchin_root "$(dirname "$current")" "$orig"
+    urchin_root "$(dirname -- "$current")" "$orig"
   elif test -f "$current"/.urchin; then
     remove_trailing_slash "$current"
   else
@@ -130,10 +130,10 @@ recurse() {
     )
   else
     stdout_file="$tmp/stdout$(fullpath "$potential_test")"
-    mkdir -p "$(dirname "$stdout_file")"
+    mkdir -p "$(dirname -- "$stdout_file")"
 
     if [ -x "$potential_test" ]; then
-      cd -- "$(dirname "$potential_test")"
+      cd -- "$(dirname -- "$potential_test")"
       urchin_source setup
 
       if [ -n "$shell_for_sh_tests" ] &&
@@ -206,7 +206,7 @@ report_outcome() {
     file_elapsed=$(echo "$line" | sed "s/$regex/\3/")
 
     prevdir=$currentdir
-    currentdir="$(dirname "$path")"
+    currentdir="$(dirname -- "$path")"
 
     # Number of files that have run, including this one
     n=$(($n + 1))
@@ -229,7 +229,9 @@ report_outcome() {
       echo "${not}ok $n - ${path}${skip}"
       if [ "$result" == not_ok ]; then
         echo '# ------------ Begin output ------------'
-      # sed 's/^/# /' "$stdout_file"
+        if test -f "$stdout_file"; then
+          sed 's/^/# /' "$stdout_file"
+        fi
         echo '# ------------ End output ------------'
       fi
       echo "# Previous test took $file_elapsed seconds."
@@ -252,7 +254,7 @@ report_outcome() {
           printf '\033[31m'
 
           if test -f "$stdout_file"; then
-            cat "$stdout_file"
+            sed 's/^/# /' "$stdout_file"
           fi
           printf '\033[0m'
         ;;
@@ -273,7 +275,7 @@ report_outcome() {
     echo
     echo "Done, took $elapsed $(plural second $elapsed)."
     printf '%s\n' "$oks $(plural test "$oks") passed."
-    printf '%s\n' "$skips $(plural test "$skips") skip."
+    printf '%s\n' "$skips $(plural test "$skips") skipped."
 
     # If any tests are not ok, print the message in red.
     if [ $not_oks -gt 0 ] ; then
