@@ -1,0 +1,14 @@
+n=0
+while read line; do
+  n=$(($n + 1))
+
+  contents=$(echo "$line" | cut -d, -f1)
+  expectation=$(echo "$line" | cut -d, -f2)
+
+  # Skip if invalid.
+  echo "$contents" > "$n"
+  if test "$expectation" = ok || test "$expectation" = not\ ok ||
+    test "$expectation" = skip; then
+    chmod +x $n
+  fi
+done < .fixtures.csv
