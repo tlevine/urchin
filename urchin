@@ -9,7 +9,7 @@
 
 set -e
 
-DEFAULT_SHELLS='sh bash dash mksh zsh'
+DEFAULT_SHELLS='sh bash dash mksh' # zsh'
 
 # Make sure that CDPATH isn't set, as it causes `cd` to behave unpredictably -
 # notably, it can produce output.
