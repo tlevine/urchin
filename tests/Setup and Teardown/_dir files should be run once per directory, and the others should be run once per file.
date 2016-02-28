@@ -1,3 +1,3 @@
 #!/bin/sh
 
-$TEST_SHELL ../../urchin --run-in-series .test
+../../urchin --disable-cycling --run-in-series .test

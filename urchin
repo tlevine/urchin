@@ -422,8 +422,8 @@ do
     case "$1" in
         -b|--run-in-series) run_in_series=true;;
         -e|--exit-on-fail) exit_on_not_ok=true;;
-        -f) force=true;;
-        -s)
+        -f|--force) force=true;;
+        -s|--shell)
           shift
           shell_for_sh_tests=$1
          
@@ -441,7 +441,7 @@ you don't need to quote the TEST_SHELL variable." > /dev/stderr
 
           echo "$shell_for_sh_tests" >> "$shell_list"
           ;;
-        -n) cycle_shell=false;; 
+        -n|--disable-cycling) cycle_shell=false;; 
         -t|--tap) tap_format=true;;
         -h|--help) urchin_help
           exit 0;;
