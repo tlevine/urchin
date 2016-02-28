@@ -347,6 +347,7 @@ The following flags affect how Urchin processes tests.
                          configuration files with Urchin.
 -T, --timeout <seconds>  Kill a test if it runs for longer than the
                          specified duration. The default is no timeout.
+                         XXX Not yet implemented
 -f, --force              Force running even if the test directory's name
                          does not contain the word "test".
 
@@ -435,7 +436,7 @@ do
     shift
 done
 
-# If -s was not passed, used the available default shells.
+# If -s was not passed, use the available default shells.
 if ! test -f "$shell_list"; then
   for shell in $DEFAULT_SHELLS; do
     if which $shell > /dev/null; then
