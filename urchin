@@ -138,6 +138,7 @@ recurse() {
     > $stdout_file
 
     if [ -x "$potential_test" ]; then
+      cd -- "$(dirname "$potential_test")"
       urchin_source setup
 
       if [ -n "$shell_for_sh_tests" ] &&
@@ -152,9 +153,9 @@ recurse() {
       set +e
       if $cycle_shell; then
         TEST_SHELL="$TEST_SHELL" "$shell_for_sh_tests" \
-          ./"$potential_test" > "$stdout_file" 2>&1
+          "$potential_test" > "$stdout_file" 2>&1
       else
-        TEST_SHELL="$TEST_SHELL" ./"$potential_test" > "$stdout_file" 2>&1
+        TEST_SHELL="$TEST_SHELL" "$potential_test" > "$stdout_file" 2>&1
       fi
       exit_code="$?"
       set -e
