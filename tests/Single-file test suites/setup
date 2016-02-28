@@ -1,2 +1,1 @@
-export tmp=$(mktemp -d)
 export PATH="$PWD:$PATH"

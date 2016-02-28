@@ -1,6 +1,8 @@
 #!/bin/sh
 set -e
 
+export tmp=$(mktemp -d)
+
 contents="$1"
 expectation="$2"
 
@@ -20,4 +22,8 @@ case "$expectation" in ok) regex='^ok 1 - testcase';;
 esac
 
 # Run the test suite
+set +e
 ../../urchin -n -t $testdir | grep "$regex"
+code=$?
+rm -R $tmp
+exit $?
