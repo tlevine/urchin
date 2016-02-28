@@ -30,10 +30,6 @@ urchin_source() {
 
 # Expand relative paths
 alias fullpath='readlink -f --'
-urchin_path() {
-  # XXX Change this to be relative the urchin root
-  fullpath "$1"
-}
 
 remove_trailing_slash() {
   echo "$1" | sed s/\\/$//
@@ -129,8 +125,8 @@ recurse() {
       urchin_source teardown_dir
     )
   else
-    stdout_file="$tmp/stdout$(urchin_path "$potential_test")"
-    time_file="$tmp/time$(urchin_path "$potential_test")"
+    stdout_file="$tmp/stdout$(fullpath "$potential_test")"
+    time_file="$tmp/time$(fullpath "$potential_test")"
 
     mkdir -p "$(dirname "$stdout_file")"
     mkdir -p "$(dirname "$time_file")"
