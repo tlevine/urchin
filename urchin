@@ -24,9 +24,12 @@ urchin_exit() {
 }
 
 stdout_file() {
-  x="$urchin_tmp/stdout$(fullpath "$1")"
-  mkdir -p "$(dirname -- "$x")"
-  echo "$x"
+  the_test="$1"
+  the_shell="$2"
+
+  x="$urchin_tmp/stdout$(fullpath "$the_test")"
+  mkdir -p "$x"
+  echo "$x/$(echo "$the_shell" | md5sum | cut -d\  -f1)"
 }
 
 # Expand relative paths
@@ -161,7 +164,7 @@ recurse() {
             else
               TEST_SHELL="$the_test_shell" "$potential_test"
             fi
-          } > "$(stdout_file "$potential_test")" 2>&1
+          } > "$(stdout_file "$potential_test" "$the_test_shell")" 2>&1
           exit_code="$?"
           set -e
           finish=$(date +%s)
@@ -257,7 +260,7 @@ report_outcome() {
       echo "${not}ok $n - ${path} ($the_shell) ${skip}"
       if [ "$result" = not_ok ]; then
         echo '# ------------ Begin output ------------'
-        sed 's/^/# /' "$(stdout_file "$abspath")"
+        sed 's/^/# /' "$(stdout_file "$abspath" "$the_shell")"
         echo '# ------------ End output ------------'
       fi
       echo "# Previous test took $file_elapsed seconds."
@@ -282,7 +285,7 @@ report_outcome() {
           # Print output captured from not_ok test in red.
           printf '\033[31m'
 
-          sed 's/^/  # /' "$(stdout_file "$abspath")"
+          sed 's/^/  # /' "$(stdout_file "$abspath" "$the_shell")"
           printf '\033[0m'
         ;;
         skip)
