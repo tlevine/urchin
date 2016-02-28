@@ -444,6 +444,10 @@ do
           }
 
           validate_strings "$shell_for_sh_tests" 'Shell paths'
+          if echo "$shell_for_sh_tests" | grep \  > /dev/null; then
+            echo "Warning: It is best if shell paths contain no spaces so that
+you don't need to quote the TEST_SHELL variable." > /dev/stderr
+          fi
 
           echo "$shell_for_sh_tests" >> "$shell_list"
           ;;

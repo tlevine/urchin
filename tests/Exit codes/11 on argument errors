@@ -1,0 +1,2 @@
+$TEST_SHELL ../../urchin --not-a-flag
+test $? -eq 11

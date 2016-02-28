@@ -1,0 +1,2 @@
+$TEST_SHELL ../../urchin '.test/This test passes'
+test $? -eq 1
