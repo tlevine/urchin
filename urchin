@@ -28,6 +28,12 @@ urchin_source() {
   fi
 }
 
+stdout_file() {
+  x="$tmp/stdout$(fullpath "$1")"
+  mkdir -p "$(dirname -- "$x")"
+  echo "$x"
+}
+
 # Expand relative paths
 alias fullpath='readlink -f --'
 
@@ -129,9 +135,6 @@ recurse() {
       urchin_source teardown_dir
     )
   else
-    stdout_file="$tmp/stdout$(fullpath "$potential_test")"
-    mkdir -p "$(dirname -- "$stdout_file")"
-
     if [ -x "$potential_test" ]; then
       cd -- "$(dirname -- "$potential_test")"
       urchin_source setup
@@ -147,10 +150,11 @@ recurse() {
       start=$(date +%s)
       set +e
       if $cycle_shell; then
-        TEST_SHELL="$TEST_SHELL" "$shell_for_sh_tests" \
-          "$potential_test" > "$stdout_file" 2>&1
+        TEST_SHELL="$TEST_SHELL" "$shell_for_sh_tests" "$potential_test" > \
+          "$(stdout_file "$potential_test")" 2>&1
       else
-        TEST_SHELL="$TEST_SHELL" "$potential_test" > "$stdout_file" 2>&1
+        TEST_SHELL="$TEST_SHELL" "$potential_test" > \
+          "$(stdout_file "$potential_test")" 2>&1
       fi
       exit_code="$?"
       set -e
@@ -201,7 +205,8 @@ report_outcome() {
   sort "$log_file" > $sorted_log_file
   while read line; do
     regex='^\(.*\): \(ok\|skip\|not_ok\) \([0-9]*\) seconds$'
-    path=$(echo "$line" | sed "s/$regex/\1/" | sed "s/$escaped_root\/\?//")
+    abspath=$(echo "$line" | sed "s/$regex/\1/")
+    path=$(echo "$abspath" | sed "s/$escaped_root\/\?//")
     result=$(echo "$line" | sed "s/$regex/\2/")
     file_elapsed=$(echo "$line" | sed "s/$regex/\3/")
 
@@ -229,9 +234,7 @@ report_outcome() {
       echo "${not}ok $n - ${path}${skip}"
       if [ "$result" == not_ok ]; then
         echo '# ------------ Begin output ------------'
-        if test -f "$stdout_file"; then
-          sed 's/^/# /' "$stdout_file"
-        fi
+        sed 's/^/# /' "$(stdout_file "$abspath")"
         echo '# ------------ End output ------------'
       fi
       echo "# Previous test took $file_elapsed seconds."
@@ -253,9 +256,7 @@ report_outcome() {
           # Print output captured from not_oked test in red.
           printf '\033[31m'
 
-          if test -f "$stdout_file"; then
-            sed 's/^/# /' "$stdout_file"
-          fi
+          sed 's/^/# /' "$(stdout_file "$abspath")"
           printf '\033[0m'
         ;;
         skip)
