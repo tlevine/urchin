@@ -253,7 +253,7 @@ report_outcome() {
           printf '\033[31m✗ \033[0m'
           printf '%s\n' "${path}"
 
-          # Print output captured from not_oked test in red.
+          # Print output captured from not_ok test in red.
           printf '\033[31m'
 
           sed 's/^/# /' "$(stdout_file "$abspath")"
