@@ -182,10 +182,13 @@ recurse() {
 }
 
 report_outcome() {
-  tap_format="$1"
-  log_file="$2"
-  start="$3"
-  finish="$4"
+  root="$1"
+  tap_format="$2"
+  log_file="$3"
+  start="$4"
+  finish="$5"
+
+  escaped_root="$(fullpath "$root" | sed 's/\//\\\//g')"
   elapsed=$(($finish - $start))
 
 # if "$tap_format"; then
@@ -203,7 +206,7 @@ report_outcome() {
   sort "$log_file" > $sorted_log_file
   while read line; do
     regex='^\(.*\): \(ok\|skip\|not_ok\) \([0-9]*\) seconds$'
-    path=$(echo "$line" | sed "s/$regex/\1/")
+    path=$(echo "$line" | sed "s/$regex/\1/" | sed "s/$escaped_root\/\?//")
     result=$(echo "$line" | sed "s/$regex/\2/")
     file_elapsed=$(echo "$line" | sed "s/$regex/\3/")
 
@@ -413,7 +416,7 @@ if basename "$(fullpath "$root")" |
   set -e
   finish=$(date +%s)
 
-  report_outcome true $tmp/log $start $finish
+  report_outcome "$root" true $tmp/log $start $finish
 
   urchin_exit $exit_code
 else
