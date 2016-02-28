@@ -7,21 +7,14 @@
 # No part of urchin, including this file, may be copied, modified, propagated,
 # or distributed except according to the terms contained in the COPYING file.
 
-
+set -e
 
 # Make sure that CDPATH isn't set, as it causes `cd` to behave unpredictably -
-# notably, it can produce output, which breaks fullpath().
+# notably, it can produce output.
 unset CDPATH
 
 # Urchin version number
-VERSION=0.0.6
-
-fullpath() {
-  (
-    cd -- "$1"
-    pwd
-  )
-}
+VERSION=0.1.0-rc1
 
 indent() {
   level="$1"
@@ -40,10 +33,7 @@ recurse() {
   [ "$potential_test" = 'setup' ] && return
   [ "$potential_test" = 'teardown' ] && return
 
-  [ $indent_level -eq 0 ] && : > "$stdout_file"
-
-  if [ -d "$potential_test" ]
-    then
+  if [ -d "$potential_test" ]; then
 
     if $tap_format; then
       indent $indent_level | sed 's/  /#/g'
@@ -54,7 +44,9 @@ recurse() {
     fi
 
     (
+      stdout_file=$(mktemp)
       cd -- "$potential_test"
+
       [ -f setup_dir ] && [ -x setup_dir ] && ./setup_dir >> "$stdout_file"
 
       if [ -n "$ZSH_VERSION" ]; then
@@ -62,13 +54,14 @@ recurse() {
         setopt NULL_GLOB
       fi
 
-      for test in *
-        do
-        [ -f setup ] && [ -x setup ] && ./setup >> "$stdout_file"
+      for test in *; do
+        [ -f setup ] && [ -x setup ] && ./setup
 
+        set +e
         # $2 instead of $indent_level so it doesn't clash
         recurse "${test}" $(( $2 + 1 )) "$shell_for_sh_tests"
         exit_code=$?
+        set -e
 
         if $exit_on_fail && test $exit_code -ne 0; then
           [ -f teardown ] && [ -x teardown ] && ./teardown >> "$stdout_file"
@@ -79,6 +72,9 @@ recurse() {
         [ -f teardown ] && [ -x teardown ] && ./teardown >> "$stdout_file"
       done
       [ -f teardown_dir ] && [ -x teardown_dir ] && ./teardown_dir >> "$stdout_file"
+
+      cd ..
+      rm $stdout_file
     )
     if $tap_format; then
       indent $indent_level | sed 's/  /#/g'
