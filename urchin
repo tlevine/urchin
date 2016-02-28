@@ -89,22 +89,37 @@ recurse() {
     )
   else
     stdout_file="$tmp/stdout$(urchin_path "$potential_test")"
+    time_file="$tmp/time$(urchin_path "$potential_test")"
+
     mkdir -p "$(dirname "$stdout_file")"
+    mkdir -p "$(dirname "$time_file")"
+
     > $stdout_file
+
     if [ -x "$potential_test" ]; then
-      [ -f setup ] && . ./setup > /dev/null
+      urchin_source setup
+
+      if [ -n "$shell_for_sh_tests" ] &&
+        has_sh_or_no_shebang_line ./"$potential_test"; then
+        cycle_shell=true
+      else
+        cycle_shell=false
+      fi
 
       # Run the test
+      start=$(date +%s)
       set +e
-      if [ -n "$shell_for_sh_tests" ] && has_sh_or_no_shebang_line ./"$potential_test"; then
-        TEST_SHELL="$TEST_SHELL" "$shell_for_sh_tests" ./"$potential_test" > "$stdout_file" 2>&1
+      if $cycle_shell; then
+        TEST_SHELL="$TEST_SHELL" "$shell_for_sh_tests" \
+          ./"$potential_test" > "$stdout_file" 2>&1
       else
         TEST_SHELL="$TEST_SHELL" ./"$potential_test" > "$stdout_file" 2>&1
       fi
       exit_code="$?"
       set -e
+      stop=$(date +%s)
 
-      [ -f teardown ] && . ./teardown > /dev/null
+      urchin_source teardown
       if [ $exit_code -eq 0 ]; then
         result=success
       elif [ $exit_code -eq 3 ]; then
@@ -124,6 +139,8 @@ recurse() {
 }
 
 report_outcome() {
+  tap_format="$1"
+
   # XXX just copied from elsewhere and thus broken
   if "$tap_format"; then
     printf \#\ 
