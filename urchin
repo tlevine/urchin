@@ -254,30 +254,33 @@ report_outcome() {
       if test "$prevdir" != "$currentdir"; then
         echo
       fi
-      pretty_path="%s$(dirname -- "$path")/\n  $(basename -- "$path")\n"
+      if test "$prevpath" != "$path"; then
+        printf "$(dirname -- "$path")/\n> $(basename -- "$path")\n"
+      fi
       case "$result" in
         ok)
           # On success, print a green '✓'
           printf '\033[32m✓ \033[0m'
-          printf "${pretty_path}"
+          echo "${the_shell}"
         ;;
         not_ok)
           # On not_ok, print a red '✗'
           printf '\033[31m✗ \033[0m'
-          printf "${pretty_path}"
+          echo "${the_shell}"
 
           # Print output captured from not_ok test in red.
           printf '\033[31m'
 
-          sed 's/^/# /' "$(stdout_file "$abspath")"
+          sed 's/^/  # /' "$(stdout_file "$abspath")"
           printf '\033[0m'
         ;;
         skip)
-          printf "${pretty_path}"
+          :
         ;;
       esac
     fi
 
+  prevpath="$path"
   done < $sorted_log_file
   rm $sorted_log_file
 
