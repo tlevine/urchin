@@ -16,9 +16,13 @@ unset CDPATH
 # All temporary files go here
 tmp=$(mktemp -d)
 urchin_exit() {
-  rm -f "$tmp"
+  echo rm -f "$tmp"
+# rm -f "$tmp"
   exit "$@"
 }
+
+# Expand relative paths
+alias fullpath='readlink -f --'
 
 # Urchin version number
 VERSION=0.1.0-rc1
@@ -41,15 +45,6 @@ recurse() {
   [ "$potential_test" = 'teardown' ] && return
 
   if [ -d "$potential_test" ]; then
-
-    if $tap_format; then
-      indent $indent_level | sed 's/  /#/g'
-      echo "# Begin - ${potential_test}"
-    else
-      indent $indent_level
-      echo "+ ${potential_test}"
-    fi
-
     (
       cd -- "$potential_test"
       [ -f setup_dir ] && . ./setup_dir > /dev/null
@@ -71,21 +66,15 @@ recurse() {
         if $exit_on_fail && test $exit_code -ne 0; then
           [ -f teardown ] && . ./teardown > /dev/null
           [ -f teardown_dir ] && . ./teardown_dir > /dev/null
-          return 1
+          exit 1 # Exit the sub-shell
         fi
 
         [ -f teardown ] && . ./teardown > /dev/null
       done
       [ -f teardown_dir ] && . ./teardown_dir > /dev/null
     )
-    if $tap_format; then
-      indent $indent_level | sed 's/  /#/g'
-      echo "# End - ${potential_test}"
-    else
-      echo
-    fi
   else
-    stdout_file=$(mktemp)
+    stdout_file="$tmp/stdout$(fullpath "$potential_test")"
     > $stdout_file
     if [ -x "$potential_test" ]; then
       [ -f setup ] && . ./setup > /dev/null
@@ -121,6 +110,25 @@ recurse() {
 
 report_outcome() {
   # XXX just copied from elsewhere and thus broken
+
+  if $tap_format; then
+    indent $indent_level | sed 's/  /#/g'
+    echo "# Begin - ${potential_test}"
+  else
+    indent $indent_level
+    echo "+ ${potential_test}"
+  fi
+
+
+  if $tap_format; then
+    indent $indent_level | sed 's/  /#/g'
+    echo "# End - ${potential_test}"
+  else
+    echo
+  fi
+
+
+
   if $tap_format; then
     n=$(grep -ce '^\(success\|fail\|skip\)' "$logfile")
 
@@ -311,9 +319,6 @@ if [ "$#" != '1' ] || [ ! -d "$1" ]
   echo "$USAGE" >&2
   urchin_exit 11
 fi
-
-# Constants
-alias fullpath='readlink -f --'
 
 # Run or present the Molly guard.
 if fullpath "$1" | grep -Fi 'test' > /dev/null || $force
