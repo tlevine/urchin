@@ -1,5 +1,0 @@
-#!/bin/sh
-
-tmp=$(mktemp -d)/blah
-echo '#!/usr/bin/env true' > $tmp
-! ../../urchin $tmp
