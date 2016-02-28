@@ -50,8 +50,10 @@ urchin_root() {
     orig="$1"
   fi
 
-  if test "$(readlink -f -- "$1")" = /; then
-    # Stop traversing upwards at /
+  abscurrent="$(fullpath "$1")"
+  if test "$abscurrent" = / ||
+    basename "$abscurrent" | grep '^\.' > /dev/null; then
+    # Stop traversing upwards at / and at hidden directories.
     if test -d "$orig"; then
       echo "$orig"
     else
