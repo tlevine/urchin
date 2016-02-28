@@ -157,7 +157,12 @@ report_outcome() {
   for number in n oks skips not_oks; do
     eval "$number=0"
   done
-  sort "$log_file" | while read line; do
+
+  # Use a temporary file rather than a pipe because a pipe starts a sub-shell
+  # and thus makes the above variables local.
+  sorted_log_file=$(mktemp)
+  sort "$log_file" > $sorted_log_file
+  while read line; do
     regex='^\(.*\): \(ok\|skip\|not_ok\) \([0-9]*\) seconds$'
     path=$(echo "$line" | sed "s/$regex/\1/")
     result=$(echo "$line" | sed "s/$regex/\2/")
@@ -170,10 +175,7 @@ report_outcome() {
     eval "old_count=${result}s"
     eval "${result}s=$(($old_count+1))"
 
-  # if $tap_format; then
-  #   indent $indent_level | sed 's/  /#/g'
-  #   echo "# Begin - ${path}"
-  # else
+  # if ! $tap_format; then
   #   indent $indent_level
   #   echo "+ ${path}"
   # fi
@@ -221,19 +223,16 @@ report_outcome() {
   #   esac
     fi
 
-  # if $tap_format; then
-  #   indent $indent_level | sed 's/  /#/g'
-  #   echo "# End - ${potential_test}"
-  # else
+  # if ! $tap_format; then
   #   echo
   # fi
-  done
-  return
+  done < $sorted_log_file
+  rm $sorted_log_file
 
   set +e
   if $tap_format; then
-    echo "# Took $elapsed $(plural second $elapsed)."
-    echo 1..$(($oks + $not_oks + $skips))
+    echo "# Full test suite took $elapsed $(plural second $elapsed)."
+    echo 1..$n
   else
     echo "Done, took $elapsed $(plural second $elapsed)."
     printf '%s\n' "$oks $(plural test "$oks") oks."
