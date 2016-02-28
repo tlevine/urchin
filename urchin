@@ -240,34 +240,33 @@ report_outcome() {
         echo '# ------------ End output ------------'
       fi
       echo "# Previous test took $file_elapsed seconds."
-  # else
-  #   indent $indent_level
-  #   case "$result" in
-  #     success)
-  #       # On success, print a green '✓'
-  #       printf '\033[32m✓ \033[0m'
-  #       printf '%s\n' "${potential_test}"
-  #     ;;
-  #     not_ok)
-  #       # On not_ok, print a red '✗'
-  #       printf '\033[31m✗ \033[0m'
-  #       printf '%s\n' "${potential_test}"
+    else
+      case "$result" in
+        ok)
+          # On success, print a green '✓'
+          printf '\033[32m✓ \033[0m'
+          printf '%s\n' "${path}"
+        ;;
+        not_ok)
+          # On not_ok, print a red '✗'
+          printf '\033[31m✗ \033[0m'
+          printf '%s\n' "${path}"
 
-  #       # Print output captured from not_oked test in red.
-  #       printf '\033[31m'
+          # Print output captured from not_oked test in red.
+          printf '\033[31m'
 
-  #       cat "$stdout_file"
-  #       printf '\033[0m'
-  #     ;;
-  #     skip)
-  #       printf '  %s\n' "${potential_test}"
-  #     ;;
-  #   esac
+          cat "$stdout_file"
+          printf '\033[0m'
+        ;;
+        skip)
+          printf '  %s\n' "${path}"
+        ;;
+      esac
     fi
 
-  # if ! $tap_format; then
-  #   echo
-  # fi
+  if ! $tap_format; then
+    echo
+  fi
   done < $sorted_log_file
   rm $sorted_log_file
 
@@ -277,14 +276,14 @@ report_outcome() {
     echo 1..$n
   else
     echo "Done, took $elapsed $(plural second $elapsed)."
-    printf '%s\n' "$oks $(plural test "$oks") oks."
-    printf '%s\n' "$skips $(plural test "$skips") skips."
+    printf '%s\n' "$oks $(plural test "$oks") passed."
+    printf '%s\n' "$skips $(plural test "$skips") skip."
 
     # If any tests are not ok, print the message in red.
     if [ $not_oks -gt 0 ] ; then
       printf '\033[31m'
     fi
-    printf '%s\n' "$not_ok $(plural test "$not_oks") failed."
+    printf '%s\n' "$not_oks $(plural test "$not_oks") failed."
     printf '\033[m'
   fi
   test "$not_oks" -eq '0'
@@ -416,7 +415,7 @@ if basename "$(fullpath "$root")" |
   set -e
   finish=$(date +%s)
 
-  report_outcome "$root" true $tmp/log $start $finish
+  report_outcome "$root" $tap_format $tmp/log $start $finish
 
   urchin_exit $exit_code
 else
