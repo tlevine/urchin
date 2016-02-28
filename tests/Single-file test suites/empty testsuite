@@ -1,0 +1,7 @@
+#!/bin/sh
+set -e
+
+testdir=$tmp/tests
+mkdir -p $testdir
+
+../../urchin -n -t $testdir
