@@ -499,14 +499,10 @@ if basename "$(fullpath "$root")" |
   # 3 Should we cycle shells?
   # 4 TEST_SHELL
   recurse "$(fullpath "$1")" "$root" "$cycle_shell" "$TEST_SHELL"
-  exit_code=$?
-
-  set -e
   finish=$(date +%s)
 
   report_outcome "$root" $tap_format $urchin_tmp/log $start $finish
-
-  urchin_exit $exit_code
+  urchin_exit $?
 else
   echo 'The name of the directory on which you are running urchin
 does not contain the word "test", so I am not running,
