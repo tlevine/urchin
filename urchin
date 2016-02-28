@@ -115,21 +115,26 @@ recurse() {
           # The directory is empty.
           break
         fi
-        urchin_source setup
 
-        set +e
-        recurse "$requested_path" "$test" "$cycle_shell" "$TEST_SHELL"
-       
-        exit_code=$?
-        set -e
-
-        if $exit_on_not_ok && test $exit_code -ne 0; then
+        (
+          urchin_source setup
+          set +e
+          recurse "$requested_path" "$test" "$cycle_shell" "$TEST_SHELL"
+          exit_code=$?
+          set -e
           urchin_source teardown
-          urchin_source teardown_dir
-          urchin_exit 1
-        fi
+          exit $exit_code
+        ) &
 
-        urchin_source teardown
+        if $single_process; then
+          wait $!
+          exit_code=$?
+          if $exit_on_not_ok && test $exit_code -ne 0; then
+            urchin_source teardown_dir
+            urchin_exit 1
+          fi
+        else
+        fi
       done
       urchin_source teardown_dir
     )
