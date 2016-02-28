@@ -1,12 +1,22 @@
 n=0
+tmp=$(mktemp -d)
+testdir=$tmp/tests
 while read line; do
   n=$(($n + 1))
 
   contents=$(echo "$line" | cut -d, -f1)
   expectation=$(echo "$line" | cut -d, -f2)
 
+  # Set up the test suite.
+  mkdir -p "$testdir/$n"
+  touch "$testdir/$n/.urchin"
+  echo "$contents" > "$testdir/$n/testcase"
+
+  # Write the test that runs on the test suite
+  echo "#!/bin/sh
+../../urchin -t '$testdir/$n' | grep '$expectation'" > $n
+
   # Skip if invalid.
-  echo "$contents" > "$n"
   if test "$expectation" = ok || test "$expectation" = not\ ok ||
     test "$expectation" = skip; then
     chmod +x $n
