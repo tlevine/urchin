@@ -102,10 +102,7 @@ recurse() {
     echo "$potential_test" | grep "^$requested_path" > /dev/null ||
     return 0
 
-  if test $(echo "$potential_test" | wc -l) -ne 1; then
-    echo 'Test file names may not contain newline characters.' >&2
-    exit 1
-  fi
+  validate_strings "$potential_test" 'Test file names'
 
   if [ -d "$potential_test" ]; then
     (
@@ -143,23 +140,47 @@ recurse() {
   else
     if [ -x "$potential_test" ]; then
       cd -- "$(dirname -- "$potential_test")"
-      urchin_source setup
-
-      # Run the test
-      start=$(date +%s)
-      set +e
 
       # Determine the environment variable to define for test scripts
       # that reflects the specified or implied shell to use for shell-code tests.
       if $cycle_shell && has_sh_or_no_shebang_line "$potential_test"; then
         # Set it to the shell specified via -s.
         while read the_test_shell; do
+          urchin_source setup
+
+          # Run the test
+          start=$(date +%s)
+          set +e
           TEST_SHELL="$the_test_shell" "$the_test_shell" \
             "$potential_test" >> \
             "$(stdout_file "$potential_test")" 2>&1
+          exit_code="$?"
+          set -e
+          finish=$(date +%s)
+
+          urchin_source teardown
+
+          if [ $exit_code -eq 0 ]; then
+            result=ok
+          elif [ $exit_code -eq 3 ]; then
+            result=skip
+          else
+            result=not_ok
+          fi
+
+          elapsed=$(($finish - $start))
+          printf "${potential_test}\t${the_test_shell}\t${result}\t${elapsed}" \
+
+            >> $tmp/log
+          if $exit_on_not_ok && test 0 -ne $exit_code; then
+            return 1
+          fi
+
         done < $shell_list
 
       else
+        echo 'The -n flag is not implemented' > /dev/stderr
+        exit 1
         # Shell cycling is disabled with -n; use the present value of
         # TEST_SHELL or default to /bin/sh
         if [ -n "$TEST_SHELL" ]; then
@@ -170,26 +191,8 @@ recurse() {
         TEST_SHELL="$the_test_shell" "$the_test_shell" > \
           "$(stdout_file "$potential_test")" 2>&1
       fi
-      exit_code="$?"
-      set -e
-      finish=$(date +%s)
-
-      urchin_source teardown
-      if [ $exit_code -eq 0 ]; then
-        result=ok
-      elif [ $exit_code -eq 3 ]; then
-        result=skip
-      else
-        result=not_ok
-      fi
     else
       result=skip
-    fi
-
-    elapsed=$(($finish - $start))
-    printf "${potential_test}: ${result} ${elapsed} seconds\n" >> "$tmp"/log
-    if $exit_on_not_ok && test 0 -ne $exit_code; then
-      return 1
     fi
   fi
 }
@@ -218,11 +221,11 @@ report_outcome() {
   sorted_log_file=$(mktemp)
   sort "$log_file" > $sorted_log_file
   while read line; do
-    regex='^\(.*\): \(ok\|skip\|not_ok\) \([0-9]*\) seconds$'
-    abspath=$(echo "$line" | sed "s/$regex/\1/")
+    abspath=$(echo "$line" | cut -f1)
     path=$(echo "$abspath" | sed "s/$escaped_root\/\?//")
-    result=$(echo "$line" | sed "s/$regex/\2/")
-    file_elapsed=$(echo "$line" | sed "s/$regex/\3/")
+    the_shell=$(echo "$line" | cut -f2)
+    result=$(echo "$line" | cut -f3)
+    file_elapsed=$(echo "$line" | cut -f4)
 
     prevdir=$currentdir
     currentdir="$(dirname -- "$path")"
@@ -389,6 +392,14 @@ urchin_molly_guard() {
   urchin_exit 1
 }
 
+validate_strings() {
+  test $(echo "$1" | wc -l) -eq 1 || {
+    echo '$1 may not contain tab or newline characters.' >&2
+    echo 'If this is really a problem, tell me, and I may fix it.' >&2
+    urchin_exit 11
+  }
+}
+
 cycle_shell=true
 shell_list=$tmp/shell_list
 force=false
@@ -409,11 +420,7 @@ do
             urchin_exit 11
           }
 
-          test $(echo "$potential_test" | wc -l) -eq 1 || {
-            echo 'Test file names may not contain newline characters.' >&2
-            echo 'If this is really a problem, I will fix it.' >&2
-            urchin_exit 11
-          }
+          validate_strings "$shell_for_sh_tests" 'Shell paths'
 
           echo "$shell_for_sh_tests" >> "$shell_list"
           ;;
