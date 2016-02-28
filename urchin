@@ -133,9 +133,9 @@ recurse() {
             urchin_source teardown_dir
             urchin_exit 1
           fi
-        else
         fi
       done
+      wait
       urchin_source teardown_dir
     )
   else
@@ -271,12 +271,12 @@ report_outcome() {
         ok)
           # On success, print a green '✓'
           printf '\033[32m✓ \033[0m'
-          echo "${the_shell}"
+          echo "${the_shell} ($file_elapsed $(plural second $file_elapsed))"
         ;;
         not_ok)
           # On not_ok, print a red '✗'
           printf '\033[31m✗ \033[0m'
-          echo "${the_shell}"
+          echo "${the_shell} ($file_elapsed $(plural second $file_elapsed))"
 
           # Print output captured from not_ok test in red.
           printf '\033[31m'
@@ -288,7 +288,7 @@ report_outcome() {
           if test -z "$the_shell"; then
             the_shell='(File is not executable.)'
           fi
-          echo "  $the_shell"
+          echo "  ${the_shell} ($file_elapsed $(plural second $file_elapsed))"
         ;;
       esac
     fi
@@ -470,6 +470,11 @@ if [ "$#" != '1' ] || [ ! -e "$1" ]; then
     echo "No such file or directory: '$1'" >&2
   fi
   echo "$USAGE" >&2
+  urchin_exit 11
+fi
+
+if $exit_on_not_ok && ! $single_process; then
+  echo 'You must also pass -b/--series in order to use -e/--exit-on-fail.' >&2
   urchin_exit 11
 fi
 
