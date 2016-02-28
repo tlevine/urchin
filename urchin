@@ -29,10 +29,14 @@ urchin_source() {
 
 # Expand relative paths
 alias fullpath='readlink -f --'
-URCHIN_ROOT="$PWD"
+DEFAULT_URCHIN_ROOT="$PWD"
 urchin_path() {
   # XXX Change this to be relative the urchin root
   fullpath "$1"
+}
+
+urchin_root() {
+
 }
 
 # Urchin version number
