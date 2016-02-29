@@ -82,7 +82,6 @@ indent() {
 }
 
 recurse() {
-  set -e
   requested_path="$1"
   potential_test="$(fullpath "$2")"
   cycle_shell="$3"
