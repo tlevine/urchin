@@ -118,20 +118,19 @@ recurse() {
 
         (
           if test -f setup; then . ./setup; fi
-          set +e
-          recurse "$requested_path" "$test" "$cycle_shell" "$TEST_SHELL"
-          exit_code=$?
-          set -e
+          if recurse "$requested_path" "$test" "$cycle_shell" "$TEST_SHELL"; then
+            exit_code=0
+          else
+            exit_code=$?
+          fi
           if test -f teardown; then . ./teardown; fi
-          exit $exit_code
         ) &
 
         if $run_in_series; then
-          wait $!
-          exit_code=$?
+          if wait $!; then exit_code=0; else exit_code=$?; fi
           if $exit_on_not_ok && test $exit_code -ne 0; then
             if test -f teardown_dir; then . ./teardown_dir; fi
-            urchin_exit 1
+            return 1
           fi
         fi
       done
@@ -190,8 +189,7 @@ recurse() {
         ) &
 
         if $run_in_series; then
-          wait $!
-          exit_code=$?
+          if wait $!; then exit_code=0; else exit_code=$?; fi
           if $exit_on_not_ok && test $exit_code -ne 0; then
             if test -f teardown_dir; then . ./teardown_dir; fi
             return 1
@@ -308,7 +306,6 @@ report_outcome() {
   done < $sorted_log_file
   rm $sorted_log_file
 
-  set +e
   if $tap_format; then
     echo "# Full test suite took $elapsed $(plural second $elapsed)."
     echo 1..$n
@@ -450,11 +447,11 @@ you don't need to quote the TEST_SHELL variable." > /dev/stderr
         -t|--tap) tap_format=true;;
         -v|--verbose) verbose=true;;
         -h|--help) urchin_help
-          exit 0;;
+                   urchin_exit 0;;
         --version) echo "$VERSION"
             urchin_exit;;
         -*) urchin_help >&2
-            exit 11;;
+            urchin_exit 11;;
         *)  break;;
     esac
     shift
@@ -498,13 +495,12 @@ if basename "$(fullpath "$root")" |
   grep -i 'test' > /dev/null || $force; then
 
   start=$(date +%s)
-  set +e
 
   # 1 test file or folder to run
   # 2 urchin root
   # 3 Should we cycle shells?
   # 4 TEST_SHELL
-  recurse "$(fullpath "$1")" "$root" "$cycle_shell" "$TEST_SHELL"
+  recurse "$(fullpath "$1")" "$root" "$cycle_shell" "$TEST_SHELL" || :
   finish=$(date +%s)
 
   report_outcome "$root" $tap_format $urchin_tmp/log $start $finish
