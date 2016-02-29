@@ -123,6 +123,7 @@ recurse() {
             exit_code=$?
           fi
           if test -f teardown; then . ./teardown; fi
+          exit $exit_code
         ) &
 
         if $run_in_series; then
