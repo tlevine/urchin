@@ -1,12 +1,10 @@
 #!/bin/sh
-
-$TEST_SHELL ../../urchin --run-in-series --exit-on-fail \
-  ./.test_-e,--exit-on-fail > $tmp
-result=$?
-
 set -e
+
+! $TEST_SHELL ../../urchin --run-in-series --exit-on-fail \
+  ./.test_-e,--exit-on-fail > $tmp
+
 grep '1 should run.' $tmp
 grep '2 should run.' $tmp
 grep -v '3 should not run.' $tmp
 grep -v '4 should not run.' $tmp
-exit $result
