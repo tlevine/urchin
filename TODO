@@ -80,29 +80,6 @@ This is as far as I have gotten with contemplating license changes. For now
 we're sticking with the original MIT-style license, but it's easy to change
 licenses later.
 
-Run on a file
-----------------
-Presently you can run urchin only on a directory.
-It would be neat if you could run it on a file as well.
-
-This occurred to me when I wanted to run
-
-    urchin test/fast/Unit\ tests/nvm_ls_current
-
-on the nvm tests. I wound up running this instead.
-
-    urchin test/fast/Unit\ tests/ | grep nvm_ls_current
-
-The Molly guard would be assessed, and the corresponding setup, setup_dir,
-teardown, and teardown_dir files would be run in the appropriate order.
-
-In order to know how far up the tree to evaluate the setup, &c. files,
-I think it would make sense to require that a ".urchin" file be placed in the
-root of the tests. Urchin would keep going up until it sees this file, and it
-would evaluate the appropriate setup, &c. files from there down to the
-particular test file of interest. We would also use this for testing
-directtories more correctly.
-
 Running automated tasks
 -------------------------
 Urchin might be appropriate for if you have lots of tasks that you want to run
@@ -114,9 +91,3 @@ this sort of thing.
 * Optionally kill tests/jobs after a specific timeout threshold
 * Send output of different tests/jobs to different files for each file
   descriptor (STDOUT, STDERR)
-
-sorting
--------
-How do sort properly?
-
-  printf '- a\n-- a\n--- a\n- b\n-- b\n--- b\n'|sor

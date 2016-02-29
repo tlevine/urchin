@@ -128,6 +128,29 @@ strategies if your setup file gets complicated.
 2. Export a path in your setup file, rewrite your setup file as a shell
    program, and put the rewritten file in your path.
 
+### Run on a file
+Previously you could run urchin only on a directory (and, in turn, all files
+in that directory). Now you can run Urchin on a single file.
+
+This occurred to me when I wanted to run
+
+    urchin test/fast/Unit\ tests/nvm_ls_current
+
+on the nvm tests. I wound up running this instead.
+
+    urchin test/fast/Unit\ tests/ | grep nvm_ls_current
+
+But now I don't have to; the first of these commands will work.
+
+When you run urchin on a file, the test suite root is determined (as with any
+other Urchin call), and the test suite is recursively descended. Setup and
+teardown files are sourced, and everything but the specified test file is
+otherwise ignored.
+
+If you don't explicitly specify the Urchin root with a .urchin file, we
+consider the test suite root directory to be the parent of the file that
+you ran Urchin on.
+
 Version 0.0.6
 ---------------------
 
