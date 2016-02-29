@@ -1,0 +1,1 @@
+../../urchin --tap --verbose .slow-tests | grep 'Begin output'

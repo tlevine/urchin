@@ -377,7 +377,6 @@ These options affect how results are formatted.
 
 -t, --tap                Format output in Test Anything Protocol (TAP)
 -v, --verbose            Print stdout from all tests, not just failed tests.
-                         XXX Not yet implemented
 
 The remaining flags provide information about urchin.
 
