@@ -3,8 +3,4 @@
 # This script should run with /bin/sh
 # regardless of whether -s or -n is passed.
 
-this_shell=$(ps -o pid,comm | sed -n "s/^ *$$//p" | cut -d\  -f2)
-
-echo "Running shell: $this_shell"
-
-test $(basename "$this_shell") = sh
+ps -a | grep $$ | grep /bin/sh
