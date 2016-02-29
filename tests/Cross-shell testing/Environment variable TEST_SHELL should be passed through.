@@ -5,4 +5,4 @@
 
 # Test if $TEST_SHELL, when placed in urchin's environment, is passed through to the test scripts.
 TEST_SHELL="$PWD/.special-shell" $TEST_SHELL \
-  ../../urchin ./.test-TEST_SHELL-passed-through
+  ../../urchin --disable-cycling ./.test-TEST_SHELL-passed-through

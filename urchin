@@ -144,15 +144,6 @@ recurse() {
       # Determine the environment variable to define for test scripts
       # that reflects the specified or implied shell to use for shell-code tests.
       while read the_test_shell; do
-        if test -z "$the_test_shell"; then
-          # Shell cycling is disabled with -n; use the present value of
-          # TEST_SHELL or default to /bin/sh
-          if [ -n "$TEST_SHELL" ]; then
-            the_test_shell="$TEST_SHELL"
-          else
-            the_test_shell=/bin/sh
-          fi
-        fi
         (
           if test -f setup; then . ./setup; fi
 
@@ -165,7 +156,13 @@ recurse() {
               TEST_SHELL="$the_test_shell" "$the_test_shell" \
                 "$potential_test"
             else
-              TEST_SHELL="$the_test_shell" "$potential_test"
+              # Shell cycling is disabled with -n; use the present value of
+              # TEST_SHELL or default to /bin/sh
+              if [ -n "$TEST_SHELL" ]; then
+                "$potential_test"
+              else
+                TEST_SHELL=/bin/sh "$potential_test"
+              fi
             fi
           } > "$(stdout_file "$potential_test" "$the_test_shell")" 2>&1
           exit_code="$?"
