@@ -192,8 +192,7 @@ recurse() {
           start=$(date +%s)
           set +e
           { 
-            if $cycle_shell &&
-              has_sh_or_no_shebang_line "$potential_test"; then
+            if $cycle_shell && ! has_shebang_line "$potential_test"; then
               TEST_SHELL="$the_test_shell" $TIMEOUT \
                 "$the_test_shell" "$potential_test"
             else
@@ -362,15 +361,8 @@ report_outcome() {
   test "$not_oks" -eq '0'
 }
 
-has_sh_or_no_shebang_line() {
-  # no shebang line at all
-  head -n 1 "$1" | grep -vqE '^#!' && return 0
-
-  # shebang line is '#!/bin/sh' or legal variations thereof
-  head -n 1 "$1" | grep -qE '^#![[:blank:]]*/bin/sh($|[[:blank:]])' &&
-    return 0  
-
-  return 1
+has_shebang_line() {
+  head -n 1 "$1" | grep -qE '^#!'
 }
 
 USAGE="usage: $0 [<options>] <test directory>"
