@@ -3,4 +3,4 @@
 # This script should run with /bin/sh
 # regardless of whether -s or -n is passed.
 
-ps -a | grep $$ | grep /bin/sh
+ps -o pid,comm,args | grep $$ | grep /bin/sh
