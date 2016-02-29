@@ -79,15 +79,3 @@ in the case of Urchin.
 This is as far as I have gotten with contemplating license changes. For now
 we're sticking with the original MIT-style license, but it's easy to change
 licenses later.
-
-Running automated tasks
--------------------------
-Urchin might be appropriate for if you have lots of tasks that you want to run
-periodically; add an urchin call to your crontab, and call all of your other
-tasks with urchin. Here are some features that might make urchin better for
-this sort of thing.
-                                                      
-* Time how long each test/job takes
-* Optionally kill tests/jobs after a specific timeout threshold
-* Send output of different tests/jobs to different files for each file
-  descriptor (STDOUT, STDERR)

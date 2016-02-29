@@ -151,6 +151,20 @@ If you don't explicitly specify the Urchin root with a .urchin file, we
 consider the test suite root directory to be the parent of the file that
 you ran Urchin on.
 
+### Verbose output
+
+### Timing
+Urchin now reports the time, in seconds, that each test took and also the
+total time that it took to run the whole test suite.
+
+Urchin also allows you to set timeouts, in seconds, with the --timeout flag.
+If you set a timeout flag and a test file takes longer to run, that run will
+be killed, and the test will thus fail. The standard error message from the
+timeout program will show up in the test output.
+
+Both of these timers use the real time (not the CPU time for example),
+so the times are not very precise and may be much larger than you expect.
+
 Version 0.0.6
 ---------------------
 
