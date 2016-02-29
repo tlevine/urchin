@@ -1,9 +1,0 @@
-Totally different syntax and similar features, plus TAP output
-https://github.com/sstephenson/bats
-
-Relatively similar interface
-https://github.com/mlafeldt/sharness
-
-Lists of alternatives
-https://thomaslevine.com/!/shell-testing/
-https://github.com/mlafeldt/sharness#alternatives
