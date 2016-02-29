@@ -1,12 +1,62 @@
 HISTORY
 =======
 
-Version 0.0.7
+Version 0.1.0-rc1
 ---------------------
+This release includes breaking changes.
 
-The Molly-guard is now more accepting. For example, you no longer need to
-pass -f in this case: https://github.com/creationix/nvm/issues/357
+### Test root directory
+We introduce a concept of the root directory of a test suite.
+Such a concept is important in case you want to run subsets of your
+test suite, as we need to know how far up to apply the setup
+and teardown files.
 
+The Urchin root directory is determined by moving higher in the directory
+tree in search of a file named `.urchin`.
+The closest directory that contains such a file is considered the root.
+In the following filesystem, for example, `/a/b/c` would be the root.
+
+    mkdir -p /a/b/c/d
+    touch /a/b/c/d/e
+    chmod +x /a/b/c/d/e
+    touch /a/b/c/.urchin
+    urchin /a/b/c/d
+
+There are two situations in which we would stop looking without having
+found a `.urchin` file.
+
+1. The system root, `/`, because we can't go any higher
+2. A directory that starts with a dot, because an urchin call on a higher
+   directory would ignore such a directory
+
+In either of these cases, Urchin uses the user-specified directory as
+the root; this is how Urchin `0.0.*` worked.
+
+Molly guard
+------------
+The Molly-guard works differently because it now considers the test suite
+root directory. The point of the Molly-guard originally was to protect
+you from things like this.
+
+    urchin /
+
+Urchin would run fine if called on a directory named something like "test",
+
+    urchin test
+
+and it would fail on directories named something else, like `/`.
+Unfortunately, it would also fail on directories like this.
+
+    urchin test/database
+
+It now now looks instead at the basename of the test suite root directory and
+otherwise ignores the entered directory. Urchin runs without error if the basename contains the phrase "test".
+
+As before, you can override the Molly guard with `-f`.
+
+    urchin -f build-scripts
+
+### Skipping of tests
 Previously, tests were run if they were executable and were otherwise marked
 as skipped. Now, an executable script can indicate that it is skipped by
 exiting with code 3.  For example, if a test requires some dependancy, it
