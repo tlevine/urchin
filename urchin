@@ -1,5 +1,6 @@
 #!/bin/sh
 
+# ----------------------------------------------------------------------
 # Copyright (c) 2013, 2014, 2015, 2016 Thomas Levine
 #
 # This program is free software: you can redistribute it and/or modify
@@ -14,8 +15,10 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
+# ----------------------------------------------------------------------
 
 
+# ----------------------------------------------------------------------
 # Copyright (c) 2014, Michael Klement
 # Copyright (c) 2012, ScraperWiki Limited
 # All rights reserved.
@@ -41,6 +44,7 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
+# ----------------------------------------------------------------------
 
 set -e
 
