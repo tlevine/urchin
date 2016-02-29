@@ -443,6 +443,7 @@ you don't need to quote the TEST_SHELL variable." > /dev/stderr
           ;;
         -n|--disable-cycling) cycle_shell=false;; 
         -t|--tap) tap_format=true;;
+        -T|--timeout) shift; urchin_timeout="$1" ;;
         -v|--verbose) verbose=true;;
         -h|--help) urchin_help
                    urchin_exit 0;;
@@ -490,6 +491,17 @@ Depending on how you name your tests, your Urchin output may look strange.
 If this is a problem, install BusyBox or BSD coreutils.' >&2
 fi
 
+if test -n "$urchin_timeout"; then
+  # Choose the timeout command
+  if timeout -t 0 true; then
+    TIMEOUT="timeout -t $urchin_timeout"
+  elif timeout 0 true; then
+    TIMEOUT="timeout $urchin_timeout"
+  else
+    echo I couldn\'t figure out to use your version of timeout >&2
+    urchin_exit 1
+  fi
+fi
 
 if $exit_on_not_ok && ! $run_in_series; then
   echo 'You must also pass -b/--series in order to use -e/--exit-on-fail.' >&2
