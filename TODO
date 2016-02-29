@@ -1,34 +1,6 @@
 Things I want
 =============
 
-Test speed
--------------
-Make tests run faster.
-https://github.com/bike-barn/hermit/issues/62
-
-First, easier thing is probably to run tests in parallel.
-
-Second, also easier thing is to tell people to save things to RAM rather than
-disk whenever they can.
-
-Third, harder thing is to put the test suite in RAM automatically. Maybe the
-whole test directory, which includes fixtures, gets copied to a tmpfs if one
-exists.
-
-Hmm or maybe there's a compromise: Tell people to mount /tmp as a tmpfs so
-that temp files are fast. Maybe allow people to set some other directory as
-the temporary file place, in case they want a different tmpfs location.
-
-In order to run things in parallel, we have to change how we do the
-stdout_file. I think it's easiest to create separate files for each test and
-to save them in testroot/.urchin/stdout/$filename. The test root would be
-defined as the closest ancestor containing a .urchin directory.
-
-Options
--------------
-I want long options. For example, there's presently -f and -e.
-I want to make them -f|--force and -e|--exit.
-
 Environment variables
 -------------
 Do something to make it easier to debug environment variables, because that is
@@ -107,26 +79,6 @@ in the case of Urchin.
 This is as far as I have gotten with contemplating license changes. For now
 we're sticking with the original MIT-style license, but it's easy to change
 licenses later.
-
-Nagios plugins
------------------
-It would be cool to run Nagios plugins with Urchin. This is already possible,
-actually, but it might be worth giving some special thought to it.
-https://nagios-plugins.org/doc/guidelines.html
-
-Source setup and teardown
---------------------
-If setup and teardown are sourced instead of executed, maybe we can more
-cleanly create and teardown temporary files.
-
-    (
-      . ./setup
-      ./$thetestfile
-      . ./teardown
-    )
-
-On the other hand, this could just be sourced explicitly in the test file,
-without the special setup and teardown feature.
 
 Run on a file
 ----------------

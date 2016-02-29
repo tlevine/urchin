@@ -32,8 +32,7 @@ found a `.urchin` file.
 In either of these cases, Urchin uses the user-specified directory as
 the root; this is how Urchin `0.0.*` worked.
 
-Molly guard
-------------
+### Molly guard
 The Molly-guard works differently because it now considers the test suite
 root directory. The point of the Molly-guard originally was to protect
 you from things like this.
@@ -56,6 +55,15 @@ As before, you can override the Molly guard with `-f`.
 
     urchin -f build-scripts
 
+### Consolidation of temporary files in /tmp
+All of Urchin's temporary files are now stored in /tmp. Urchin previously
+created `.urchin.log` files alongside the tests, which led to such
+inconveniences as accidentally commiting them to version control repositories.
+
+This also means that Urchin will keep all of its temporary files in RAM
+if you mount a tmpfs on /tmp. On large test suites you may find the tmpfs
+to be slightly faster than slower storage media like solid-state drives.
+
 ### Skipping of tests
 Previously, tests were run if they were executable and were otherwise marked
 as skipped. Now, an executable script can indicate that it is skipped by
@@ -73,6 +81,52 @@ I chose status code 3 sort of arbitrarily at first, but it turns out that it
 would the appropriate status code if these tests were Nagios plugins, as the
 concept of skipping a test is similar to the Nagios concept of unknown service
 status (https://nagios-plugins.org/doc/guidelines.html#AEN78).
+
+### Parallel test execution
+Tests now run in parallel when possible.
+
+Parallel processes come about in two situations when parallel execution is
+turned on.
+
+1. All files and immediate subdirectories of one particular directory
+   are run in parallel. This happens recursively; during the execution
+   of each particular subdirectory, that subdirectory's children are
+   also run in parallel.
+2. When cycling of shells is enabled, execution of a particular file in
+   different shells are run parellel.
+
+Parallel processing and shell cycling are both enabled by default.
+
+### Options
+Long options are now available for all command line flags.
+For example, the `-s` flag is now available as `--shell` as well.
+See the help for the full list.
+
+    urchin -h
+
+### Source setup and teardown
+setup, teardown, setup_dir, and teardown_dir are now sourced instead of
+executed; they are referenced a bit like this.
+
+    (
+      . ./setup
+      ./$thetestfile
+      . ./teardown
+    )
+
+My intent is that you should be able to export variables in the setup files.
+I think it would be fine to invoke the teardown files instead of sourcing them,
+but I chose to source them anyway for consistency.
+
+The disadvantage of this, and the reason I have been reluctant to do it,
+is that these files now become much harder to debug, so I recommend keeping
+your setup and teardown files very simple. I recommend either of the following
+strategies if your setup file gets complicated.
+
+1. Rename it to something starting with a dot, and explicitly source it
+   in your test file.
+2. Export a path in your setup file, rewrite your setup file as a shell
+   program, and put the rewritten file in your path.
 
 Version 0.0.6
 ---------------------
