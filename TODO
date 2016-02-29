@@ -1,6 +1,14 @@
 Things I want
 =============
 
+Wider testing
+--------------
+Test in other environments
+
+* Specify a few different ones with Nix.
+* Some sort of BSD
+* Windows
+
 Packaging
 ------------
 Package for package managers.
