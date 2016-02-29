@@ -9,7 +9,14 @@
 
 set -e
 
-DEFAULT_SHELLS='sh bash dash mksh' # zsh'
+DEFAULT_SHELLS='sh bash dash mksh zsh'
+if [ -n "$ZSH_VERSION" ]; then
+  # avoid "no matches found: *" error when directories are empty
+  setopt NULL_GLOB
+
+  emulate sh
+fi
+
 
 # Make sure that CDPATH isn't set, as it causes `cd` to behave unpredictably -
 # notably, it can produce output.
@@ -103,11 +110,6 @@ recurse() {
     (
       cd -- "$potential_test" > /dev/null
       if test -f setup_dir; then . ./setup_dir; fi
-
-      if [ -n "$ZSH_VERSION" ]; then
-        # avoid "no matches found: *" error when directories are empty
-        setopt NULL_GLOB
-      fi
 
       for test in *; do
         if test "$test" = '*' && ! test -e $test; then
