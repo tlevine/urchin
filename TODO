@@ -37,3 +37,10 @@ Add shall to my NYC*BUG talk.
 
     #!/usr/bin/env shall
     echo This runs in several shells.
+
+Linters
+-----------
+List some shell linters somewhere.
+
+* ShellCheck
+* checkbashisms
