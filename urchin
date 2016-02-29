@@ -229,8 +229,7 @@ report_outcome() {
 
   # Sort in alphabetical order.
   # GNU sort requires -m, and BSD sort doesn't.
-  sort -m "$log_file" > $sorted_log_file 2>/dev/null || 
-    sort  "$log_file" > $sorted_log_file
+  sort  "$log_file" > $sorted_log_file
 
   while read line; do
     abspath=$(echo "$line" | cut -f1)
@@ -483,6 +482,15 @@ if [ "$#" != '1' ] || [ ! -e "$1" ]; then
   echo "$USAGE" >&2
   urchin_exit 11
 fi
+
+# Warn about strange sort commands
+weird_string='\n- c\n-- b\n--- c\n---- a\n'
+if test $(printf "$weird_string" | sort | tr -d '[ \n-]') != cbca; then
+  echo 'Your version of sort sorts in dictionary order (-d) by default.
+Depending on how you name your tests, your Urchin output may look strange.
+If this is a problem, install BusyBox or BSD coreutils.' >&2
+fi
+
 
 if $exit_on_not_ok && ! $run_in_series; then
   echo 'You must also pass -b/--series in order to use -e/--exit-on-fail.' >&2
