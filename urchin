@@ -228,7 +228,12 @@ report_outcome() {
   # Use a temporary file rather than a pipe because a pipe starts a sub-shell
   # and thus makes the above variables local.
   sorted_log_file=$(mktemp)
-  sort "$log_file" > $sorted_log_file
+
+  # Sort in alphabetical order.
+  # GNU sort requires -m, and BSD sort doesn't.
+  sort -m "$log_file" > $sorted_log_file || 
+    sort  "$log_file" > $sorted_log_file
+
   while read line; do
     abspath=$(echo "$line" | cut -f1)
     path=$(echo "$abspath" | sed "s/$escaped_root\/\?//")
