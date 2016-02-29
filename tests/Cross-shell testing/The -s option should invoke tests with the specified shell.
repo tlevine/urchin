@@ -1,4 +1,5 @@
 #!/bin/sh
 
-# Tests the `-s <shell> option, which invokes shebang-less and sh-shebang-line test scripts with the specified shell (for testing *sourced* shell code).
-../../urchin -s "$PWD/.special-shell" ./.test-run-by-specified-shell
+# Tests the `-s <shell> option, which invokes shebang-less test scripts with
+# the specified shell (for testing *sourced* shell code).
+../../urchin -s .special-shell ./.test-run-by-specified-shell

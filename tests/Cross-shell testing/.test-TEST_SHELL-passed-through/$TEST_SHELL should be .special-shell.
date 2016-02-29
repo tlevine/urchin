@@ -8,4 +8,4 @@
 
 echo "\$TEST_SHELL: $TEST_SHELL"
 
-[ "$(basename "$TEST_SHELL")" = '.special-shell' ]
+basename "$TEST_SHELL" | grep '.special-shell'

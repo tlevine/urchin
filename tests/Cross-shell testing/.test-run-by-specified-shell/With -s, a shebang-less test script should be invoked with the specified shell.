@@ -3,7 +3,7 @@ set -e
 
 # Assuming that urchin was invoked with `-s bash`, this script should be being run with bash.
 
-this_shell=$(ps -o pid,comm | sed -n "s/^ *$$//p" | cut -d\  -f2)
+this_shell="$(ps -o pid,comm | sed -n "s/^ *$$//p" | cut -d\  -f2)"
 
 echo "Running shell: $this_shell"
 

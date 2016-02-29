@@ -4,5 +4,5 @@
 # (for test scripts that want to invoke shell scripts with a specified shell).
 
 # Test if $TEST_SHELL, when placed in urchin's environment, is passed through to the test scripts.
-TEST_SHELL="$PWD/.special-shell" $TEST_SHELL \
+TEST_SHELL=.special-shell $TEST_SHELL \
   ../../urchin --disable-cycling ./.test-TEST_SHELL-passed-through

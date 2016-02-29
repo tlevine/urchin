@@ -7,4 +7,4 @@ echo "Running shell: $this_shell"
 
 echo "\$TEST_SHELL: $TEST_SHELL"
 
-basename "$this_shell" | grep .special-shell
+echo "$TEST_SHELL" | grep .special-shell

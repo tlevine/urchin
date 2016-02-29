@@ -192,9 +192,13 @@ recurse() {
           start=$(date +%s)
           set +e
           { 
-            if $cycle_shell && ! has_shebang_line "$potential_test"; then
-              TEST_SHELL="$the_test_shell" $TIMEOUT \
-                "$the_test_shell" "$potential_test"
+            if $cycle_shell; then
+              if has_shebang_line "$potential_test"; then
+                TEST_SHELL="$the_test_shell" $TIMEOUT "$potential_test"
+              else
+                TEST_SHELL="$the_test_shell" $TIMEOUT \
+                  "$the_test_shell" "$potential_test"
+              fi
             else
               # Shell cycling is disabled with -n; use the present value of
               # TEST_SHELL or default to /bin/sh
