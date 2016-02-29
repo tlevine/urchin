@@ -104,6 +104,58 @@ See the help for the full list.
 
     urchin -h
 
+### Copyrights
+Some people had contributed to Urchin but had not been added to the copyright
+notice. I have updated the copyright notice to include everyone whom I believe
+to have contributed patches.
+
+### License
+I, Thomas Levine, have switched the previous BSD-style license for the Afferro
+Gnu Public License (AGPL) after determining that the added restrictions in the
+AGPL shouldn't have any practical legal consequences for people who want to
+use Urchin. I did not get approval from the other authors as I believe the
+licenses to be compatible.  Here are the considerations that I considered.
+
+#### History
+ScraperWiki owns the original version of Urchin (Thomas Levine did the early
+work as part of his work for ScraperWiki.) and originally licensed it under a
+BSD-style license with the advertising clauses removed. (This makes it a
+"2-clause BSD license", similar to the FreeBSD license.) We had the previous
+license just because that's what ScraperWiki put on everything. 
+
+Other people made changes after this original ScraperWiki version. As of
+January 2016, they are just Thomas Levine (when he wasn't working for
+ScraperWiki) and Michael Klement.
+
+The 2-clause BSD license grants pretty much all rights. It says that you need
+to attribute when you redistribute source code, but you don't necessarily have
+to redistribute source code.
+
+#### License compatibility
+A copyleft license adds the restriction that modified versions of the code
+need to be licensed under the same license. GNU licenses in particular require
+that source code be released if non-source versions are released, and the
+different GNU licenses differ in what how the non-source version is defined.
+(The original, GPL, discusses compiled binaries, for example.) Copyleft
+doesn't mean anything specific for commercial use.
+
+Code licensed under the 2-clause BSD license can be modified and then licensed
+as AGPL, because the 2-clause BSD license license allows that, but AGPL code
+can't be modified as 2-clause BSD, because AGPL doesn't allow that.
+
+Of course, if we get all of the authors to agree on it, we can always add
+whatever crazy license we want, regardless of what we have already.
+
+#### Practical differences
+The distinction between the permissive 2-clause BSD license and the AGPL seem
+to matter quite little in the case of Urchin.
+
+1. Urchin is written in an interpreted language (shell), so it would be
+   hard to distribute usefully without providing the source code.
+2. Urchin usually just runs tests; it doesn't get compiled with the rest of
+   the code (also because it's in shell). Thus, I think a GPL license on Urchin
+   wouldn't infect the code being tested.
+
 ### Source setup and teardown
 setup, teardown, setup_dir, and teardown_dir are now sourced instead of
 executed; they are referenced a bit like this.

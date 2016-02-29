@@ -11,12 +11,6 @@ https://github.com/creationix/nvm/issues/589
 Documenting that people should run "env" when their tests fail might be good
 enough.
 
-Licensing and copyright
-------------------------
-* Reference all owners and years in the Copyright file
-* Consider copyleft licenses
-* Add license notices to other files if necessary
-
 Packaging
 ------------
 Package for package managers.
@@ -39,43 +33,3 @@ Try running Urchin in Windows somehow. Interpreters include
 * Git for Windows (https://git-scm.com/download/win)
 * win-bash (http://win-bash.sourceforge.net/)
 
-Consider copyleft licenses
-----------
-ScraperWiki owns the original version of Urchin (Thomas Levine did the early
-work as part of his work for ScraperWiki.) and originally licensed it under an
-MIT-style license. Other people made changes after this original ScraperWiki
-version. As of January 2016, they are just Thomas Levine (when he wasn't
-working for ScraperWiki) and Michael Klement.
-
-The original license was MIT just because that's what ScraperWiki put on
-everything. Should we change the license?
-
-The MIT-style license grants pretty much all rights. It says that you need
-to attribute when you redistribute source code, but you don't
-necessarily have to redistribute source code.
-
-A copyleft license adds the restriction that modified versions of the
-code need to be licensed under the same license. GNU licenses in
-particular require that source code be released if non-source versions are
-released, and the different GNU licenses differ in what how the
-non-source version is defined. (The original, GPL, discusses compiled
-binaries.) Copyleft doesn't mean anything specific for commercial use.
-
-MIT-licensed code can be modified and then licensed as GPL, because MIT
-license allows that, but GPL code can't be modified as MIT, because MIT
-doesn't allow that. And if we get all of the authors to agree on it, we
-can always add whatever crazy license we want, regardless of what we
-have already.
-
-The distinction between MIT-style and GNU-something might matter quite little
-in the case of Urchin.
-
-1. Urchin is written in an interpreted language (shell), so it might be
-   hard to distribute usefully without providing the source code.
-2. Urchin just runs tests; it doesn't get compiled with the rest of the
-   code (also because it's in shell). Thus, I think a GPL license on
-   Urchin wouldn't infect the code being tested.
-
-This is as far as I have gotten with contemplating license changes. For now
-we're sticking with the original MIT-style license, but it's easy to change
-licenses later.
