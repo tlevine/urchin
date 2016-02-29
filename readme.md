@@ -23,14 +23,6 @@ Run the tests
     cd urchin
     ./urchin tests
 
-The above command will run the tests in your system's default
-shell, /bin/sh (on recent Ubuntu this is dash, but it could be
-ksh or bash on other systems); to test urchin's cross-shell compatibility,
-run this:
-
-    cd urchin
-    ./cross-shell-tests
-
 ## Install
 Urchin is contained in a single file, so you can install it by copying it to a
 directory in your `PATH`. For example, you can run the following as root.
@@ -81,11 +73,13 @@ and directories have special meanings.
       teardown
 
 Directories are processed in a depth-first order. When a particular directory
-is processed, `setup_dir` is run before everything else in the directory, including
-subdirectories. `teardown_dir` is run after everything else in the directory.
+is processed, `setup_dir` is sourced before everything else in the directory,
+including subdirectories. `teardown_dir` is sourced after everything else in
+the directory.
 
-A directory's `setup` file, if it exists, is run right before each test file
-within the particular directory, and the `teardown` file is run right after.
+A directory's `setup` file, if it exists, is sourced right before each test
+file within the particular directory is run, and the `teardown` file is
+sourced right after.
 
 Files are only run if they are executable, and files beginning with `.` are
 ignored. Thus, fixtures and libraries can be included sloppily within the test
@@ -119,16 +113,17 @@ In your test scripts, invoke the shell scripts to test via the shell
 specified in environment variable `TEST_SHELL` rather than directly;
 e.g.: `$TEST_SHELL ../foo bar` (rather than just `../foo bar`).  
 
-On invocation of Urchin, prepend a definition of environment variable
-`TEST_SHELL` specifying the shell to test with, e.g.,
+Urchin runs tests in multiple different shells by default; Urchin has a
+list of default shells, and the following command will run your tests in
+all of those shells that Urchin detects.
 
-    TEST_SHELL=zsh urchin ./tests
+    ./urchin ./tests
 
-To test with multiple shells in sequence, use something like:
+You can override the default list of shells with the `-s` flag.
 
-    for shell in sh bash ksh zsh; do
-      TEST_SHELL=$shell urchin ./tests
-    done
+    urchin -s sh -s ksh ./tests
+
+You can also 
 
 If `TEST_SHELL` has no value, Urchin defines it as `/bin/sh`, so the test
 scripts can rely on `$TEST_SHELL` always containing a value when Urchin runs
@@ -159,13 +154,3 @@ To test with multiple shells in sequence, use something like:
     for shell in sh bash ksh zsh; do
       urchin -s $shell ./tests
     done
-
-Also consider using [shall](https://github.com/mklement0/shall).
-It does something similar, but the interface may be more intuitive.
-
-    #!/usr/bin/env shall
-    echo This is a test file.
-
-## Alternatives to Urchin
-Alternatives to Urchin are discussed in
-[this blog post](https://blog.scraperwiki.com/2012/12/how-to-test-shell-scripts/).

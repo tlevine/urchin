@@ -156,6 +156,36 @@ to matter quite little in the case of Urchin.
    the code (also because it's in shell). Thus, I think a GPL license on Urchin
    wouldn't infect the code being tested.
 
+### Specification of the shell to run tests in
+Urchin previously had separate methods for setting the TEST_SHELL environment
+variable and for setting the shell that would run the tests; the former was
+set as an environment variable, and the latter was set with the -s flag..
+
+Urchin now uses the -s flag for both of these settings, and it mostly ignores
+the exported TEST_SHELL variable.
+
+Urchin also inspects the shebang line differently. Previously, Urchin would
+vary the shells with which a test is run if the shebang line either was absent
+or was #!/bin/sh. Now it varies the shell only if the shebang line is absent.
+
+If you pass -n/--disable-cycling, Urchin will invoke tests ordinarily and will
+only set the TEST_SHELL variable if it does not exist. If the TEST_SHELL
+variable is absent, it will be set to /bin/sh.
+
+Here is how you should write your tests for cross-shell testing, depending on
+their structure.
+
+* If you want a test file to run in the same shell every time and to have
+  access to the TEST_SHELL variable, usually for invoking the program that
+  you are testing, then set the file's shebang line.
+* If you want a test file to be run in a different shell every time, do not
+  set the shebang line. TEST_SHELL variable will be set to correspond with the
+  shell that is presently invoking the test file, though you probably won't
+  need this variable.
+* If you want a test file to have access to a TEST_SHELL variable that you
+  set yourself, pass -n/--disable-cycling to urchin. Urchin will ignore the
+  shebang lines in this case.
+
 ### Source setup and teardown
 setup, teardown, setup_dir, and teardown_dir are now sourced instead of
 executed; they are referenced a bit like this.
