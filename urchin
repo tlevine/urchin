@@ -231,7 +231,7 @@ report_outcome() {
 
   # Sort in alphabetical order.
   # GNU sort requires -m, and BSD sort doesn't.
-  sort -m "$log_file" > $sorted_log_file || 
+  sort -m "$log_file" > $sorted_log_file 2>/dev/null || 
     sort  "$log_file" > $sorted_log_file
 
   while read line; do
