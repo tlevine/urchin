@@ -445,109 +445,120 @@ validate_strings() {
   }
 }
 
-cycle_shell=true
-shell_list="${urchin_tmp}"/shell_list
-run_in_series=false
-force=false
-exit_on_not_ok=false
-tap_format=false
-verbose=false
-while [ "${#}" -gt 0 ]
-do
-    case "${1}" in
-        -b|--run-in-series) run_in_series=true;;
-        -e|--exit-on-fail) exit_on_not_ok=true;;
-        -f|--force) force=true;;
-        -s|--shell)
-          shift
-          shell_for_sh_tests="${1}"
-         
-          which "${shell_for_sh_tests}" > /dev/null || {
-            echo "Cannot find specified shell: '${shell_for_sh_tests}'" >&2
-            urchin_help >&2
-            urchin_exit 11
-          }
+main() {
+  cycle_shell=true
+  shell_list="${urchin_tmp}"/shell_list
+  run_in_series=false
+  force=false
+  exit_on_not_ok=false
+  tap_format=false
+  verbose=false
+  while [ "${#}" -gt 0 ]
+  do
+      case "${1}" in
+          -b|--run-in-series) run_in_series=true;;
+          -e|--exit-on-fail) exit_on_not_ok=true;;
+          -f|--force) force=true;;
+          -s|--shell)
+            shift
+            shell_for_sh_tests="${1}"
+           
+            which "${shell_for_sh_tests}" > /dev/null || {
+              echo "Cannot find specified shell: '${shell_for_sh_tests}'" >&2
+              urchin_help >&2
+              urchin_exit 11
+            }
 
-          validate_strings "${shell_for_sh_tests}" 'Shell paths'
-          if echo "${shell_for_sh_tests}" | grep \  > /dev/null; then
-            echo "Warning: It is best if shell paths contain no spaces so that
-you don't need to quote the TEST_SHELL variable." > /dev/stderr
-          fi
+            validate_strings "${shell_for_sh_tests}" 'Shell paths'
+            if echo "${shell_for_sh_tests}" | grep \  > /dev/null; then
+              echo "Warning: It is best if shell paths contain no spaces so that
+  you don't need to quote the TEST_SHELL variable." > /dev/stderr
+            fi
 
-          echo "${shell_for_sh_tests}" >> "${shell_list}"
-          ;;
-        -n|--disable-cycling) cycle_shell=false;; 
-        -t|--tap) tap_format=true;;
-        -T|--timeout) shift; urchin_timeout="${1}" ;;
-        -v|--verbose) verbose=true;;
-        -h|--help) urchin_help
-                   urchin_exit 0;;
-        --version) echo "${VERSION}"
-            urchin_exit;;
-        -*) urchin_help >&2
-            urchin_exit 11;;
-        *)  break;;
-    esac
-    shift
-done
+            echo "${shell_for_sh_tests}" >> "${shell_list}"
+            ;;
+          -n|--disable-cycling) cycle_shell=false;; 
+          -t|--tap) tap_format=true;;
+          -T|--timeout) shift; urchin_timeout="${1}" ;;
+          -v|--verbose) verbose=true;;
+          -h|--help) urchin_help
+                     urchin_exit 0;;
+          --version) echo "${VERSION}"
+              urchin_exit;;
+          -*) urchin_help >&2
+              urchin_exit 11;;
+          *)  break;;
+      esac
+      shift
+  done
 
-if ! "${cycle_shell}" && test -f "${shell_list}"; then
-  echo "The -n/--disable-cycling and -s/--shell options clash with each other." >&2
-  urchin_exit 11
-fi
-
-# If -s was not passed, use the available default shells.
-if ! test -f "${shell_list}"; then
-  if $cycle_shell; then
-    for shell in $DEFAULT_SHELLS; do
-      if which $shell > /dev/null; then
-        echo $shell >> "$shell_list"
-      fi
-    done
-  else
-    echo > "$shell_list"
+  # -------------------- VALIDATE INPUT -------------------- #
+  if ! "${cycle_shell}" && test -f "${shell_list}"; then
+    echo "The -n/--disable-cycling and -s/--shell options clash with each other." >&2
+    urchin_exit 11
   fi
-fi
 
-# Verify argument for main stuff
-if [ "${#}" != '1' ] || [ ! -e "${1}" ]; then
-  if [ -n "${1}" ] && [ ! -e "${1}" ]; then
-    echo "No such file or directory: '${1}'" >&2
+  # If -s was not passed, use the available default shells.
+  if ! test -f "${shell_list}"; then
+    if $cycle_shell; then
+      for shell in $DEFAULT_SHELLS; do
+        if which $shell > /dev/null; then
+          echo $shell >> "$shell_list"
+        fi
+      done
+    else
+      echo > "$shell_list"
+    fi
   fi
-  echo "${USAGE}" >&2
-  urchin_exit 11
-fi
 
-# Warn about strange sort commands
-weird_string='\n- c\n-- b\n--- c\n---- a\n'
-if test $(printf "${weird_string}" | sort | tr -d '[ \n-]') != cbca; then
-  echo 'Your version of sort sorts in dictionary order (-d) by default.
-Depending on how you name your tests, your Urchin output may look strange.
-If this is a problem, install BusyBox or BSD coreutils.' >&2
-fi
+  # Verify argument for main stuff
+  if [ "${#}" != '1' ] || [ ! -e "${1}" ]; then
+    if [ -n "${1}" ] && [ ! -e "${1}" ]; then
+      echo "No such file or directory: '${1}'" >&2
+    fi
+    echo "${USAGE}" >&2
+    urchin_exit 11
+  fi
 
-if test -n "${urchin_timeout}"; then
-  # Choose the timeout command
-  if timeout -t 0 true; then
-    TIMEOUT="timeout -t ${urchin_timeout}"
-  elif timeout 0 true; then
-    TIMEOUT="timeout ${urchin_timeout}"
-  else
-    echo I couldn\'t figure out to use your version of timeout >&2
+  # Warn about strange sort commands
+  weird_string='\n- c\n-- b\n--- c\n---- a\n'
+  if test $(printf "${weird_string}" | sort | tr -d '[ \n-]') != cbca; then
+    echo 'Your version of sort sorts in dictionary order (-d) by default.
+  Depending on how you name your tests, your Urchin output may look strange.
+  If this is a problem, install BusyBox or BSD coreutils.' >&2
+  fi
+
+  if test -n "${urchin_timeout}"; then
+    # Choose the timeout command
+    if timeout -t 0 true; then
+      TIMEOUT="timeout -t ${urchin_timeout}"
+    elif timeout 0 true; then
+      TIMEOUT="timeout ${urchin_timeout}"
+    else
+      echo I couldn\'t figure out to use your version of timeout >&2
+      urchin_exit 1
+    fi
+  fi
+
+  if "${exit_on_not_ok}" && ! "${run_in_series}"; then
+    echo 'You must also pass -b/--series in order to use -e/--exit-on-fail.' >&2
+    urchin_exit 11
+  fi
+
+  # Molly guard.
+  root="$(urchin_root "${1}")"
+  if ! {
+    basename "$(fullpath "${root}")" |
+    grep -i 'test' > /dev/null || "${force}"
+  }; then
+    echo 'The root directory of the tests that you are running urchin on
+  does not contain the word "test", so I am not running,
+  in case that was an accident. Use the -f flag if you really
+  want to run urchin on that directory.' >&2
     urchin_exit 1
   fi
-fi
 
-if "${exit_on_not_ok}" && ! "${run_in_series}"; then
-  echo 'You must also pass -b/--series in order to use -e/--exit-on-fail.' >&2
-  urchin_exit 11
-fi
-
-# Run or present the Molly guard.
-root="$(urchin_root "${1}")"
-if basename "$(fullpath "${root}")" |
-  grep -i 'test' > /dev/null || "${force}"; then
-
+  # --------------------   REALLY RUN   -------------------- #
   start=$(date +%s)
 
   # 1 test file or folder to run
@@ -560,11 +571,6 @@ if basename "$(fullpath "${root}")" |
   report_outcome "${root}" "${tap_format}" "${urchin_tmp}"/log "${start}" \
     "${finish}"
   urchin_exit "${?}"
-else
-  echo 'The root directory of the tests that you are running urchin on
-does not contain the word "test", so I am not running,
-in case that was an accident. Use the -f flag if you really
-want to run urchin on that directory.' >&2
-  exit_code=1
-fi
-urchin_exit "${exit_code}"
+}
+
+main "$@"
