@@ -1,0 +1,3 @@
+#!/bin/sh
+../../../urchin $testdir
+test 1 -eq $?

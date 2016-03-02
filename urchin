@@ -56,10 +56,6 @@ if [ -n "${ZSH_VERSION}" ]; then
 fi
 
 
-# Make sure that CDPATH isn't set, as it causes `cd` to behave unpredictably -
-# notably, it can produce output.
-unset CDPATH
-
 # All temporary files go here
 urchin_tmp=$(mktemp -d)
 > "${urchin_tmp}/log"
@@ -146,7 +142,7 @@ recurse() {
 
   if [ -d "${potential_test}" ]; then
     (
-      cd -- "${potential_test}" > /dev/null
+      cd -- "${potential_test}"
       if test -f setup_dir; then . ./setup_dir; fi
 
       for test in *; do
@@ -568,6 +564,11 @@ main() {
   recurse "$(fullpath "${1}")" "${root}" "${cycle_shell}" "${TEST_SHELL}" || :
   finish=$(date +%s)
 
+  test $(cat "${urchin_tmp}"/log | wc -l) -gt 0 || {
+    echo 'No tests found' > /dev/stderr
+    urchin_exit 1
+  }
+    
   report_outcome "${root}" "${tap_format}" "${urchin_tmp}"/log "${start}" \
     "${finish}"
   urchin_exit "${?}"

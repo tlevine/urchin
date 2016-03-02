@@ -1,0 +1,2 @@
+#!/bin/sh
+../../../urchin $testdir 2>&1 | grep -i 'no.*found'

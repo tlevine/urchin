@@ -1,0 +1,4 @@
+tmp=$(mktemp -d)
+export testdir=$tmp/tests
+mkdir -p $testdir
+touch $testdir/.urchin
