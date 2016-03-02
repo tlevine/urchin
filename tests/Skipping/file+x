@@ -1,0 +1,3 @@
+touch $testsuite/file+x
+chmod +x $testsuite/file+x
+! ../../urchin -t $testsuite | grep SKIP
