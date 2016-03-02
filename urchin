@@ -52,7 +52,6 @@ DEFAULT_SHELLS='sh bash dash mksh zsh'
 if [ -n "${ZSH_VERSION}" ]; then
   # avoid "no matches found: *" error when directories are empty
   setopt NULL_GLOB
-
   emulate sh
 fi
 
