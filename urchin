@@ -49,7 +49,7 @@
 set -e
 
 DEFAULT_SHELLS='sh bash dash mksh zsh'
-if [ -n "$ZSH_VERSION" ]; then
+if [ -n "${ZSH_VERSION}" ]; then
   # avoid "no matches found: *" error when directories are empty
   setopt NULL_GLOB
 
@@ -63,24 +63,24 @@ unset CDPATH
 
 # All temporary files go here
 urchin_tmp=$(mktemp -d)
-> $urchin_tmp/log
+> "${urchin_tmp}/log"
 urchin_exit() {
-  rm -Rf "$urchin_tmp"
+  rm -Rf "${urchin_tmp}"
   exit "$@"
 }
 
 stdout_file() {
-  the_test="$1"
-  the_shell="$2"
+  the_test="${1}"
+  the_shell="${2}"
 
-  x="$urchin_tmp/stdout$(fullpath "$the_test")"
-  mkdir -p "$x"
-  echo "$x/$(echo "$the_shell" | md5sum | cut -d\  -f1)"
+  x="${urchin_tmp}/stdout$(fullpath "$the_test")"
+  mkdir -p "${x}"
+  echo "${x}/$(echo "${the_shell}" | md5sum | cut -d\  -f1)"
 }
 
 # Expand relative paths
 fullpath() {
-  readlink -f -- "$1"
+  readlink -f -- "${1}"
 }
 
 remove_trailing_slash() {
@@ -89,31 +89,31 @@ remove_trailing_slash() {
 
 urchin_root() {
   # Call recursively but remember the original argument.
-  current="$(remove_trailing_slash "$1")"
-  if test -n "$2"; then
-    orig="$2"
+  current="$(remove_trailing_slash "${1}")"
+  if test -n "${2}"; then
+    orig="${2}"
   else
-    orig="$1"
+    orig="${1}"
   fi
 
-  abscurrent="$(fullpath "$1")"
-  if test "$abscurrent" = / ||
-    basename "$abscurrent" | grep '^\.' > /dev/null; then
+  abscurrent="$(fullpath "${1}")"
+  if test "${abscurrent}" = / ||
+    basename "${abscurrent}" | grep '^\.' > /dev/null; then
     # Stop traversing upwards at / and at hidden directories.
-    if test -d "$orig"; then
-      echo "$orig"
+    if test -d "${orig}"; then
+      echo "${orig}"
     else
-      dirname -- "$orig"
+      dirname -- "${orig}"
     fi
-  elif ! test -e "$current"; then
-    echo "$current: No such file or directory">&2
+  elif ! test -e "${current}"; then
+    echo "${current}: No such file or directory">&2
     return 1
-  elif test -f "$current"; then
-    urchin_root "$(dirname -- "$current")" "$orig"
-  elif test -f "$current"/.urchin; then
-    remove_trailing_slash "$current"
+  elif test -f "${current}"; then
+    urchin_root "$(dirname -- "${current}")" "${orig}"
+  elif test -f "${current}"/.urchin; then
+    remove_trailing_slash "${current}"
   else
-    urchin_root "$current"/.. "$orig"
+    urchin_root "${current}"/.. "${orig}"
   fi
 }
 
@@ -121,55 +121,56 @@ urchin_root() {
 VERSION=0.1.0-rc1
 
 indent() {
-  level="$1"
-  if test "$level" -gt 0; then
+  level="${1}"
+  if test "${level}" -gt 0; then
     printf "%$((2 * ${level}))s"
   fi
 }
 
 recurse() {
-  requested_path="$1"
-  potential_test="$(fullpath "$2")"
-  cycle_shell="$3"
-  TEST_SHELL="$4"
+  requested_path="${1}"
+  potential_test="$(fullpath "${2}")"
+  cycle_shell="${3}"
+  TEST_SHELL="${4}"
 
   for ignore in setup_dir teardown_dir setup teardown; do
-    if test "$(basename "$potential_test")" = $ignore; then
+    if test "$(basename "${potential_test}")" = "${ignore}"; then
       return
     fi
   done
 
-  echo "$requested_path" | grep "^$potential_test" > /dev/null ||
-    echo "$potential_test" | grep "^$requested_path" > /dev/null ||
+  echo "${requested_path}" | grep "^${potential_test}" > /dev/null ||
+    echo "${potential_test}" | grep "^${requested_path}" > /dev/null ||
     return 0
 
-  validate_strings "$potential_test" 'Test file names'
+  validate_strings "${potential_test}" 'Test file names'
 
-  if [ -d "$potential_test" ]; then
+  if [ -d "${potential_test}" ]; then
     (
-      cd -- "$potential_test" > /dev/null
+      cd -- "${potential_test}" > /dev/null
       if test -f setup_dir; then . ./setup_dir; fi
 
       for test in *; do
-        if test "$test" = '*' && ! test -e $test; then
+        if test "${test}" = '*' && ! test -e "${test}"; then
           # The directory is empty.
           break
         fi
 
         (
           if test -f setup; then . ./setup; fi
-          if recurse "$requested_path" "$test" "$cycle_shell" "$TEST_SHELL"; then
+          if recurse "${requested_path}" "${test}" "${cycle_shell}" \
+            "${TEST_SHELL}"; then
             exit_code=0
           else
-            exit_code=$?
+            exit_code="${?}"
           fi
           if test -f teardown; then . ./teardown; fi
-          exit $exit_code
+          exit "${exit_code}"
         ) &
 
-        if $run_in_series; then
-          if wait $!; then exit_code=0; else exit_code=$?; fi
-          if $exit_on_not_ok && test $exit_code -ne 0; then
+        if "${run_in_series}"; then
+          if wait "${!}"; then exit_code=0; else exit_code="${?}"; fi
+          if "${exit_on_not_ok}" && test "${exit_code}" -ne 0; then
             if test -f teardown_dir; then . ./teardown_dir; fi
             return 1
           fi
@@ -179,8 +180,8 @@ recurse() {
       if test -f teardown_dir; then . ./teardown_dir; fi
     )
   else
-    if [ -x "$potential_test" ]; then
-      cd -- "$(dirname -- "$potential_test")"
+    if [ -x "${potential_test}" ]; then
+      cd -- "$(dirname -- "${potential_test}")"
 
       # Determine the environment variable to define for test scripts
       # that reflects the specified or implied shell to use for shell-code tests.
@@ -192,95 +193,95 @@ recurse() {
           start=$(date +%s)
           set +e
           { 
-            if $cycle_shell; then
-              if has_shebang_line "$potential_test"; then
-                TEST_SHELL="$the_test_shell" $TIMEOUT "$potential_test"
+            if "${cycle_shell}"; then
+              if has_shebang_line "${potential_test}"; then
+                TEST_SHELL="${the_test_shell}" $TIMEOUT "${potential_test}"
               else
-                TEST_SHELL="$the_test_shell" $TIMEOUT \
-                  "$the_test_shell" "$potential_test"
+                TEST_SHELL="${the_test_shell}" $TIMEOUT \
+                  "${the_test_shell}" "${potential_test}"
               fi
             else
               # Shell cycling is disabled with -n; use the present value of
               # TEST_SHELL or default to /bin/sh
-              if [ -n "$TEST_SHELL" ]; then
-                $TIMEOUT "$potential_test"
+              if [ -n "${TEST_SHELL}" ]; then
+                $TIMEOUT "${potential_test}"
               else
-                TEST_SHELL=/bin/sh $TIMEOUT "$potential_test"
+                TEST_SHELL=/bin/sh $TIMEOUT "${potential_test}"
               fi
             fi
-          } > "$(stdout_file "$potential_test" "$the_test_shell")" 2>&1
-          exit_code="$?"
+          } > "$(stdout_file "${potential_test}" "${the_test_shell}")" 2>&1
+          exit_code="${?}"
           set -e
           finish=$(date +%s)
 
           if test -f teardown; then . ./setup; fi
 
-          if [ $exit_code -eq 0 ]; then
+          if [ "${exit_code}" -eq 0 ]; then
             result=ok
-          elif [ $exit_code -eq 3 ]; then
+          elif [ "${exit_code}" -eq 3 ]; then
             result=skip
           else
             result=not_ok
           fi
 
-          elapsed=$(($finish - $start))
+          elapsed=$(("${finish}" - "${start}"))
           printf "${potential_test}\t${the_test_shell}\t${result}\t${elapsed}\n" \
-            >> $urchin_tmp/log
-          exit "$exit_code"
+            >> "${urchin_tmp}"/log
+          exit "${exit_code}"
         ) &
 
-        if $run_in_series; then
-          if wait $!; then exit_code=0; else exit_code=$?; fi
-          if $exit_on_not_ok && test $exit_code -ne 0; then
+        if "${run_in_series}"; then
+          if wait "${!}"; then exit_code=0; else exit_code="${?}"; fi
+          if "${exit_on_not_ok}" && test "${exit_code}" -ne 0; then
             if test -f teardown_dir; then . ./teardown_dir; fi
             return 1
           fi
         fi
-      done < $shell_list
+      done < "${shell_list}"
       wait
     else
       # Shell is ''
-      printf "${potential_test}\t\tskip\t0\n" >> $urchin_tmp/log
+      printf "${potential_test}\t\tskip\t0\n" >> "${urchin_tmp}"/log
     fi
   fi
 }
 
 report_outcome() {
-  root="$1"
-  tap_format="$2"
-  log_file="$3"
-  start="$4"
-  finish="$5"
+  root="${1}"
+  tap_format="${2}"
+  log_file="${3}"
+  start="${4}"
+  finish="${5}"
 
-  escaped_root="$(fullpath "$root" | sed 's/\//\\\//g')"
-  elapsed=$(($finish - $start))
+  escaped_root="$(fullpath "${root}" | sed 's/\//\\\//g')"
+  elapsed=$((finish - start))
 
-  if "$tap_format"; then
+  if "${tap_format}"; then
     printf \#\ 
   fi
   echo Running tests at $(date +%Y-%m-%dT%H:%M:%S)
 
   for number in n oks skips not_oks; do
-    eval "$number=0"
+    eval "${number}=0"
   done
 
   # Use a temporary file rather than a pipe because a pipe starts a sub-shell
   # and thus makes the above variables local.
-  sorted_log_file=$(mktemp)
+  sorted_log_file="$(mktemp)"
 
   # Sort in alphabetical order.
   # GNU sort requires -m, and BSD sort doesn't.
-  sort  "$log_file" > $sorted_log_file
+  sort "${log_file}" > "${sorted_log_file}"
 
   while read line; do
-    abspath=$(echo "$line" | cut -f1)
-    path=$(echo "$abspath" | sed "s/$escaped_root\/\?//")
-    the_shell=$(echo "$line" | cut -f2)
-    result=$(echo "$line" | cut -f3)
+    abspath=$(echo "${line}" | cut -f1)
+    path=$(echo "${abspath}" | sed "s/${escaped_root}\/\?//")
+    the_shell=$(echo "${line}" | cut -f2)
+    result=$(echo "${line}" | cut -f3)
     file_elapsed=$(echo "$line" | cut -f4)
 
-    prevdir=$currentdir
-    currentdir="$(dirname -- "$path")"
+    prevdir="${currentdir}"
+    currentdir="$(dirname -- "${path}")"
 
     # Number of files that have run, including this one
     n=$(($n + 1))
@@ -289,97 +290,97 @@ report_outcome() {
     eval "old_count=${result}s"
     eval "${result}s=$(($old_count+1))"
 
-    if $tap_format; then
-      if [ "$result" = not_ok ]; then
+    if "${tap_format}"; then
+      if [ "${result}" = not_ok ]; then
         not='not '
       else
         not=''
       fi
-      if [ "$result" = skip ]; then
+      if [ "${result}" = skip ]; then
         skip='# SKIP'
       else
         skip=''
       fi
 
-      if test -z "$the_shell"; then
+      if test -z "${the_shell}"; then
         the_shell='File is not executable.'
       fi
-      echo "${not}ok $n - ${path} ($the_shell) ${skip}"
-      if $verbose || [ "$result" = not_ok ]; then
+      echo "${not}ok ${n} - ${path} (${the_shell}) ${skip}"
+      if "${verbose}" || [ "${result}" = not_ok ]; then
         echo '# ------------ Begin output ------------'
-        sed 's/^/# /' "$(stdout_file "$abspath" "$the_shell")"
+        sed 's/^/# /' "$(stdout_file "${abspath}" "${the_shell}")"
         echo '# ------------ End output ------------'
       fi
-      echo "# Previous test took $file_elapsed seconds."
+      echo "# Previous test took ${file_elapsed} seconds."
     else
-      if test "$prevdir" != "$currentdir"; then
+      if test "${prevdir}" != "${currentdir}"; then
         echo
       fi
-      if test "$prevpath" != "$path"; then
-        printf "$(dirname -- "$path")/\n> $(basename -- "$path")\n"
+      if test "${prevpath}" != "${path}"; then
+        printf "$(dirname -- "${path}")/\n> $(basename -- "${path}")\n"
       fi
-      case "$result" in
+      case "${result}" in
         ok)
           # On success, print a green '✓'
           printf '\033[32m✓ \033[0m'
-          echo "${the_shell} ($file_elapsed $(plural second $file_elapsed))"
+          echo "${the_shell} (${file_elapsed} $(plural second ${file_elapsed}))"
         ;;
         not_ok)
           # On not_ok, print a red '✗'
           printf '\033[31m✗ \033[0m'
-          echo "${the_shell} ($file_elapsed $(plural second $file_elapsed))"
+          echo "${the_shell} (${file_elapsed} $(plural second ${file_elapsed}))"
         ;;
         skip)
-          if test -z "$the_shell"; then
+          if test -z "${the_shell}"; then
             echo '  (File is not executable.)'
           else
-            echo "  ${the_shell} ($file_elapsed $(plural second $file_elapsed))"
+            echo "  ${the_shell} ($file_elapsed $(plural second ${file_elapsed}))"
           fi
         ;;
       esac
-      if $verbose || test "$result" = not_ok; then
-        sed 's/^/  # /' "$(stdout_file "$abspath" "$the_shell")"
+      if "${verbose}" || test "${result}" = not_ok; then
+        sed 's/^/  # /' "$(stdout_file "${abspath}" "${the_shell}")"
       fi
     fi
 
-  prevpath="$path"
-  done < $sorted_log_file
-  rm $sorted_log_file
+  prevpath="${path}"
+  done < "${sorted_log_file}"
+  rm "${sorted_log_file}"
 
-  if $tap_format; then
-    echo "# Full test suite took $elapsed $(plural second $elapsed)."
-    echo 1..$n
+  if "${tap_format}"; then
+    echo "# Full test suite took ${elapsed} $(plural second ${elapsed})."
+    echo 1.."${n}"
   else
     echo
-    echo "Done, took $elapsed $(plural second $elapsed)."
-    printf '%s\n' "$oks $(plural test "$oks") passed."
-    printf '%s\n' "$skips $(plural test "$skips") skipped."
+    echo "Done, took ${elapsed} $(plural second ${elapsed})."
+    printf '%s\n' "${oks} $(plural test "${oks}") passed."
+    printf '%s\n' "${skips} $(plural test "${skips}") skipped."
 
     # If any tests are not ok, print the message in red.
-    if [ $not_oks -gt 0 ] ; then
+    if [ "${not_oks}" -gt 0 ] ; then
       printf '\033[31m'
     fi
-    printf '%s\n' "$not_oks $(plural test "$not_oks") failed."
+    printf '%s\n' "${not_oks} $(plural test "${not_oks}") failed."
     printf '\033[m\n'
   fi
-  test "$not_oks" -eq '0'
+  test "${not_oks}" -eq '0'
 }
 
 has_shebang_line() {
-  head -n 1 "$1" | grep -qE '^#!'
+  head -n 1 "${1}" | grep -qE '^#!'
 }
 
-USAGE="usage: $0 [<options>] <test directory>"
+USAGE="usage: ${0} [<options>] <test directory>"
 
 urchin_help() {
   cat <<EOF
 
-$USAGE
+${USAGE}
 
 By default, Urchin checks for the following shells and runs every
 particular test file once per shell.
 
-  $(echo "$DEFAULT_SHELLS" | sed 's/ /\n  /g')
+  $(echo "${DEFAULT_SHELLS}" | sed 's/ /\n  /g')
 
 On each run,
 
@@ -429,16 +430,16 @@ plural () {
   # Make $1 a plural according to the number $2.
   # If $3 is supplied, use that instead of "${1}s".
   # Result is written to stdout.
-  if [ "$2" = 1 ]
+  if [ "${2}" = 1 ]
   then
-    printf '%s\n' "$1"
+    printf '%s\n' "${1}"
   else
     printf '%s\n' "${3-${1}s}"
   fi
 }
 
 validate_strings() {
-  test $(echo "$1" | wc -l) -eq 1 || {
+  test $(echo "${1}" | wc -l) -eq 1 || {
     echo '$1 may not contain tab or newline characters.' >&2
     echo 'If this is really a problem, tell me, and I may fix it.' >&2
     urchin_exit 11
@@ -446,43 +447,43 @@ validate_strings() {
 }
 
 cycle_shell=true
-shell_list=$urchin_tmp/shell_list
+shell_list="${urchin_tmp}"/shell_list
 run_in_series=false
 force=false
 exit_on_not_ok=false
 tap_format=false
 verbose=false
-while [ $# -gt 0 ]
+while [ "${#}" -gt 0 ]
 do
-    case "$1" in
+    case "${1}" in
         -b|--run-in-series) run_in_series=true;;
         -e|--exit-on-fail) exit_on_not_ok=true;;
         -f|--force) force=true;;
         -s|--shell)
           shift
-          shell_for_sh_tests=$1
+          shell_for_sh_tests="${1}"
          
-          which "$shell_for_sh_tests" > /dev/null || {
-            echo "Cannot find specified shell: '$shell_for_sh_tests'" >&2
+          which "${shell_for_sh_tests}" > /dev/null || {
+            echo "Cannot find specified shell: '${shell_for_sh_tests}'" >&2
             urchin_help >&2
             urchin_exit 11
           }
 
-          validate_strings "$shell_for_sh_tests" 'Shell paths'
-          if echo "$shell_for_sh_tests" | grep \  > /dev/null; then
+          validate_strings "${shell_for_sh_tests}" 'Shell paths'
+          if echo "${shell_for_sh_tests}" | grep \  > /dev/null; then
             echo "Warning: It is best if shell paths contain no spaces so that
 you don't need to quote the TEST_SHELL variable." > /dev/stderr
           fi
 
-          echo "$shell_for_sh_tests" >> "$shell_list"
+          echo "${shell_for_sh_tests}" >> "${shell_list}"
           ;;
         -n|--disable-cycling) cycle_shell=false;; 
         -t|--tap) tap_format=true;;
-        -T|--timeout) shift; urchin_timeout="$1" ;;
+        -T|--timeout) shift; urchin_timeout="${1}" ;;
         -v|--verbose) verbose=true;;
         -h|--help) urchin_help
                    urchin_exit 0;;
-        --version) echo "$VERSION"
+        --version) echo "${VERSION}"
             urchin_exit;;
         -*) urchin_help >&2
             urchin_exit 11;;
@@ -491,61 +492,61 @@ you don't need to quote the TEST_SHELL variable." > /dev/stderr
     shift
 done
 
-if ! $cycle_shell && test -f "$shell_list"; then
+if ! "${cycle_shell}" && test -f "${shell_list}"; then
   echo "The -n/--disable-cycling and -s/--shell options clash with each other." >&2
   urchin_exit 11
 fi
 
 # If -s was not passed, use the available default shells.
-if ! test -f "$shell_list"; then
-  if $cycle_shell; then
-    for shell in $DEFAULT_SHELLS; do
-      if which $shell > /dev/null; then
-        echo $shell >> "$shell_list"
+if ! test -f "${shell_list}"; then
+  if "${cycle_shell}"; then
+    for shell in "${DEFAULT_SHELLS}"; do
+      if which "${shell}" > /dev/null; then
+        echo "${shell}" >> "${shell_list}"
       fi
     done
   else
-    echo > "$shell_list"
+    echo > "${shell_list}"
   fi
 fi
 
 # Verify argument for main stuff
-if [ "$#" != '1' ] || [ ! -e "$1" ]; then
-  if [ -n "$1" ] && [ ! -e "$1" ]; then
+if [ "${#}" != '1' ] || [ ! -e "${1}" ]; then
+  if [ -n "${1}" ] && [ ! -e "${1}" ]; then
     echo "No such file or directory: '$1'" >&2
   fi
-  echo "$USAGE" >&2
+  echo "${USAGE}" >&2
   urchin_exit 11
 fi
 
 # Warn about strange sort commands
 weird_string='\n- c\n-- b\n--- c\n---- a\n'
-if test $(printf "$weird_string" | sort | tr -d '[ \n-]') != cbca; then
+if test $(printf "${weird_string}" | sort | tr -d '[ \n-]') != cbca; then
   echo 'Your version of sort sorts in dictionary order (-d) by default.
 Depending on how you name your tests, your Urchin output may look strange.
 If this is a problem, install BusyBox or BSD coreutils.' >&2
 fi
 
-if test -n "$urchin_timeout"; then
+if test -n "${urchin_timeout}"; then
   # Choose the timeout command
   if timeout -t 0 true; then
-    TIMEOUT="timeout -t $urchin_timeout"
+    TIMEOUT="timeout -t ${urchin_timeout}"
   elif timeout 0 true; then
-    TIMEOUT="timeout $urchin_timeout"
+    TIMEOUT="timeout ${urchin_timeout}"
   else
     echo I couldn\'t figure out to use your version of timeout >&2
     urchin_exit 1
   fi
 fi
 
-if $exit_on_not_ok && ! $run_in_series; then
+if "${exit_on_not_ok}" && ! "${run_in_series}"; then
   echo 'You must also pass -b/--series in order to use -e/--exit-on-fail.' >&2
   urchin_exit 11
 fi
 
 # Run or present the Molly guard.
-root="$(urchin_root "$1")"
-if basename "$(fullpath "$root")" |
+root="$(urchin_root "${1}")"
+if basename "$(fullpath "${root}")" |
   grep -i 'test' > /dev/null || $force; then
 
   start=$(date +%s)
@@ -554,11 +555,12 @@ if basename "$(fullpath "$root")" |
   # 2 urchin root
   # 3 Should we cycle shells?
   # 4 TEST_SHELL
-  recurse "$(fullpath "$1")" "$root" "$cycle_shell" "$TEST_SHELL" || :
+  recurse "$(fullpath "${1}")" "${root}" "${cycle_shell}" "${TEST_SHELL}" || :
   finish=$(date +%s)
 
-  report_outcome "$root" $tap_format $urchin_tmp/log $start $finish
-  urchin_exit $?
+  report_outcome "${root}" "${tap_format}" "${urchin_tmp}"/log "${start}" \
+    "${finish}"
+  urchin_exit "${?}"
 else
   echo 'The root directory of the tests that you are running urchin on
 does not contain the word "test", so I am not running,
@@ -566,4 +568,4 @@ in case that was an accident. Use the -f flag if you really
 want to run urchin on that directory.' >&2
   exit_code=1
 fi
-urchin_exit $exit_code
+urchin_exit "${exit_code}"
