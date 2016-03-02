@@ -1,3 +1,4 @@
 export tmp=$(mktemp -d)
 export testsuite=$tmp/test
+mkdir -p $testsuite
 touch $testsuite/.urchin

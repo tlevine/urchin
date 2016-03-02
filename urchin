@@ -140,7 +140,8 @@ recurse() {
 
   validate_strings "${potential_test}" 'Test file names'
 
-  if [ -d "${potential_test}" ]; then
+  if [ -x "${potential_test}" ]; then
+    if [ -d "${potential_test}" ]; then
     (
       cd -- "${potential_test}"
       if test -f setup_dir; then . ./setup_dir; fi
@@ -174,8 +175,7 @@ recurse() {
       wait
       if test -f teardown_dir; then . ./teardown_dir; fi
     )
-  else
-    if [ -x "${potential_test}" ]; then
+    elif [ -f "${potential_test}" ]; then
       cd -- "$(dirname -- "${potential_test}")"
 
       # Determine the environment variable to define for test scripts
@@ -235,9 +235,11 @@ recurse() {
       done < "${shell_list}"
       wait
     else
-      # Shell is ''
-      printf "${potential_test}\t\tskip\t0\n" >> "${urchin_tmp}"/log
+      echo "${potential_test}: Neither file nor directory!?" > /dev/stderr
     fi
+  else
+    # Shell is ''
+    printf "${potential_test}\t\tskip\t0\n" >> "${urchin_tmp}"/log
   fi
 }
 
