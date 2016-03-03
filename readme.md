@@ -154,3 +154,10 @@ To test with multiple shells in sequence, use something like:
     for shell in sh bash ksh zsh; do
       urchin -s $shell ./tests
     done
+
+## References
+
+On shell programming
+
+* http://blackskyresearch.net/shelltables.txt
+* http://blackskyresearch.net/try.sh.txt
