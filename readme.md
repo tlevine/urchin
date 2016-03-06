@@ -4,9 +4,10 @@
     / /_/ / /  / /__/ / / / / / / /
     \__,_/_/   \___/_/ /_/_/_/ /_/ 
 
-Urchin is a file-based test harness, normally used for testing shell programs.
-It is written in portable shell and should thus work on GNU/Linux, BSD
-(including Mac OS X), and other Unix-like platforms.
+Urchin is a portable shell program that runs a directory of Unix-style
+programs and produces pretty output. It is normally used for testing
+shell programs, where each test case corresponds to a single file in
+the directory that Urchin runs.
 
 Urchin is called "Urchin" because
 [sea urchins](https://en.wikipedia.org/wiki/Sea_urchin)
