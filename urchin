@@ -339,7 +339,7 @@ report_outcome() {
           if "${print_in_color}"; then
             printf '\033[31m✗ \033[0m'
           else
-            printf '✗ \033[0m'
+            printf '✗ '
           fi
           echo "${the_shell} ("${file_elapsed}" $(plural second $file_elapsed))"
         ;;
