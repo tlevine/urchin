@@ -56,7 +56,6 @@ and use the incomplete sort that is installed on your system. This is not a
 big deal; if your test files all start with alphanumeric letters, the output
 should look fine.
 
-
 ## Install
 Urchin is contained in a single file, so you can install it by copying it to a
 directory in your `PATH`. For example, you can run the following as root.
