@@ -196,17 +196,8 @@ recurse() {
           break
         fi
 
-        (
-          if test -f setup; then . ./setup; fi
-          if recurse "${requested_path}" "${test}" "${cycle_shell}" \
-            "${TEST_SHELL}"; then
-            exit_code=0
-          else
-            exit_code="${?}"
-          fi
-          if test -f teardown; then . ./teardown; fi
-          exit "${exit_code}"
-        ) &
+        recurse "${requested_path}" "${test}" "${cycle_shell}" \
+          "${TEST_SHELL}" &
 
         if "${run_in_series}" || "${run_in_series_dir}"; then
           if wait "${!}"; then exit_code=0; else exit_code="${?}"; fi
