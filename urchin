@@ -49,7 +49,7 @@
 set -e
 
 # Kill subprocesses on interrupt.
-trap "kill -$$" SIGHUP SIGINT SIGTERM
+trap "kill -$$; exit" HUP INT TERM
 
 DEFAULT_SHELLS='sh bash dash mksh zsh'
 if [ -n "${ZSH_VERSION}" ]; then
@@ -517,7 +517,7 @@ validate_strings() {
 main() {
   cycle_shell=true
   shell_list="${urchin_tmp}"/shell_list
-  test_spec_list="${urchin_tmp}"/test_list
+  test_arg_list="${urchin_tmp}"/test_list
   run_in_series=false
   force=false
   exit_on_not_ok=false
@@ -576,7 +576,7 @@ main() {
               urchin_exit 11;;
           *)  validate_strings "${1}" 'Test file names'
               validate_test_arg "${1}"
-              echo "${1}" >> "${test_spec_list}" ;;
+              echo "${1}" >> "${test_arg_list}" ;;
       esac
       shift
   done
@@ -643,8 +643,7 @@ main() {
   while read seed; do
     recurse "$(fullpath "${seed}")" "${root}" "${cycle_shell}" \
       "${TEST_SHELL}" || break
-    break
-  done < "${shell_list}"
+  done < "${test_arg_list}"
   finish=$(date +%s)
 
   test $(cat "${urchin_tmp}"/log | wc -l) -gt 0 || {
