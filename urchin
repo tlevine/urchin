@@ -134,12 +134,16 @@ recurse() {
     fi
   done
 
-  echo "${requested_path}" | grep "^${potential_test}" > /dev/null ||
-    echo "${potential_test}" | grep "^${requested_path}" > /dev/null ||
-    { test "${potential_test}" != "${requested_test}" &&
-      test -f "${potential_test}" && test -f "${requested_path}"; } ||
+  if echo "${requested_path}" | grep "^${potential_test}" > /dev/null ||
+     echo "${potential_test}" | grep "^${requested_path}" > /dev/null; then
+    if test "$(dirname "${potential_test}")" = \
+            "$(dirname "${requested_path}")" &&
+       test "${potential_test}" != "${requested_path}"; then
+      return 0
+    fi
+  else
     return 0
-  echo "${requested_path}" XXX "${potential_test}"
+  fi
 
   validate_strings "${potential_test}" 'Test file names'
 
