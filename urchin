@@ -48,6 +48,9 @@
 
 set -e
 
+# Kill subprocesses on interrupt.
+trap "kill -$$" SIGHUP SIGINT SIGTERM
+
 DEFAULT_SHELLS='sh bash dash mksh zsh'
 if [ -n "${ZSH_VERSION}" ]; then
   # avoid "no matches found: *" error when directories are empty
@@ -55,6 +58,27 @@ if [ -n "${ZSH_VERSION}" ]; then
   emulate sh
 fi
 
+validate_test_arg() {
+  # Must be a file or directory
+  if [ ! -e "${1}" ]; then
+    echo "No such file or directory: '${1}'" >&2
+    echo "${USAGE}" >&2
+    urchin_exit 11
+  fi
+
+  # Molly guard
+  root="$(urchin_root "${1}")"
+  if ! {
+    basename "$(fullpath "${root}")" |
+    grep -i 'test' > /dev/null || "${force}"
+  }; then
+    echo 'The root directory of the tests that you are running urchin on
+  does not contain the word "test", so I am not running,
+  in case that was an accident. Use the -f flag if you really
+  want to run urchin on that directory.' >&2
+    urchin_exit 1
+  fi
+}
 
 sort_python() {
   python -c 'import sys
@@ -493,6 +517,7 @@ validate_strings() {
 main() {
   cycle_shell=true
   shell_list="${urchin_tmp}"/shell_list
+  test_spec_list="${urchin_tmp}"/test_list
   run_in_series=false
   force=false
   exit_on_not_ok=false
@@ -549,7 +574,9 @@ main() {
               urchin_exit;;
           -*) urchin_help >&2
               urchin_exit 11;;
-          *)  break;;
+          *)  validate_strings "${1}" 'Test file names'
+              validate_test_arg "${1}"
+              echo "${1}" >> "${test_spec_list}" ;;
       esac
       shift
   done
@@ -571,15 +598,6 @@ main() {
     else
       echo > "$shell_list"
     fi
-  fi
-
-  # Verify argument for main stuff
-  if [ "${#}" != '1' ] || [ ! -e "${1}" ]; then
-    if [ -n "${1}" ] && [ ! -e "${1}" ]; then
-      echo "No such file or directory: '${1}'" >&2
-    fi
-    echo "${USAGE}" >&2
-    urchin_exit 11
   fi
 
   # Warn about strange sort commands
@@ -615,19 +633,6 @@ main() {
     urchin_exit 11
   fi
 
-  # Molly guard.
-  root="$(urchin_root "${1}")"
-  if ! {
-    basename "$(fullpath "${root}")" |
-    grep -i 'test' > /dev/null || "${force}"
-  }; then
-    echo 'The root directory of the tests that you are running urchin on
-  does not contain the word "test", so I am not running,
-  in case that was an accident. Use the -f flag if you really
-  want to run urchin on that directory.' >&2
-    urchin_exit 1
-  fi
-
   # --------------------   REALLY RUN   -------------------- #
   start=$(date +%s)
 
@@ -635,7 +640,11 @@ main() {
   # 2 urchin root
   # 3 Should we cycle shells?
   # 4 TEST_SHELL
-  recurse "$(fullpath "${1}")" "${root}" "${cycle_shell}" "${TEST_SHELL}" || :
+  while read seed; do
+    recurse "$(fullpath "${seed}")" "${root}" "${cycle_shell}" \
+      "${TEST_SHELL}" || break
+    break
+  done < "${shell_list}"
   finish=$(date +%s)
 
   test $(cat "${urchin_tmp}"/log | wc -l) -gt 0 || {
