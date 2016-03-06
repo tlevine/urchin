@@ -1,0 +1,42 @@
+On the criteria for ordering
+==============================
+The following sh code creates several files in a directory and then
+calls "*", listing them in order.
+
+    printf '@ b\n- d\n? a\n~ c\n! e\n' | while read line; do
+      touch -- "${line}"
+    done
+    for file in *; do echo "$file"; done
+
+On one computer, running FreeBSD, the order is apparently ASCIIbetical.
+
+    ! e
+    - d
+    ? a
+    @ b
+    ~ c
+
+On another computer, running NixOS, the following commands print results
+in dictionary order. I'm not exactly sure what dictionary order is, but
+it is something like sorting on the alphabetical characters before
+sorting on the rest of the line.
+
+    ? a
+    @ b
+    ~ c
+    - d
+    ! e
+
+While I don't really know what dictionary order is, I was able to determine
+that the above results are in dictionary order because of my investigation of
+incompatible implementations of sort. Consider the following two sort
+commands.
+
+    printf '@ b\n- d\n? a\n~ c\n! e\n' | sort
+    printf '@ b\n- d\n? a\n~ c\n! e\n' | sort -d
+
+With BSD sort, the first of these commands print ASCIIbetical order and
+the second prints dictionary order. With GNU sort, both print dictionary
+order.
+
+How annoying.
