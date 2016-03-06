@@ -244,7 +244,7 @@ recurse() {
           set -e
           finish=$(date +%s)
 
-          if test -f teardown; then . ./setup; fi
+          if test -f teardown; then . ./teardown; fi
 
           if [ "${exit_code}" -eq 0 ]; then
             result=ok
