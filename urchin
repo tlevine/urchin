@@ -275,8 +275,7 @@ report_outcome() {
   # and thus makes the above variables local.
   sorted_log_file=$(mktemp)
 
-  # Sort in alphabetical order.
-  # GNU sort requires -m, and BSD sort doesn't.
+  # GNU sort is broken. Oh well.
   sort "${log_file}" > "${sorted_log_file}"
 
   while read line; do
