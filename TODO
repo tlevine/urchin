@@ -49,6 +49,8 @@ List some shell linters somewhere.
 Set parallel and series
 ----------
 I want to be able to make only some directories run in series.
+This is helpful when directories actually need to run in series
+and also when running all your tests in parallel crashes your computer.
 
 * Rename .urchin to .urchin_root.
 * Look for a .urchin_dir file.
