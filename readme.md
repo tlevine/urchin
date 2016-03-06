@@ -24,6 +24,28 @@ Run the tests
     cd urchin
     ./urchin tests
 
+## Dependencies
+Urchin depends on the following programs.
+
+* sh
+* echo
+* printf
+* mktemp
+* readlink
+* basename
+* dirname
+* sed
+* grep
+* cut
+* true
+* false
+* which
+* timeout
+* sort
+
+All of the above programs are usually included on base BSD installations.
+On GNU systems it should be sufficient to install the busybox package.
+
 ## Install
 Urchin is contained in a single file, so you can install it by copying it to a
 directory in your `PATH`. For example, you can run the following as root.
