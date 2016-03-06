@@ -46,6 +46,17 @@ Urchin depends on the following programs.
 All of the above programs are usually included on base BSD installations.
 On GNU systems it should be sufficient to install the busybox package.
 
+Urchin uses sort to format its output. GNU sort (as of GNU coreutils version
+8.24) lacks the ability to sort in lexicographic order, and this feature is
+necessary for the output to look right. If your version of sort lacks this
+feature, Urchin will try to use one of the following tools for sorting.
+
+If no acceptable sorting program is available, Urchin will print a warning
+and use the incomplete sort that is installed on your system. This is not a
+big deal; if your test files all start with alphanumeric letters, the output
+should look fine.
+
+
 ## Install
 Urchin is contained in a single file, so you can install it by copying it to a
 directory in your `PATH`. For example, you can run the following as root.
