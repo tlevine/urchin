@@ -60,3 +60,10 @@ and also when running all your tests in parallel crashes your computer.
 Rename to something other than "test"?
 ----------
 Maybe wait until I have a use for this.
+
+More sort alternatives
+-----------
+awk
+  https://stackoverflow.com/questions/20250937/sorting-lines-in-a-file-alphabetically-using-awk-and-or-sed
+bash
+  https://stackoverflow.com/questions/7442417/how-to-sort-an-array-in-bash
