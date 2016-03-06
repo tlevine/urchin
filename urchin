@@ -136,7 +136,7 @@ urchin_root() {
     return 1
   elif test -f "${current}"; then
     urchin_root "$(dirname -- "${current}")" "${orig}"
-  elif test -f "${current}"/.urchin; then
+  elif test -f "${current}"/.urchin_root; then
     remove_trailing_slash "${current}"
   else
     urchin_root "${current}"/.. "${orig}"
