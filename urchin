@@ -182,6 +182,12 @@ recurse() {
     if [ -d "${potential_test}" ]; then
     (
       cd -- "${potential_test}"
+      if test -f .urchin_dir && grep series .urchin_dir > /dev/null; then
+        run_in_series_dir=true
+      else
+        run_in_series_dir=false
+      fi
+
       if test -f setup_dir; then . ./setup_dir; fi
 
       for test in *; do
@@ -202,7 +208,7 @@ recurse() {
           exit "${exit_code}"
         ) &
 
-        if "${run_in_series}"; then
+        if "${run_in_series}" || "${run_in_series_dir}"; then
           if wait "${!}"; then exit_code=0; else exit_code="${?}"; fi
           if "${exit_on_not_ok}" && test "${exit_code}" -ne 0; then
             if test -f teardown_dir; then . ./teardown_dir; fi
