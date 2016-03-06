@@ -263,7 +263,9 @@ report_outcome() {
   if "${tap_format}"; then
     printf \#\ 
   fi
-  echo Running tests at $(date +%Y-%m-%dT%H:%M:%S)
+  if "${print_margins}" || "${tap_format}"; then
+    echo Running tests at $(date +%Y-%m-%dT%H:%M:%S)
+  fi
 
   for number in n oks skips not_oks; do
     eval "${number}=0"
@@ -375,7 +377,7 @@ report_outcome() {
   if "${tap_format}"; then
     echo "# Full test suite took ${elapsed} $(plural second ${elapsed})."
     echo 1.."${n}"
-  else
+  elif "${print_margins}"; then
     echo
     echo "Done, took ${elapsed} $(plural second ${elapsed})."
     printf '%s\n' "${oks} $(plural test "${oks}") passed."
@@ -493,6 +495,7 @@ main() {
   tap_format=false
   print_in_color=false
 
+  print_margins=true
   print_ok=false
   print_not_ok=true
   print_ok_stdout=false
@@ -526,6 +529,8 @@ main() {
           -T|--timeout) shift; urchin_timeout="${1}" ;;
           -c|--color) print_in_color=true;;
 
+          -q|--quiet)    print_not_ok=false
+                         print_margins=false;; 
           -v)            print_ok=true;;
           -vv|--verbose) print_ok=true
                          print_not_ok_stdout=true;;
