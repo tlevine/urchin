@@ -1,7 +1,7 @@
 #!/bin/sh
 set -e
 
-! $TEST_SHELL ../../urchin --run-in-series --exit-on-fail \
+! $TEST_SHELL ../../urchin -vv --run-in-series --exit-on-fail \
   ./.test_-e,--exit-on-fail > $tmp
 
 grep '1 should run.' $tmp
