@@ -648,4 +648,4 @@ main() {
   urchin_exit "${?}"
 }
 
-main "$@"
+test -n "${TESTING_URCHIN_INTERNALS}" || main "$@"

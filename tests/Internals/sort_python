@@ -1,0 +1,4 @@
+set -e
+TESTING_URCHIN_INTERNALS=true . ../../urchin
+unsorted='@ b\n- d\n? a\n~ c\n! e\n'
+test $(printf "${unsorted}" | sort_python | cut -d\  -f2|tr -d '\n') = edabc
