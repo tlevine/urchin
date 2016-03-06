@@ -447,10 +447,10 @@ effect when combined with --tap.
 -c, --color              Print results in color.
 -t, --tap                Format output in Test Anything Protocol (TAP)
 
--q, --quiet              Print nothing to stdout; the only output is the
-                         exit code (XXX not implemented).
-(default verbosity)      Print names of failed tests and counts of passed,
-                         failed, and skipped tests.
+-q, --quiet              Print nothing to stdout;
+                         the only output is the exit code.
+(default verbosity)      Print names of failed tests and counts
+                         of passed, failed, and skipped tests.
 -v                       Print names of passed tests.
 -vv, --verbose           Print stdout from failing tests.
 -vvv                     Print stdout from all tests.
