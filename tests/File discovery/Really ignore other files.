@@ -1,0 +1,13 @@
+#!/bin/sh
+tmp=$(mktemp -d)
+mkdir -p $tmp/test
+
+touch $tmp/test/executable-not
+echo '#!/usr/bin/env true' > $tmp/test/executable
+chmod +x $tmp/test/executable
+
+$TEST_SHELL ../../urchin --tap $tmp/test/executable | grep SKIP
+code=$?
+
+rm -r $tmp
+test $code -ne 0
