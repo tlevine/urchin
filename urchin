@@ -303,7 +303,8 @@ report_outcome() {
         the_shell='File is not executable.'
       fi
       echo "${not}ok $n - ${path} (${the_shell}) ${skip}"
-      if "${verbose}" || [ "${result}" = not_ok ]; then
+      if { test "${result}" = not_ok && "${print_not_ok_stdout}"; } ||
+         { test "${result}" = ok && "${print_ok_stdout}"; }; then
         echo '# ------------ Begin output ------------'
         sed 's/^/# /' "$(stdout_file "${abspath}" "${the_shell}")"
         echo '# ------------ End output ------------'
@@ -335,7 +336,8 @@ report_outcome() {
           fi
         ;;
       esac
-      if "${verbose}" || test "${result}" = not_ok; then
+      if { test "${result}" = not_ok && "${print_not_ok_stdout}"; } ||
+         { test "${result}" = ok && "${print_ok_stdout}"; }; then
         sed 's/^/  # /' "$(stdout_file "${abspath}" "${the_shell}")"
       fi
     fi
@@ -411,7 +413,11 @@ The following flags affect how Urchin processes tests.
 These options affect how results are formatted.
 
 -t, --tap                Format output in Test Anything Protocol (TAP)
--v, --verbose            Print stdout from all tests, not just failed tests.
+-v, --verbose            Print stdout from failing tests.
+-vv                      Print stdout from all tests.
+-vvv                     Print debugging messages (XXX not implemented)
+-q, --quiet              Print nothing to stdout; the only output is the
+                         exit code (XXX not implemented).
 
 The remaining flags provide information about urchin.
 
@@ -450,7 +456,8 @@ main() {
   force=false
   exit_on_not_ok=false
   tap_format=false
-  verbose=false
+  print_ok_stdout=false
+  print_not_ok_stdout=false
   while [ "${#}" -gt 0 ]
   do
       case "${1}" in
@@ -478,7 +485,9 @@ main() {
           -n|--disable-cycling) cycle_shell=false;; 
           -t|--tap) tap_format=true;;
           -T|--timeout) shift; urchin_timeout="${1}" ;;
-          -v|--verbose) verbose=true;;
+          -v|--verbose) print_not_ok_stdout=true;;
+          -vv) print_not_ok_stdout=true
+               print_ok_stdout=true;;
           -h|--help) urchin_help
                      urchin_exit 0;;
           --version) echo "${VERSION}"
