@@ -578,8 +578,9 @@ main() {
   fi
 
   # Warn about strange sort commands
-  weird_string='\n- c\n-- b\n--- c\n---- a\n'
-  if test $(printf "${weird_string}" | sort | tr -d '[ \n-]') != cbca; then
+  weird_string='@ b\n- d\n? a\n~ c\n! e\n'
+  sort_result="$(printf "${weird_string}" | sort | cut -d\  -f2 | tr -d '\n')"
+  if test "${sort_result}" != edacb; then
     echo 'Your version of sort sorts in dictionary order (-d) by default.
   Depending on how you name your tests, your Urchin output may look strange.
   If this is a problem, install BusyBox or BSD coreutils.' >&2
