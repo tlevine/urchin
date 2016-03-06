@@ -320,12 +320,20 @@ report_outcome() {
       case "${result}" in
         ok)
           # On success, print a green '✓'
-          printf '\033[32m✓ \033[0m'
+          if "${print_in_color}"; then
+            printf '\033[32m✓ \033[0m'
+          else
+            printf '✓ '
+          fi
           echo "${the_shell} ("${file_elapsed}" $(plural second $file_elapsed))"
         ;;
         not_ok)
           # On not_ok, print a red '✗'
-          printf '\033[31m✗ \033[0m'
+          if "${print_in_color}"; then
+            printf '\033[31m✗ \033[0m'
+          else
+            printf '✗ \033[0m'
+          fi
           echo "${the_shell} ("${file_elapsed}" $(plural second $file_elapsed))"
         ;;
         skip)
@@ -356,11 +364,13 @@ report_outcome() {
     printf '%s\n' "${skips} $(plural test "${skips}") skipped."
 
     # If any tests are not ok, print the message in red.
-    if [ "${not_oks}" -gt 0 ] ; then
+    if [ "${not_oks}" -gt 0 ] && "${print_in_color}"; then
       printf '\033[31m'
     fi
     printf '%s\n' "${not_oks} $(plural test "${not_oks}") failed."
-    printf '\033[m\n'
+    if "${print_in_color}"; then
+      printf '\033[m\n'
+    fi
   fi
   test "${not_oks}" -eq '0'
 }
@@ -412,6 +422,7 @@ The following flags affect how Urchin processes tests.
 
 These options affect how results are formatted.
 
+-c, --color              Print results in color.
 -t, --tap                Format output in Test Anything Protocol (TAP)
 -v, --verbose            Print stdout from failing tests.
 -vv                      Print stdout from all tests.
@@ -456,6 +467,7 @@ main() {
   force=false
   exit_on_not_ok=false
   tap_format=false
+  print_in_color=false
   print_ok_stdout=false
   print_not_ok_stdout=false
   while [ "${#}" -gt 0 ]
@@ -485,6 +497,7 @@ main() {
           -n|--disable-cycling) cycle_shell=false;; 
           -t|--tap) tap_format=true;;
           -T|--timeout) shift; urchin_timeout="${1}" ;;
+          -c|--color) print_in_color=true;;
           -v|--verbose) print_not_ok_stdout=true;;
           -vv) print_not_ok_stdout=true
                print_ok_stdout=true;;
