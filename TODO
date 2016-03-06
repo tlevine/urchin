@@ -46,17 +46,6 @@ List some shell linters somewhere.
 * checkbashisms
 
 
-Set parallel and series
-----------
-I want to be able to make only some directories run in series.
-This is helpful when directories actually need to run in series
-and also when running all your tests in parallel crashes your computer.
-
-* Rename .urchin to .urchin_root.
-* Look for a .urchin_dir file.
-* If .urchin_dir contains "series", run that directory in series rather
-  than in parallel.
-
 Rename to something other than "test"?
 ----------
 Maybe wait until I have a use for this.

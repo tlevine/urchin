@@ -12,18 +12,18 @@ test suite, as we need to know how far up to apply the setup
 and teardown files.
 
 The Urchin root directory is determined by moving higher in the directory
-tree in search of a file named `.urchin`.
+tree in search of a file named `.urchin_root`.
 The closest directory that contains such a file is considered the root.
 In the following filesystem, for example, `/a/b/c` would be the root.
 
     mkdir -p /a/b/c/d
     touch /a/b/c/d/e
     chmod +x /a/b/c/d/e
-    touch /a/b/c/.urchin
+    touch /a/b/c/.urchin_root
     urchin /a/b/c/d
 
 There are two situations in which we would stop looking without having
-found a `.urchin` file.
+found a `.urchin_root` file.
 
 1. The system root, `/`, because we can't go any higher
 2. A directory that starts with a dot, because an urchin call on a higher
@@ -96,6 +96,13 @@ turned on.
    different shells are run parellel.
 
 Parallel processing and shell cycling are both enabled by default.
+
+You may want make only some directories run in series, you can create
+".urchin_dir" files in those directories.
+If .urchin_dir contains the phrase "series", run that directory in series
+rather than in parallel.
+This is helpful when directories actually need to run in series
+and also when running all your tests in parallel crashes your computer.
 
 ### Options
 Long options are now available for all command line flags.
@@ -229,7 +236,7 @@ other Urchin call), and the test suite is recursively descended. Setup and
 teardown files are sourced, and everything but the specified test file is
 otherwise ignored.
 
-If you don't explicitly specify the Urchin root with a .urchin file, we
+If you don't explicitly specify the Urchin root with a .urchin_root file, we
 consider the test suite root directory to be the parent of the file that
 you ran Urchin on.
 
