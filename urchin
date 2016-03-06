@@ -318,36 +318,47 @@ report_outcome() {
       fi
       echo "# Previous test took ${file_elapsed} seconds."
     else
-      if test "${prevdir}" != "${currentdir}"; then
-        echo
-      fi
-      if test "${prevpath}" != "${path}"; then
-        printf "$(dirname -- "${path}")/\n> $(basename -- "${path}")\n"
-      fi
+      header() {
+        if test "${prevdir}" != "${currentdir}"; then
+          echo
+        fi
+        if test "${prevpath}" != "${path}"; then
+          printf "$(dirname -- "${path}")/\n> $(basename -- "${path}")\n"
+        fi
+      }
       case "${result}" in
         ok)
-          # On success, print a green '✓'
-          if "${print_in_color}"; then
-            printf '\033[32m✓ \033[0m'
-          else
-            printf '✓ '
+          if "${print_ok}"; then
+            header
+            # On success, print a green '✓'
+            if "${print_in_color}"; then
+              printf '\033[32m✓ \033[0m'
+            else
+              printf '✓ '
+            fi
+            echo "${the_shell} ("${file_elapsed}" $(plural second $file_elapsed))"
           fi
-          echo "${the_shell} ("${file_elapsed}" $(plural second $file_elapsed))"
         ;;
         not_ok)
-          # On not_ok, print a red '✗'
-          if "${print_in_color}"; then
-            printf '\033[31m✗ \033[0m'
-          else
-            printf '✗ '
+          if "${print_not_ok}"; then
+            header
+            # On not_ok, print a red '✗'
+            if "${print_in_color}"; then
+              printf '\033[31m✗ \033[0m'
+            else
+              printf '✗ '
+            fi
+            echo "${the_shell} ("${file_elapsed}" $(plural second $file_elapsed))"
           fi
-          echo "${the_shell} ("${file_elapsed}" $(plural second $file_elapsed))"
         ;;
         skip)
-          if test -z "${the_shell}"; then
-            echo '  (File is not executable.)'
-          else
-            echo "  ${the_shell} ("${file_elapsed}" $(plural second $file_elapsed))"
+          if "${print_ok}"; then
+            header
+            if test -z "${the_shell}"; then
+              echo '  (File is not executable.)'
+            else
+              echo "  ${the_shell} ("${file_elapsed}" $(plural second $file_elapsed))"
+            fi
           fi
         ;;
       esac
@@ -427,15 +438,21 @@ The following flags affect how Urchin processes tests.
 -f, --force              Force running even if the test directory's name
                          does not contain the word "test".
 
-These options affect how results are formatted.
+These options affect how results are formatted. Options -q, and -v
+have no effect when combined with --tap. -vv, -vvv, and -vvvv do have
+effect when combined with --tap.
 
 -c, --color              Print results in color.
 -t, --tap                Format output in Test Anything Protocol (TAP)
--v, --verbose            Print stdout from failing tests.
--vv                      Print stdout from all tests.
--vvv                     Print debugging messages (XXX not implemented)
+
 -q, --quiet              Print nothing to stdout; the only output is the
                          exit code (XXX not implemented).
+(default verbosity)      Print names of failed tests and counts of passed,
+                         failed, and skipped tests.
+-v                       Print names of passed tests.
+-vv, --verbose           Print stdout from failing tests.
+-vvv                     Print stdout from all tests.
+-vvvv, --debug           Print debugging messages (XXX not implemented)
 
 The remaining flags provide information about urchin.
 
@@ -475,6 +492,9 @@ main() {
   exit_on_not_ok=false
   tap_format=false
   print_in_color=false
+
+  print_ok=false
+  print_not_ok=true
   print_ok_stdout=false
   print_not_ok_stdout=false
   while [ "${#}" -gt 0 ]
