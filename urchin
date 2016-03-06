@@ -87,6 +87,10 @@ for line in sorted(sys.stdin.readlines()):
 '
 }
 
+sort_perl() {
+  perl -e 'print sort (<>);'
+}
+
 # All temporary files go here
 urchin_tmp=$(mktemp -d)
 > "${urchin_tmp}/log"
@@ -603,7 +607,9 @@ main() {
   if test "${sort_result}" = edacb; then
     sort=sort
   else
-    if which python > /dev/null; then
+    if which perl > /dev/null; then
+      sort=sort_perl
+    elif which python > /dev/null; then
       sort=sort_python
     else
       echo 'Your version of sort sorts in dictionary order (-d) by default.

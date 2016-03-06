@@ -51,6 +51,9 @@ Urchin uses sort to format its output. GNU sort (as of GNU coreutils version
 necessary for the output to look right. If your version of sort lacks this
 feature, Urchin will try to use one of the following tools for sorting.
 
+* perl
+* python
+
 If no acceptable sorting program is available, Urchin will print a warning
 and use the incomplete sort that is installed on your system. This is not a
 big deal; if your test files all start with alphanumeric letters, the output
