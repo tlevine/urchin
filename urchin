@@ -234,7 +234,7 @@ recurse() {
                   "${the_test_shell}" "${potential_test}"
               fi
             else
-              # Shell cycling is disabled with -n; use the present value of
+              # Shell cycling is disabled with -d; use the present value of
               # TEST_SHELL or default to /bin/sh
               if [ -n "${TEST_SHELL}" ]; then
                 $TIMEOUT "${potential_test}"
@@ -449,8 +449,7 @@ The following flags affect how this multiple-shell testing is handled.
 
 -s, --shell <shell>      Tell Urchin to use a different list of shells.
                          (You can pass this flag multiple times.)
-
--n, --disable-cycling    Disable the cycling of shells; Urchin will
+-d, --disable-cycling    Disable the cycling of shells; Urchin will
                          execute test files ordinarily, implicitly using
                          sh for files that lack shebang lines. It will
                          set the TEST_SHELL variable to "/bin/sh" if and
@@ -460,6 +459,7 @@ The following flags affect how Urchin processes tests.
 
 -b, --run-in-series      Run tests in series. The default is to run tests
                          in parallel where possible.
+-n, --max-forks          Maximum number of parallel tests (Default is 50.)
 -e, --exit-on-fail       Stop running if any single test fails.
                          This is useful if you are running something
                          configuration files with Urchin.
@@ -515,6 +515,7 @@ validate_strings() {
 }
 
 main() {
+  max_forks=50
   cycle_shell=true
   shell_list="${urchin_tmp}"/shell_list
   test_arg_list="${urchin_tmp}"/test_list
@@ -533,6 +534,8 @@ main() {
   do
       case "${1}" in
           -b|--run-in-series) run_in_series=true;;
+          -n|--max-forks) shift
+                          max_forks="${1}";;
           -e|--exit-on-fail) exit_on_not_ok=true;;
           -f|--force) force=true;;
           -s|--shell)
@@ -553,7 +556,7 @@ main() {
 
             echo "${shell_for_sh_tests}" >> "${shell_list}"
             ;;
-          -n|--disable-cycling) cycle_shell=false;; 
+          -d|--disable-cycling) cycle_shell=false;; 
           -t|--tap) tap_format=true;;
           -T|--timeout) shift; urchin_timeout="${1}" ;;
           -c|--color) print_in_color=true;;
