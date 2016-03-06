@@ -455,9 +455,9 @@ effect when combined with --tap.
                          the only output is the exit code.
 (default verbosity)      Print names of failed tests and counts
                          of passed, failed, and skipped tests.
--v                       Print names of passed tests.
--vv, --verbose           Print stdout from failing tests.
--vvv                     Print stdout from all tests.
+-v                       Print stdout from failing tests.
+-vv                      Print names of passed tests.
+-vvv, --verbose          Print stdout from all tests.
 -vvvv, --debug           Print debugging messages (XXX not implemented)
 
 The remaining flags provide information about urchin.
@@ -535,11 +535,11 @@ main() {
 
           -q|--quiet)    print_not_ok=false
                          print_margins=false;; 
-          -v)            print_ok=true;;
-          -vv|--verbose) print_ok=true
-                         print_not_ok_stdout=true;;
-          -vvv)          print_ok=true;
-                         print_not_ok_stdout=true
+          -v)            print_not_ok_stdout=true;;
+          -vv)           print_not_ok_stdout=true
+                         print_ok=true;;
+          -vvv|--verbose)print_not_ok_stdout=true
+                         print_ok=true;
                          print_ok_stdout=true;;
           -vvvv|--debug) echo 'Not implemented' > /dev/stderr && exit 1;;
 
