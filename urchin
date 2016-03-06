@@ -281,7 +281,7 @@ report_outcome() {
   # Use a temporary file rather than a pipe because a pipe starts a sub-shell
   # and thus makes the above variables local.
   sorted_log_file=$(mktemp)
-  "${sort}" "${log_file}" > "${sorted_log_file}"
+  cat "${log_file}" | "${sort}" > "${sorted_log_file}"
 
   while read line; do
     abspath=$(echo "${line}" | cut -f1)
