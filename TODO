@@ -26,10 +26,13 @@ Windows
 Try running Urchin in Windows somehow. Interpreters include
 
 * CygWin (https://www.cygwin.com/)
+  * https://cygwin.com/setup-x86.exe
 * MSYS (http://mingw.org/wiki/msys)
 * GNU on Windows (https://github.com/bmatzelle/gow/wiki)
 * Git for Windows (https://git-scm.com/download/win)
+  * https://github.com/git-for-windows/git/releases/download/v2.7.2.windows.1/Git-2.7.2-32-bit.exe
 * win-bash (http://win-bash.sourceforge.net/)
+
 
 shall
 ----------
