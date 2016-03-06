@@ -525,9 +525,15 @@ main() {
           -t|--tap) tap_format=true;;
           -T|--timeout) shift; urchin_timeout="${1}" ;;
           -c|--color) print_in_color=true;;
-          -v|--verbose) print_not_ok_stdout=true;;
-          -vv) print_not_ok_stdout=true
-               print_ok_stdout=true;;
+
+          -v)            print_ok=true;;
+          -vv|--verbose) print_ok=true
+                         print_not_ok_stdout=true;;
+          -vvv)          print_ok=true;
+                         print_not_ok_stdout=true
+                         print_ok_stdout=true;;
+          -vvvv|--debug) echo 'Not implemented' > /dev/stderr && exit 1;;
+
           -h|--help) urchin_help
                      urchin_exit 0;;
           --version) echo "${VERSION}"
