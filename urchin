@@ -428,7 +428,7 @@ has_shebang_line() {
   head -n 1 "${1}" | grep -qE '^#!'
 }
 
-USAGE="usage: $0 [<options>] <test directory>"
+USAGE="usage: $0 [options]... [test file or directory]..."
 
 urchin_help() {
   cat <<EOF
