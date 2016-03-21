@@ -626,7 +626,7 @@ main() {
     elif timeout 0 true; then
       TIMEOUT="timeout ${urchin_timeout}"
     else
-      echo I couldn\'t figure out to use your version of timeout >&2
+      echo I couldn\'t figure out how to use your version of timeout >&2
       urchin_exit 1
     fi
   fi
