@@ -425,7 +425,7 @@ report_outcome() {
 }
 
 has_shebang_line() {
-  head -n 1 "${1}" | grep -qE '^#!'
+  head -n 1 "${1}" | grep -v '#!/bin/sh' | grep -q '^#!'
 }
 
 USAGE="usage: $0 [options]... [test file or directory]..."
@@ -443,8 +443,8 @@ particular test file once per shell.
 On each run,
 
 1. The TEST_SHELL environment variable is set to the particular shell.
-2. If the test file lacks a shebang line, the test script is also
-   executed in that shell.
+2. If the test file lacks a shebang line or has a shebang line of
+   "#!/bin/sh", the test script is also executed in that shell.
 
 The following flags affect how this multiple-shell testing is handled.
 
