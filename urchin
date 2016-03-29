@@ -70,7 +70,7 @@ validate_test_arg() {
   root="$(urchin_root "${1}")"
   if ! {
     basename "$(fullpath "${root}")" |
-    grep -i 'test' > /dev/null || "${force}"
+    grep -qi 'test' || "${force}"
   }; then
     echo 'The root directory of the tests that you are running urchin on
   does not contain the word "test", so I am not running,
@@ -128,7 +128,7 @@ urchin_root() {
 
   abscurrent="$(fullpath "${1}")"
   if test "${abscurrent}" = / ||
-    basename "${abscurrent}" | grep '^\.' > /dev/null; then
+    basename "${abscurrent}" | grep -q '^\.' ; then
     # Stop traversing upwards at / and at hidden directories.
     if test -d "${orig}"; then
       echo "${orig}"
@@ -169,8 +169,8 @@ recurse() {
     fi
   done
 
-  if echo "${requested_path}" | grep "^${potential_test}" > /dev/null ||
-     echo "${potential_test}" | grep "^${requested_path}" > /dev/null; then
+  if echo "${requested_path}" | grep -q "^${potential_test}" ||
+     echo "${potential_test}" | grep -q "^${requested_path}" ; then
     if test "$(dirname "${potential_test}")" = \
             "$(dirname "${requested_path}")" &&
        test "${potential_test}" != "${requested_path}"; then
@@ -186,7 +186,7 @@ recurse() {
     if [ -d "${potential_test}" ]; then
     (
       cd -- "${potential_test}"
-      if test -f .urchin_dir && grep series .urchin_dir > /dev/null; then
+      if test -f .urchin_dir && grep -q series .urchin_dir ; then
         run_in_series_dir=true
       else
         run_in_series_dir=false
@@ -425,7 +425,7 @@ report_outcome() {
 }
 
 has_shebang_line() {
-  head -n 1 "${1}" | grep -v '#!/bin/sh' | grep -q '^#!'
+  head -n 1 "${1}" | grep -q -v '#!/bin/sh' | grep -q '^#!'
 }
 
 USAGE="usage: $0 [options]... [test file or directory]..."
@@ -547,7 +547,7 @@ main() {
             }
 
             validate_strings "${shell_for_sh_tests}" 'Shell paths'
-            if echo "${shell_for_sh_tests}" | grep \  > /dev/null; then
+            if echo "${shell_for_sh_tests}" | grep -q \ ; then
               echo "Warning: It is best if shell paths contain no spaces so that
   you don't need to quote the TEST_SHELL variable." > /dev/stderr
             fi
