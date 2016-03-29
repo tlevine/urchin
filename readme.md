@@ -121,13 +121,14 @@ Files are only run if they are executable, and files beginning with `.` are
 ignored. Thus, fixtures and libraries can be included sloppily within the test
 directory tree. The test passes if the file exits 0; otherwise, it fails.
 
-Tests files and subdirectories are run in ASCIIbetical order within each
-directory; that is,
 urchin looks for files within a directory in the following manner.
 
     for file in *; do
       do_something_with_test_file $file
     done
+
+`*` usually returns files in ASCIIbetical order. On at least some GNU
+systems, it returns files in alphabetic order.
 
 ### Writing cross-shell compatibility tests for testing shell code
 
