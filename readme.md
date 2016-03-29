@@ -183,14 +183,9 @@ shell.)
 
 Note that only test scripts that either have no shebang line at all or
 have shebang line `#!/bin/sh` are invoked with the specified shell.
-This allows non-shell test scripts or test scripts for specific
-shells to coexist with those whose invocation should be controlled by `-s`.
-
-To test with multiple shells in sequence, use something like:
-
-    for shell in sh bash ksh zsh; do
-      urchin -s $shell ./tests
-    done
+This allows non-shell test scripts or test scripts for other languages
+or for specific shells to coexist with those whose invocation should be
+controlled by `-s`.
 
 ## References
 
