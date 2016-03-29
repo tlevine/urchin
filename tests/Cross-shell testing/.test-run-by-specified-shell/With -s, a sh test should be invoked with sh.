@@ -1,6 +1,0 @@
-#!/bin/sh
-
-# This script should run with /bin/sh
-# regardless of whether -s or -n is passed.
-
-ps -o pid,comm,args | grep $$ | grep /bin/sh

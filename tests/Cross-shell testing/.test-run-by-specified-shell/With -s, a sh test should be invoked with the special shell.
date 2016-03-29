@@ -1,0 +1,6 @@
+#!/bin/sh
+
+# Assuming that urchin was invoked with `-s bash`,
+# this script should be being run with bash.
+
+ps -o pid,comm,args | grep $$ | grep .special-shell
