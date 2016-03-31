@@ -114,14 +114,29 @@ urchin looks for files within a directory in the following manner,
       do_something_with_test_file $file
     done
 
-so files are run in whatever order `*` produces. On GNU systems the
-order is configured in your
-[environment](https://www.gnu.org/software/coreutils/faq/coreutils-faq.html#Sort-does-not-sort-in-normal-order_0021).
+so files are run in whatever order `*` produces. The order is
+configured in your environment, at least in
+[GNU systems](https://www.gnu.org/software/coreutils/faq/coreutils-faq.html#Sort-does-not-sort-in-normal-order_0021).
 Other systems may ignore the locales configured in the environment and
 always produce ASCIIbetical order.
 
 Results are always printed in ASCIIbetical order, regardless of what
 order the tests ran in.
+
+Below you can see how the locale can affect the order.
+
+    $ printf '!c\n@a\n~b\n' | LC_COLLATE=C sort
+    !c
+    @a
+    ~b
+    $ printf '!c\n@a\n~b\n' | LC_COLLATE=en_US.UTF-8 sort
+    @a
+    ~b
+    !c
+    $ printf '!c\n@a\n~b\n' | sort -d
+    @a
+    ~b
+    !c
 
 ### Writing cross-shell compatibility tests for testing shell code
 
