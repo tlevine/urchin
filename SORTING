@@ -1,17 +1,11 @@
 On the criteria for ordering
 ==============================
 
-I was confused by the documentation for sort's "-d" flag. I suggest that
-we do one of the following.
-
-* Specify that dictionary order is the default ordering and
-  that "-d" thus usually has no effect
-* Change the default ordering to be a be ASCIIbetical, a lexicographic
-  sort that considers all characters rather than just blanks and
-  alphanumeric characters.
+I was confused by the documentation for sort's "-d" flag. This confusion
+relates to GNU coreutil's locale-specific sort. [^]
 
 Below I discuss sort order differences between different implementations
-of sort and of sh "*".
+of sort and of sh "*" for my particular environments.
 
 Sorting with sort
 ------------
@@ -47,7 +41,7 @@ Debian Wheezy.
     - d
     ! e
 
-IEEE Std 1003.1, 2013 Edition [^] specifies that the "-d" flag should
+IEEE Std 1003.1, 2013 Edition [^^] specifies that the "-d" flag should
 enable dictionary order. All of these versions of sort have clear
 documentation about the order that should be returned when the "-d" flag
 is set, (See --help, man, or info.) and the implementations match the
@@ -100,4 +94,5 @@ sorting on the rest of the line.
 that the above results are in dictionary order because of my investigation of
 incompatible implementations of sort.)
 
-[^] http://pubs.opengroup.org/onlinepubs/9699919799/
+[^] https://www.gnu.org/software/coreutils/faq/coreutils-faq.html#Sort-does-not-sort-in-normal-order_0021
+[^^] http://pubs.opengroup.org/onlinepubs/9699919799/
