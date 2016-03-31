@@ -1,0 +1,10 @@
+TESTING_URCHIN_INTERNALS=true . ../../urchin
+
+echo '!#/bin/sh' > $tmp
+! has_shebang_line $tmp
+
+echo '!#/bin/bash' > $tmp
+has_shebang_line $tmp
+
+echo '!#/usr/bin/env true' > $tmp
+has_shebang_line $tmp
