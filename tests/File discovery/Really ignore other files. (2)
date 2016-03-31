@@ -1,1 +1,1 @@
-! $TEST_SHELL ../../urchin ../Flags/Urchin\ format|grep -- --color
+! $TEST_SHELL ../../urchin ../Flags/Urchin\ format|grep -- --pretty

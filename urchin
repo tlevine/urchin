@@ -461,7 +461,7 @@ These options affect how results are formatted. Options -q, and -v
 have no effect when combined with --tap. -vv, -vvv, and -vvvv do have
 effect when combined with --tap.
 
--c, --color              Print results in color.
+-p, --pretty             Print results in color and with fancy symbols.
 -t, --tap                Format output in Test Anything Protocol (TAP)
 
 -q, --quiet              Print nothing to stdout;
@@ -545,7 +545,7 @@ main() {
           -n|--disable-cycling) cycle_shell=false;; 
           -t|--tap) tap_format=true;;
           -T|--timeout) shift; urchin_timeout="${1}" ;;
-          -c|--color) print_in_color=true;;
+          -p|--pretty) print_in_color=true;;
 
           -q|--quiet)    print_not_ok=false
                          print_margins=false;; 

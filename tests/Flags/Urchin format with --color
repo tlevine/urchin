@@ -1,3 +1,3 @@
-$TEST_SHELL ../../urchin --color -vv --shell sh .testsuite/ |
+$TEST_SHELL ../../urchin --pretty -vv --shell sh .testsuite/ |
   sed -e 1d -e 's/. seconds\?/1 second/' > $tmp
 diff $tmp .urchin-output-expectation-color
