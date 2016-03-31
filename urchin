@@ -384,7 +384,7 @@ report_outcome() {
       esac
       if { test "${result}" = not_ok && "${print_not_ok_stdout}"; } ||
          { test "${result}" = ok && "${print_ok_stdout}"; }; then
-        sed 's/^/  # /' "$(stdout_file "${abspath}" "${the_shell}")"
+        sed 's/^/  | /' "$(stdout_file "${abspath}" "${the_shell}")"
       fi
     fi
 
