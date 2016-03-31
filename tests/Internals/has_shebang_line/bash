@@ -1,1 +1,1 @@
-run '!#/bin/bash'
+./.run '!#/bin/bash'

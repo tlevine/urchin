@@ -1,7 +1,1 @@
 export tmp=$(mktemp)
-
-run() {
-  TESTING_URCHIN_INTERNALS=true . ../../urchin
-  echo "$1" > $tmp
-  has_shebang_line $tmp
-}

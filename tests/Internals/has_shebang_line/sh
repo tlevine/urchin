@@ -1,1 +1,1 @@
-! run '!#/bin/sh'
+! ./.run '!#/bin/sh'
