@@ -80,17 +80,6 @@ validate_test_arg() {
   fi
 }
 
-sort_python() {
-  python -c 'import sys
-for line in sorted(sys.stdin.readlines()):
-    sys.stdout.write(line)
-'
-}
-
-sort_perl() {
-  perl -e 'print sort (<>);'
-}
-
 # All temporary files go here
 urchin_tmp=$(mktemp -d)
 > "${urchin_tmp}/log"
@@ -306,7 +295,7 @@ report_outcome() {
   # Use a temporary file rather than a pipe because a pipe starts a sub-shell
   # and thus makes the above variables local.
   sorted_log_file=$(mktemp)
-  cat "${log_file}" | "${sort}" > "${sorted_log_file}"
+  cat "${log_file}" | LC_ALL=POSIX sort > "${sorted_log_file}"
 
   while read line; do
     abspath=$(echo "${line}" | cut -f1)
@@ -598,24 +587,6 @@ main() {
       done
     else
       echo > "$shell_list"
-    fi
-  fi
-
-  # Warn about strange sort commands
-  weird_string='@ b\n- d\n? a\n~ c\n! e\n'
-  sort_result="$(printf "${weird_string}" | sort | cut -d\  -f2 | tr -d '\n')"
-  if test "${sort_result}" = edacb; then
-    sort=sort
-  else
-    if which perl > /dev/null; then
-      sort=sort_perl
-    elif which python > /dev/null; then
-      sort=sort_python
-    else
-      echo 'Your version of sort sorts in dictionary order (-d) by default.
-    Depending on how you name your tests, your Urchin output may look strange.
-    If this is a problem, install BusyBox or BSD coreutils.' >&2
-      sort=sort
     fi
   fi
 
