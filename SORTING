@@ -16,7 +16,7 @@ On one computer, running FreeBSD, the order is apparently ASCIIbetical.
     @ b
     ~ c
 
-On another computer, running NixOS, the following commands print results
+On two GNU systems, running NixOS and Debian, respectively, output is
 in dictionary order. I'm not exactly sure what dictionary order is, but
 it is something like sorting on the alphabetical characters before
 sorting on the rest of the line.
@@ -38,5 +38,3 @@ commands.
 With BSD sort, the first of these commands print ASCIIbetical order and
 the second prints dictionary order. With GNU sort, both print dictionary
 order.
-
-How annoying.
