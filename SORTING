@@ -8,7 +8,8 @@ calls "*", listing them in order.
     done
     for file in *; do echo "$file"; done
 
-On one computer, running FreeBSD, the order is apparently ASCIIbetical.
+On one computer, running FreeBSD, the order is apparently
+ASCIIbetical/lexicographic.
 
     ! e
     - d
@@ -35,6 +36,27 @@ commands.
     printf '@ b\n- d\n? a\n~ c\n! e\n' | sort
     printf '@ b\n- d\n? a\n~ c\n! e\n' | sort -d
 
-With BSD sort, the first of these commands print ASCIIbetical order and
-the second prints dictionary order. With GNU sort, both print dictionary
-order.
+With BusyBox v1.23.2 on NixOS 15.09, the first of these commands returns
+ASCIIbetical order, and the second returns dictionary order.
+
+With GNU coreutils version 8.24 on NixOS, both commands return
+dictionary order. The same is true for GNU coreutils version 8.23 on
+Debian Wheezy.
+
+IEEE Std 1003.1, 2013 Edition
+http://pubs.opengroup.org/onlinepubs/9699919799/
+
+All of these versions of sort are clear about the order that should be
+returned when the "-d" flag is set. Here are results from the "--help"
+flag (info and man give similar explanations.) for BusyBox
+
+  -d      Dictionary order (blank or alphanumeric only)
+
+and GNU coreutils.
+
+  -d, --dictionary-order      consider only blanks and alphanumeric characters
+
+So the "-d" flag seems to be fine in all of these versions.
+
+I have found no explicit documentation from any of the three versions
+of sort as to what the default order should be.
