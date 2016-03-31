@@ -2,7 +2,7 @@
 ./
 > a
 ✗ sh (1 second)
-  # This is stdout from a.
+  | This is stdout from a.
 ./
 > b
 ✓ sh (1 second)

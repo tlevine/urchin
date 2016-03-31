@@ -2,7 +2,7 @@
 ./
 > a
 [31m✗ [0msh (1 second)
-  # This is stdout from a.
+  | This is stdout from a.
 ./
 > b
 [32m✓ [0msh (1 second)
