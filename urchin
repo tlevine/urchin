@@ -346,15 +346,15 @@ report_outcome() {
           printf "$(dirname -- "${path}")/\n> $(basename -- "${path}")\n"
         fi
       }
+
       case "${result}" in
         ok)
           if "${print_ok}"; then
             header
-            # On success, print a green '✓'
             if "${print_in_color}"; then
-              printf '\033[32m✓ \033[0m'
+              printf "\033[32m${success_mark} \033[0m"
             else
-              printf '✓ '
+              printf "${success_mark} "
             fi
             echo "${the_shell} ("${file_elapsed}" $(plural second $file_elapsed))"
           fi
@@ -362,11 +362,10 @@ report_outcome() {
         not_ok)
           if "${print_not_ok}"; then
             header
-            # On not_ok, print a red '✗'
             if "${print_in_color}"; then
-              printf '\033[31m✗ \033[0m'
+              printf "\033[31m${fail_mark} \033[0m"
             else
-              printf '✗ '
+              printf "${fail_mark} "
             fi
             echo "${the_shell} ("${file_elapsed}" $(plural second $file_elapsed))"
           fi
@@ -570,6 +569,14 @@ main() {
       esac
       shift
   done
+
+  if $print_in_color; then
+    success_mark=✓
+    fail_mark=✗
+  else
+    success_mark=.
+    fail_mark=F
+  fi
 
   # -------------------- VALIDATE INPUT -------------------- #
   if ! "${cycle_shell}" && test -f "${shell_list}"; then

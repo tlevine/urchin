@@ -1,11 +1,11 @@
 
 ./
 > a
-✗ sh (1 second)
+F sh (1 second)
   | This is stdout from a.
 ./
 > b
-✓ sh (1 second)
+. sh (1 second)
 ./
 > c
   (File is not executable.)
