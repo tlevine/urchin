@@ -1,1 +1,1 @@
-./.run '!#/usr/bin/env true'
+./.run '#!/usr/bin/env true'
