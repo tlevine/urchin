@@ -1,5 +1,73 @@
 On the criteria for ordering
 ==============================
+
+I was confused by the documentation for sort's "-d" flag. I suggest that
+we do one of the following.
+
+* Specify that dictionary order is the default ordering and
+  that "-d" thus usually has no effect
+* Change the default ordering to be a be ASCIIbetical, a lexicographic
+  sort that considers all characters rather than just blanks and
+  alphanumeric characters.
+
+Below I discuss sort order differences between different implementations
+of sort and of sh "*".
+
+Sorting with sort
+------------
+Consider the following two sort commands.
+
+    printf '@ b\n- d\n? a\n~ c\n! e\n' | sort
+    printf '@ b\n- d\n? a\n~ c\n! e\n' | sort -d
+
+With BusyBox v1.23.2 on NixOS 15.09, the first of these commands returns
+ASCIIbetical order,
+
+    ! e
+    - d
+    ? a
+    @ b
+    ~ c
+
+and the second returns dictionary order.
+
+    ? a
+    @ b
+    ~ c
+    - d
+    ! e
+
+With GNU coreutils version 8.24 on NixOS, both commands return
+dictionary order. The same is true for GNU coreutils version 8.23 on
+Debian Wheezy.
+
+    ? a
+    @ b
+    ~ c
+    - d
+    ! e
+
+IEEE Std 1003.1, 2013 Edition [^] specifies that the "-d" flag should
+enable dictionary order. All of these versions of sort have clear
+documentation about the order that should be returned when the "-d" flag
+is set, (See --help, man, or info.) and the implementations match the
+documentation as far as I can tell.
+
+I have found no explicit documentation from any relevant source as to
+what the default sort order should be. On the other hand, they all
+suggest that "-d" produces an order different from the default order.
+
+In GNU coreutils 8.24, for example, "-d" is a direction to "consider
+only blanks and alphanumeric characters". It lacks any mention that the
+"-d" flag has no effect or that it is the default. Furthermore, on my
+first reading, I took it to mean that the default is to consider all
+characters and that "-d" limits the considered characters to blanks and
+alphanumeric characters.
+
+
+Sorting in *
+-------------
+I think this is related to the order returned by "*" in sh.
 The following sh code creates several files in a directory and then
 calls "*", listing them in order.
 
@@ -9,7 +77,7 @@ calls "*", listing them in order.
     for file in *; do echo "$file"; done
 
 On one computer, running FreeBSD, the order is apparently
-ASCIIbetical/lexicographic.
+ASCIIbetical.
 
     ! e
     - d
@@ -28,35 +96,8 @@ sorting on the rest of the line.
     - d
     ! e
 
-While I don't really know what dictionary order is, I was able to determine
+(I don't really know what dictionary order is, I was able to determine
 that the above results are in dictionary order because of my investigation of
-incompatible implementations of sort. Consider the following two sort
-commands.
+incompatible implementations of sort.)
 
-    printf '@ b\n- d\n? a\n~ c\n! e\n' | sort
-    printf '@ b\n- d\n? a\n~ c\n! e\n' | sort -d
-
-With BusyBox v1.23.2 on NixOS 15.09, the first of these commands returns
-ASCIIbetical order, and the second returns dictionary order.
-
-With GNU coreutils version 8.24 on NixOS, both commands return
-dictionary order. The same is true for GNU coreutils version 8.23 on
-Debian Wheezy.
-
-IEEE Std 1003.1, 2013 Edition
-http://pubs.opengroup.org/onlinepubs/9699919799/
-
-All of these versions of sort are clear about the order that should be
-returned when the "-d" flag is set. Here are results from the "--help"
-flag (info and man give similar explanations.) for BusyBox
-
-  -d      Dictionary order (blank or alphanumeric only)
-
-and GNU coreutils.
-
-  -d, --dictionary-order      consider only blanks and alphanumeric characters
-
-So the "-d" flag seems to be fine in all of these versions.
-
-I have found no explicit documentation from any of the three versions
-of sort as to what the default order should be.
+[^] http://pubs.opengroup.org/onlinepubs/9699919799/
