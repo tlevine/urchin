@@ -10,11 +10,11 @@ echo '!#/usr/bin/env true' > $tmp
 has_shebang_line $tmp
 
 echo > $tmp
-has_shebang_line $tmp
+! has_shebang_line $tmp
 
 echo '
 
 
 
 ' > $tmp
-has_shebang_line $tmp
+! has_shebang_line $tmp
