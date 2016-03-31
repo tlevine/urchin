@@ -43,21 +43,8 @@ Urchin depends on the following programs.
 * timeout
 * sort
 
-All of the above programs are usually included on base BSD installations.
-On GNU systems it should be sufficient to install the busybox package.
-
-Urchin uses sort to format its output. GNU sort (as of GNU coreutils version
-8.24) lacks the ability to sort in lexicographic order, and this feature is
-necessary for the output to look right. If your version of sort lacks this
-feature, Urchin will try to use one of the following tools for sorting.
-
-* perl
-* python
-
-If no acceptable sorting program is available, Urchin will print a warning
-and use the incomplete sort that is installed on your system. This is not a
-big deal; if your test files all start with alphanumeric letters, the output
-should look fine.
+Vanilla installations of modern BSD and GNU systems usually include all
+of these programs.
 
 ## Install
 Urchin is contained in a single file, so you can install it by copying it to a
@@ -121,14 +108,20 @@ Files are only run if they are executable, and files beginning with `.` are
 ignored. Thus, fixtures and libraries can be included sloppily within the test
 directory tree. The test passes if the file exits 0; otherwise, it fails.
 
-urchin looks for files within a directory in the following manner.
+urchin looks for files within a directory in the following manner,
 
     for file in *; do
       do_something_with_test_file $file
     done
 
-`*` usually returns files in ASCIIbetical order. On at least some GNU
-systems, it returns files in alphabetic order.
+so files are run in whatever order `*` produces. On GNU systems the
+order is configured in your
+[environment](https://www.gnu.org/software/coreutils/faq/coreutils-faq.html#Sort-does-not-sort-in-normal-order_0021).
+Other systems may ignore the locales configured in the environment and
+always produce ASCIIbetical order.
+
+Results are always printed in ASCIIbetical order, regardless of what
+order the tests ran in.
 
 ### Writing cross-shell compatibility tests for testing shell code
 
