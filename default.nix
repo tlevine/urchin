@@ -4,7 +4,6 @@ with import <nixpkgs> {}; {
     buildInputs = [
       busybox
       bash dash mksh zsh
-      python ruby
     ];
   };  
 }
