@@ -414,7 +414,7 @@ report_outcome() {
 }
 
 has_shebang_line() {
-  head -n 1 "${1}" | grep -q -v '#!/bin/sh' | grep -q '^#!'
+  head -n 1 "${1}" | grep -q -v '^#!/bin/sh'
 }
 
 USAGE="usage: $0 [options]... [test file or directory]..."
