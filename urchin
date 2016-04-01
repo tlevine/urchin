@@ -152,6 +152,10 @@ recurse() {
   cycle_shell="${3}"
   TEST_SHELL="${4}"
 
+  if $print_debug; then
+    echo Entered directory "${PWD}"
+  fi
+
   for ignore in setup_dir teardown_dir setup teardown; do
     if test "$(basename "${potential_test}")" = "${ignore}"; then
       return
@@ -181,7 +185,10 @@ recurse() {
         run_in_series_dir=false
       fi
 
-      if test -f setup_dir; then . ./setup_dir; fi
+      if test -f setup_dir; then
+        echo Sourcing "${PWD}/setup_dir"
+        . ./setup_dir
+      fi
 
       for test in *; do
         if test "${test}" = '*' && ! test -e "${test}"; then
@@ -195,22 +202,41 @@ recurse() {
         if "${run_in_series}" || "${run_in_series_dir}"; then
           if wait "${!}"; then exit_code=0; else exit_code="${?}"; fi
           if "${exit_on_not_ok}" && test "${exit_code}" -ne 0; then
-            if test -f teardown_dir; then . ./teardown_dir; fi
+            if test -f teardown_dir; then
+              if $print_debug; then
+                echo Sourcing "${PWD}/teardown_dir"
+              fi
+              . ./teardown_dir
+            fi
             return 1
           fi
         fi
       done
       wait
-      if test -f teardown_dir; then . ./teardown_dir; fi
+      if test -f teardown_dir; then
+        if $print_debug; then
+          echo Sourcing "${PWD}/teardown_dir"
+        fi
+        . ./teardown_dir
+      fi
     )
     elif [ -f "${potential_test}" ]; then
       cd -- "$(dirname -- "${potential_test}")"
+
+      if $print_debug; then
+        echo Running "${potential_test}"
+      fi
 
       # Determine the environment variable to define for test scripts
       # that reflects the specified or implied shell to use for shell-code tests.
       while read the_test_shell; do
         (
-          if test -f setup; then . ./setup; fi
+          if test -f setup; then
+            if $print_debug; then
+              echo Sourcing "${PWD}/setup"
+            fi
+            . ./setup
+          fi
 
           # Run the test
           start=$(date +%s)
@@ -237,7 +263,10 @@ recurse() {
           set -e
           finish=$(date +%s)
 
-          if test -f teardown; then . ./teardown; fi
+          if test -f teardown; then
+            echo Sourcing "${PWD}/teardown"
+            . ./teardown
+          fi
 
           if [ "${exit_code}" -eq 0 ]; then
             result=ok
@@ -256,7 +285,12 @@ recurse() {
         if "${run_in_series}"; then
           if wait "${!}"; then exit_code=0; else exit_code="${?}"; fi
           if "${exit_on_not_ok}" && test "${exit_code}" -ne 0; then
-            if test -f teardown_dir; then . ./teardown_dir; fi
+            if test -f teardown_dir; then
+              if $print_debug; then
+                echo Sourcing "${PWD}/teardown_dir"
+              fi
+              . ./teardown_dir
+            fi
             return 1
           fi
         fi
@@ -473,7 +507,7 @@ And these options affect how much is printed.
 -v                       Print stdout from failing tests.
 -vv                      Print names of passed tests.
 -vvv, --verbose          Print stdout from all tests.
--vvvv, --debug           Print debugging messages (XXX not implemented)
+-vvvv, --debug           Print debugging messages.
 
 The remaining flags provide information about urchin.
 
@@ -520,6 +554,7 @@ main() {
   print_not_ok=true
   print_ok_stdout=false
   print_not_ok_stdout=false
+  print_debug=false
   while [ "${#}" -gt 0 ]
   do
       case "${1}" in
@@ -557,7 +592,10 @@ main() {
           -vvv|--verbose)print_not_ok_stdout=true
                          print_ok=true;
                          print_ok_stdout=true;;
-          -vvvv|--debug) echo 'Not implemented' > /dev/stderr && exit 1;;
+          -vvvv|--debug) print_not_ok_stdout=true
+                         print_ok=true;
+                         print_ok_stdout=true
+                         print_debug=true;;
 
           -h|--help) urchin_help
                      urchin_exit 0;;
@@ -597,6 +635,11 @@ main() {
     else
       echo > "$shell_list"
     fi
+  fi
+
+  if $print_debug; then
+    echo Cycling with the following shells:
+    cat "${shell_list}"
   fi
 
   if test -n "${urchin_timeout}"; then
