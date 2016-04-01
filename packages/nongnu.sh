@@ -4,6 +4,6 @@ mkdir $tmp/urchin
 cp ../urchin ../readme.md ../AUTHORS ../COPYING $tmp/urchin
 cd $tmp
 tar czf urchin.tar.gz urchin
-cd -
+cd - > /dev/null
 mv $tmp/urchin.tar.gz .
 rm -R $tmp
