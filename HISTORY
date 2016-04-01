@@ -1,7 +1,7 @@
 HISTORY
 =======
 
-Version 0.1.0-rc1
+Version 0.1.0
 ---------------------
 This release includes breaking changes.
 
@@ -72,7 +72,7 @@ might look for the dependency and then skip if it does not see the dependency.
 It might look like this.
 
     #!/bin/sh
-    if which inkscape; then
+    if ! which inkscape; then
       exit 3 # status code 3 for skip
     fi
     inkscape blah blah ...
@@ -170,10 +170,6 @@ set as an environment variable, and the latter was set with the -s flag..
 
 Urchin now uses the -s flag for both of these settings, and it mostly ignores
 the exported TEST_SHELL variable.
-
-Urchin also inspects the shebang line differently. Previously, Urchin would
-vary the shells with which a test is run if the shebang line either was absent
-or was #!/bin/sh. Now it varies the shell only if the shebang line is absent.
 
 If you pass -n/--disable-cycling, Urchin will invoke tests ordinarily and will
 only set the TEST_SHELL variable if it does not exist. If the TEST_SHELL
