@@ -450,8 +450,8 @@ The following flags affect how Urchin processes tests.
 -b, --run-in-series      Run tests in series. The default is to run tests
                          in parallel where possible.
 -e, --exit-on-fail       Stop running if any single test fails.
-                         This is useful if you are running something
-                         configuration files with Urchin.
+                         This can be useful if you are running something
+                         other than test files with Urchin.
 -T, --timeout <seconds>  Kill a test if it runs for longer than the
                          specified duration. The default is no timeout.
 -f, --force              Force running even if the test directory's name
@@ -463,6 +463,8 @@ effect when combined with --tap.
 
 -p, --pretty             Print results in color and with fancy symbols.
 -t, --tap                Format output in Test Anything Protocol (TAP)
+
+And these options affect how much is printed.
 
 -q, --quiet              Print nothing to stdout;
                          the only output is the exit code.
@@ -478,7 +480,7 @@ The remaining flags provide information about urchin.
 -h, --help               Display this help.
 --version                Display the version number.
 
-Go to https://github.com/tlevine/urchin for documentation on writing tests.
+Go to https://thomaslevine.com/!/urchin/ for documentation on writing tests.
 
 EOF
 }
