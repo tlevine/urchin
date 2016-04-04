@@ -1,0 +1,2 @@
+../../urchin -T .testsuite 2>&1 |
+  grep positive\ number
