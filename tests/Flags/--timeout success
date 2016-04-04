@@ -1,0 +1,1 @@
+$TEST_SHELL ../../urchin --shell sh .slow-tests --timeout 1000

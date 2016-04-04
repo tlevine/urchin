@@ -1,3 +1,1 @@
-set -e
-$TEST_SHELL ../../urchin --shell sh .slow-tests
 ! $TEST_SHELL ../../urchin --shell sh --timeout 0.3 .slow-tests
