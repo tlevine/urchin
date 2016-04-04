@@ -1,0 +1,4 @@
+$TEST_SHELL ../../urchin --shell sh --timeout 0.3 .slow-tests 2>&1 |
+  grep -v -- --timeout |
+  grep timeout
+test $? = 1
