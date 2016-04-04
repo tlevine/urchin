@@ -648,9 +648,9 @@ main() {
 
   if test -n "${urchin_timeout}"; then
     # Choose the timeout command
-    if timeout -t 0 true; then
+    if timeout -t 0 true 2> /dev/null; then
       TIMEOUT="timeout -t ${urchin_timeout}"
-    elif timeout 0 true; then
+    elif timeout 0 true 2> /dev/null; then
       TIMEOUT="timeout ${urchin_timeout}"
     else
       echo I couldn\'t figure out how to use your version of timeout >&2
