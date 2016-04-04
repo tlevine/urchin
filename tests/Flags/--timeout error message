@@ -1,2 +1,2 @@
-../../urchin -T aoeu .testsuite 2>&1 | grep positive\ number
-../../urchin -T .testsuite 2>&1 | grep positive\ number
+../../urchin -T aoeu .testsuite 2>&1 | grep Bad
+../../urchin -T .testsuite 2>&1 | grep Bad
