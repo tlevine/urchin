@@ -1,5 +1,5 @@
 host="$(basename "${0}")"
-urchin_dir=urchin
+urchin_dir=.urchin-cross-shell-test
 
 rsync --archive ../urchin ../tests "${host}":"${urchin_dir}"
 ssh "${host}" "cd ${urchin_dir} && ./urchin --run-in-series tests"
