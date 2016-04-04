@@ -695,10 +695,10 @@ main() {
   done < "${test_arg_list}"
   finish=$(date +%s)
 
-  test $(cat "${urchin_tmp}"/log | wc -l) -gt 0 || {
+  if test $(cat "${urchin_tmp}"/log | wc -l) -eq 0; then
     echo 'No tests found' > /dev/stderr
     urchin_exit 1
-  }
+  fi
     
   report_outcome "${root}" "${tap_format}" "${urchin_tmp}"/log "${start}" \
     "${finish}"
