@@ -1,0 +1,7 @@
+host="${0}"
+
+echo "$host"
+tmp=$(ssh "${host}" 'mktemp -d')
+rsync --archive ../urchin ../tests "${host}:${tmp}"
+ssh "${host}" \
+  "cd ${tmp} && ./urchin -v tests; c=$? && rm -Rf ${tmp} && exit $c"
