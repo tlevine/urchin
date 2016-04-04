@@ -188,8 +188,8 @@ recurse() {
       if test -f setup_dir; then
         if $print_debug; then
           echo Sourcing "${PWD}/setup_dir"
-          . ./setup_dir
         fi
+        . ./setup_dir
       fi
 
       for test in *; do
@@ -268,8 +268,8 @@ recurse() {
           if test -f teardown; then
             if $print_debug; then
               echo Sourcing "${PWD}/teardown"
-              . ./teardown
             fi
+            . ./teardown
           fi
 
           if [ "${exit_code}" -eq 0 ]; then

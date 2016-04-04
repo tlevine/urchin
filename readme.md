@@ -51,7 +51,7 @@ Urchin is contained in a single file, so you can install it by copying it to a
 directory in your `PATH`. For example, you can run the following as root.
 
     cd /usr/local/bin
-    wget https://raw.githubusercontent.com/tlevine/urchin/v0.1.0-rc2/urchin
+    wget https://raw.githubusercontent.com/tlevine/urchin/v0.1.0-rc3/urchin
     chmod +x urchin
 
 Urchin can be installed with npm too.
