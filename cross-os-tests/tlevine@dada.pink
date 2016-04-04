@@ -1,2 +1,3 @@
 #!/bin/sh
+# apt-get install bash dash ksh posh pdksh mksh yash zsh
 . ./.run

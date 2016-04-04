@@ -51,7 +51,17 @@ set -e
 # Kill subprocesses on interrupt.
 trap "kill -$$; exit" HUP INT TERM
 
-DEFAULT_SHELLS='sh bash dash mksh zsh'
+DEFAULT_SHELLS='
+sh
+bash
+dash
+ksh
+posh
+pdksh
+mksh
+yash
+zsh
+'
 if [ -n "${ZSH_VERSION}" ]; then
   # avoid "no matches found: *" error when directories are empty
   setopt NULL_GLOB
@@ -641,7 +651,7 @@ main() {
   if ! test -f "${shell_list}"; then
     if $cycle_shell; then
       for shell in $DEFAULT_SHELLS; do
-        if which $shell > /dev/null; then
+        if which $shell 1> /dev/null 2> /dev/null; then
           echo $shell >> "$shell_list"
         fi
       done
