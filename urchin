@@ -585,7 +585,16 @@ main() {
             ;;
           -n|--disable-cycling) cycle_shell=false;; 
           -t|--tap) tap_format=true;;
-          -T|--timeout) shift; urchin_timeout="${1}" ;;
+          -T|--timeout)
+            shift
+            urchin_timeout="${1}" 
+            if ! {
+              echo "${urchin_timeout}" |
+              grep '[0-9][0-9.]*\(s\|m\|h\|d\|\)'
+            }; then
+              echo Bad timeout argument: "${urchin_timeout}" >&2
+              urchin_exit 1
+            fi ;;
           -p|--pretty) print_in_color=true;;
 
           -q|--quiet)    print_not_ok=false
