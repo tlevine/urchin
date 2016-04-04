@@ -5,6 +5,14 @@ Version 0.1.0
 ---------------------
 This release includes breaking changes.
 
+### Cross-OS testing
+I have started testing Urchin across multiple operating systems.
+This gives access to more shells, as some shels are easier to install on
+certain operating systems.
+
+With this cross-OS test suite, I have extended support to more shells.
+A later version of Urchin could include a remote testing feature.
+
 ### Test root directory
 We introduce a concept of the root directory of a test suite.
 Such a concept is important in case you want to run subsets of your
