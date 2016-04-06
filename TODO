@@ -63,3 +63,11 @@ bash
 Alternatives
 --------------
 JSON.sh test suite
+
+Running in multiple environments
+-----------------------------------
+Setup for other environments includes the following.
+
+* Installing packages
+* `touch .zshrc`
+* Copy urchin and tests
