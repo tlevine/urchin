@@ -1,8 +1,9 @@
+set -x
 params="$(basename "${0}")"
 
 hostname="$(echo "${params}" | cut -d\  -f1)"
 if echo "${params}" | grep -q \ ; then
-  flags="$(echo "${params}" | cut -d\  -f2)"
+  flags="$(echo "${params}" | cut -d\  -f2-)"
 fi
 
 urchin_dir=.urchin-cross-shell-test
