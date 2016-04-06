@@ -71,3 +71,8 @@ Setup for other environments includes the following.
 * Installing packages
 * `touch .zshrc`
 * Copy urchin and tests
+
+Bugs
+-------
+
+* Both md5sum and md5 should be supported.

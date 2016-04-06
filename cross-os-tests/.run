@@ -1,4 +1,3 @@
-set -x
 params="$(basename "${0}")"
 
 hostname="$(echo "${params}" | cut -d\  -f1)"
