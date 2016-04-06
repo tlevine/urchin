@@ -1,2 +1,3 @@
 #!/bin/sh
+# SSH public key needs to be in ~/.etc/ssh/authorized_keys
 . ./.run
