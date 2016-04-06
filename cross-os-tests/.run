@@ -1,5 +1,22 @@
-host="$(basename "${0}")"
+params="$(basename "${0}")"
+
+fullhost="$(echo "${params}" | cut -d\  -f1)"
+if echo "${params}" | grep -q \ ; then
+  flags="$(echo "${params}" | cut -d\  -f2)"
+fi
+
+hostname="$(echo "${fullhost}" | cut -d: -f1)"
+if echo "${fullhost}" | grep -q : ; then
+  port="$(echo "${fullhost}" | cut -d: -f2)"
+else
+  port=22
+fi
+
+echo $port
+exit
 urchin_dir=.urchin-cross-shell-test
 
-rsync --archive ../urchin ../tests "${host}":"${urchin_dir}"
-ssh "${host}" "cd ${urchin_dir} && ./urchin --run-in-series tests"
+rsync --archive -e "ssh ${params}" \
+  ../urchin ../tests "${host}":"${urchin_dir}"
+ssh -p "${port}" "${host}" \
+  "cd ${urchin_dir} && ./urchin --run-in-series tests"
