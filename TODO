@@ -144,3 +144,8 @@ Update tests to support
 * epoch
 * Report cycling by default
 * New format for reporting cycling
+
+
+
+
+Support systems without rsync
