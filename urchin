@@ -558,9 +558,9 @@ The remaining flags provide information about urchin.
 Urchin recognizes certain environment variables.
 
 TEST_SHELL           This is sometimes over-ridden; see -s.
-DISABLE_CYCLING      Set this to true to have the same effect as -n.
-                     This is helpful if you are calling urchin
-                     inside an urchin test suite.
+RUN_IN_SERIES        Set this to true to have the same effect as
+                     -b/--run-in-series. This is helpful if you are
+                     calling urchin inside an urchin test suite.
 
 Go to https://thomaslevine.com/!/urchin/ for documentation on writing tests.
 
@@ -666,8 +666,8 @@ main() {
       esac
       shift
   done
-  if "${DISABLE_CYCLING}" 2> /dev/null; then
-    cycle_shell=false
+  if "${RUN_IN_SERIES}" 2> /dev/null; then
+    run_in_series=true
   fi
 
   if $print_in_color; then
