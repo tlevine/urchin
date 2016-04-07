@@ -81,7 +81,7 @@ epoch_pax() {
 mktemp_dir() {
   # Support HP-UX mktemp that has wrong exit codes and
   # can't make directories.
-  tmp=$(mktemp)
+  tmp=$(mktemp /tmp/urchin.XXXXXXXX)
   if test -f "${tmp}"; then
     rm "${tmp}"
   fi
@@ -89,7 +89,7 @@ mktemp_dir() {
   echo "${tmp}"
 }
 mktemp_file() {
-  tmp=$(mktemp)
+  tmp=$(mktemp /tmp/urchin.XXXXXXXX)
   if ! test -f "${tmp}"; then
     > "${tmp}"
   fi
