@@ -161,3 +161,9 @@ BSD mktemp
     | ./urchin: cannot create /log: permission denied
 
 
+NetBSD
+
+    md5: unknown option -- q
+    usage: cksum [-n] [-a algorithm [-ptx] [-s string]] [-o 1|2]
+                 [file ... | -c [-w] [sumfile]]
+

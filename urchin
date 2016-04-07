@@ -154,7 +154,7 @@ stdout_file() {
   mkdir -p "${x}"
   case "${urchin_md5}" in
     md5sum) y=$(echo "${the_shell}" | md5sum | cut -d\  -f1) ;;
-    md5) y=$(echo "${the_shell}" | md5 -q) ;;
+    md5) y=$(echo "${the_shell}" | md5 | sed 's/.* //') ;;
     *) echo md5 command is not configured >&2; urchin_exit 1;;
   esac
   echo "${x}/${y}"
