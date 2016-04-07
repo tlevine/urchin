@@ -91,8 +91,17 @@ validate_test_arg() {
 }
 
 # All temporary files go here
-urchin_tmp=$(mktemp -d)
+urchin_tmp=$(mktemp)
+
+# Support HP-UX mktemp that has wrong exit codes and
+# can't make directories.
+if test -f "${urchin_tmp}"; then
+  rm "${urchin_tmp}"
+fi
+mkdir "${urchin_tmp}"
+
 > "${urchin_tmp}/log"
+
 urchin_exit() {
   rm -Rf "${urchin_tmp}"
   exit "$@"
