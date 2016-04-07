@@ -666,6 +666,9 @@ main() {
       esac
       shift
   done
+  if "${DISABLE_CYCLING}" 2> /dev/null; then
+    cycle_shell=false
+  fi
 
   if $print_in_color; then
     success_mark=✓

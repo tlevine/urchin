@@ -10,4 +10,4 @@ urchin_dir=.urchin-cross-shell-test
 rsync --archive -e "ssh ${flags}" $RSYNC_FLAGS \
   ../urchin ../tests "${hostname}":"${urchin_dir}"
 ssh "${hostname}" ${flags} \
-  "cd ${urchin_dir} && ./urchin --run-in-series tests"
+  "cd ${urchin_dir} && DISABLE_CYCLING=true ./urchin --run-in-series tests"
