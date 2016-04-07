@@ -95,6 +95,45 @@ your tests. For example.
 It's best if I can wrap a bunch of commands in braces or paratheses
 rather than just one command. Is there a nice way to do that?
 
+Once I have this new way, I guess I might as well keep the old way.
+I think the setup, teardown thing can be easier if you only have simple
+fixtures. And since I'm going to keep it, I'm going to add another one.
+
+* setup_dir runs once for the present directory.
+* setup_children runs once for each child.
+* setup_file runs once for each file descendent.
+
+The present `setup` is renamed to `setup_children`, and the new
+`setup_file` runs on each file (not directory) that is a child,
+grandchild, great-grandchild, and so on.
+
+Dependency checking
+----------------------
+You might want to skip tests based on dependencies. Currently you can
+conditionally skip tests one at a time by exiting with code 3. I want to
+be able to skip an entire directory.
+
+So we add a new magic file called `dep`. If it exists, it is run before
+everything else in the directory.
+
+* If it exits with code 0, tests continue as if dep did not exist.
+* If it exits with code 3, all tests in the directory are marked as
+  skipped.
+* If it exits with code 1, all tests in the directory are marked as
+  failed. To make the implementation easier, I'll probably treat the
+  directory as a single test in this case.
+
+A note on magic files
+-------------------------
+It is nice to have access to things like setup and dep (magic files)
+once in a while, but you need to be doing rather substantial testing
+before they make your test suite simpler; the documentation should
+strongly recommend writing your tests without magic files and then
+refactoring and only then considering moving things to magic files.
+
+
+
+
 Bugs
 -------
 
