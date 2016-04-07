@@ -555,6 +555,13 @@ The remaining flags provide information about urchin.
 -h, --help               Display this help.
 --version                Display the version number.
 
+Urchin recognizes certain environment variables.
+
+TEST_SHELL           This is sometimes over-ridden; see -s.
+DISABLE_CYCLING      Set this to true to have the same effect as -n.
+                     This is helpful if you are calling urchin
+                     inside an urchin test suite.
+
 Go to https://thomaslevine.com/!/urchin/ for documentation on writing tests.
 
 EOF
