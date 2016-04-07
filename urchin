@@ -98,16 +98,10 @@ urchin_exit() {
   exit "$@"
 }
 
-urchin_md5_quiet() {
-  md5 -q
-}
-urchin_md5sum_quiet() {
-  md5sum | cut -d\  -f1
-}
-if which md5 > /dev/null; then
-  md5=urchin_md5_quiet
-elif which md5sum > /dev/null; then
-  md5=urchin_mdsum_quiet
+if which md5 1> /dev/null 2> /dev/null; then
+  alias urchin_md5='md5 -q'
+elif which md5sum 1> /dev/null 2> /dev/null; then
+  alias urchin_md5='md5sum | cut -d\  -f1'
 else
   echo Could not find md5sum command >&2
   urchin_exit 1
@@ -120,7 +114,7 @@ stdout_file() {
 
   x="${urchin_tmp}/stdout$(fullpath "$the_test")"
   mkdir -p "${x}"
-  echo "${x}/$(echo "${the_shell}" | $md5)"
+  echo "${x}/$(echo "${the_shell}" | urchin_md5)"
 }
 
 # Expand relative paths
