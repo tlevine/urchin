@@ -149,3 +149,15 @@ Update tests to support
 
 
 Support systems without rsync
+
+
+BSD mktemp
+
+    | NetBSD 6.1.3 
+    | Welcome to NetBSD ...member of polarhome.com realm
+    | 
+    | Usage: mktemp [-dqu] [-p <tmpdir>] {-t prefix | template ...}
+    | mkdir: : No such file or directory
+    | ./urchin: cannot create /log: permission denied
+
+
