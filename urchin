@@ -119,7 +119,6 @@ stdout_file() {
     md5) y=$(echo "${the_shell}" | md5 -q) ;;
     *) echo md5 command is not configured >&2; urchin_exit 1;;
   esac
-  y=$(echo "${the_shell}" | $urchin_md5)"
   echo "${x}/${y}"
 }
 
