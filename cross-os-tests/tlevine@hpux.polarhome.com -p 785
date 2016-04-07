@@ -1,2 +1,3 @@
 #!/bin/sh
+RSYNC_FLAGS='--rsync-path=/usr/local/bin/rsync'
 . ./.run
