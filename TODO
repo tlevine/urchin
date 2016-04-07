@@ -114,3 +114,6 @@ date
     tlevine@hpux64$ ./urchin tests/ -n -vv
     date: bad format character - s
 
+So I need a portable seconds-from epoch
+
+I also need to handle when no arguments are passed to urchin.
