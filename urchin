@@ -162,7 +162,7 @@ urchin_root() {
 }
 
 # Urchin version number
-VERSION=0.1.0-rc2
+VERSION=0.1.1-unstable
 
 indent() {
   level="${1}"
