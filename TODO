@@ -72,6 +72,29 @@ Setup for other environments includes the following.
 * `touch .zshrc`
 * Copy urchin and tests
 
+
+Fixtures
+------------
+I want to change the way that fixtures are done.
+
+Instead of using setup, teardown, &c., use ordinary programs from within
+your tests. For example.
+
+    # tests/.fixtures/tmp-dir
+    tmp=$(mktemp -d)
+    cd $tmp
+    @$
+    code=$?
+    cd /
+    rm -Rf $tmp
+    exit $code
+
+    # tests/blah
+    ../.fixtures/tmp-dir 'blah blah blah'
+
+It's best if I can wrap a bunch of commands in braces or paratheses
+rather than just one command. Is there a nice way to do that?
+
 Bugs
 -------
 
@@ -166,4 +189,7 @@ NetBSD
     md5: unknown option -- q
     usage: cksum [-n] [-a algorithm [-ptx] [-s string]] [-o 1|2]
                  [file ... | -c [-w] [sumfile]]
+
+
+
 
