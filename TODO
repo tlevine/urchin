@@ -120,8 +120,15 @@ I also need to handle when no arguments are passed to urchin.
 
 Exit code is wrong for which on HP-UX
 
-Same error as above
+## `$(...)`
+Solaris doesn't support `$(...)`; you need `\`...\`` instead.
 
     tlevine@solaris$ ./urchin --run-in-series tests/Errors/
     ./urchin: syntax error at line 84: `tmp=$' unexpected
 
+I use this a lot.
+
+    $ grep -c '\$(' urchin 
+    52
+
+Darn
