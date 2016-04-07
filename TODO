@@ -75,4 +75,11 @@ Setup for other environments includes the following.
 Bugs
 -------
 
-* Both md5sum and md5 should be supported.
+Both md5sum and md5 should be supported.
+
+Trouble logging in to hpux, irix, miros, netbsd, tru64, qnx, ....
+
+OpenIndiana grep does not support -q
+
+I get `/urchin: syntax error at line 84: \`}' unexpected` on
+unixware and solaris.
