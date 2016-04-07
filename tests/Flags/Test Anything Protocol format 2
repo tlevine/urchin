@@ -1,0 +1,5 @@
+lines=$(
+  $TEST_SHELL ../../urchin -v -s sh -t .testsuite/ |
+    tee $tmp | grep -v '^#' | wc -l)
+cat $tmp
+test $lines -eq 4

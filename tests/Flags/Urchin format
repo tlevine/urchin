@@ -1,3 +1,3 @@
 $TEST_SHELL ../../urchin -vv -s sh .testsuite/ |
-  sed -e 1d -e 's/. seconds\?/1 second/' > $tmp
+  sed -e 1,2\ d -e 's/. seconds\?/1 second/' > $tmp
 diff $tmp .urchin-output-expectation
