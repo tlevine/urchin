@@ -74,10 +74,27 @@ epoch_date() {
 
 epoch_pax() {
   # Based on http://stackoverflow.com/a/7262588/407226
-  tmp="$(mktemp)"
+  tmp="$(mktemp_file)"
   echo "ibase=8;$({ pax -wx cpio "${tmp}"; echo; } | cut -c 48-59)" | bc
   rm "${tmp}"
 }
+
+mktemp_dir() {
+  # Support HP-UX mktemp that has wrong exit codes and
+  # can't make directories.
+  if test -f "${urchin_tmp}"; then
+    rm "${urchin_tmp}"
+  fi
+  mkdir "${urchin_tmp}"
+}
+
+mktemp_file() {
+  tmp=$(mktemp)
+  if ! test -f "${tmp}"; then
+    > "${tmp}"
+  fi
+}
+
 
 validate_test_arg() {
   # Must be a file or directory
@@ -102,15 +119,7 @@ validate_test_arg() {
 }
 
 # All temporary files go here
-urchin_tmp=$(mktemp)
-
-# Support HP-UX mktemp that has wrong exit codes and
-# can't make directories.
-if test -f "${urchin_tmp}"; then
-  rm "${urchin_tmp}"
-fi
-mkdir "${urchin_tmp}"
-
+urchin_tmp=$(mktemp_dir)
 > "${urchin_tmp}/log"
 
 urchin_exit() {
@@ -385,7 +394,7 @@ report_outcome() {
 
   # Use a temporary file rather than a pipe because a pipe starts a sub-shell
   # and thus makes the above variables local.
-  sorted_log_file=$(mktemp)
+  sorted_log_file=$(mktemp_file)
   cat "${log_file}" | LC_COLLATE=C sort > "${sorted_log_file}"
 
   while read line; do
