@@ -137,9 +137,9 @@ else
   urchin_exit 1
 fi
 
-if epoch_date 2>&1 /dev/null; then
+if epoch_date 2>&1 > /dev/null; then
   epoch=epoch_date
-elif epoch_pax 2>&1 /dev/null; then
+elif epoch_pax 2>&1 > /dev/null; then
   epoch=epoch_pax
 else
   echo I could not find a seconds counter. >&2
@@ -284,7 +284,7 @@ recurse() {
           fi
 
           # Run the test
-          start=$(epoch)
+          start=$("${epoch}")
           set +e
           { 
             if "${cycle_shell}"; then
@@ -306,7 +306,7 @@ recurse() {
           } > "$(stdout_file "${potential_test}" "${the_test_shell}")" 2>&1
           exit_code="${?}"
           set -e
-          finish=$(epoch)
+          finish=$("${epoch}")
 
           if test -f teardown; then
             . ./teardown
@@ -709,7 +709,7 @@ main() {
   fi
 
   # --------------------   REALLY RUN   -------------------- #
-  start=$(epoch)
+  start=$("${epoch}")
 
   # 1 test file or folder to run
   # 2 urchin root
@@ -719,7 +719,7 @@ main() {
     recurse "$(fullpath "${seed}")" "${root}" "${cycle_shell}" \
       "${TEST_SHELL}" || break
   done < "${test_arg_list}"
-  finish=$(epoch)
+  finish=$("${epoch}")
 
   if test $(cat "${urchin_tmp}"/log | wc -l) -eq 0; then
     echo 'No tests found' >&2
