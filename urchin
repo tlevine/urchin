@@ -71,7 +71,6 @@ fi
 epoch_date() {
   date +%s
 }
-
 epoch_pax() {
   # Based on http://stackoverflow.com/a/7262588/407226
   tmp="$(mktemp_file)"
@@ -82,12 +81,12 @@ epoch_pax() {
 mktemp_dir() {
   # Support HP-UX mktemp that has wrong exit codes and
   # can't make directories.
-  if test -f "${urchin_tmp}"; then
-    rm "${urchin_tmp}"
+  tmp=$(mktemp)
+  if test -f "${tmp}"; then
+    rm "${tmp}"
   fi
-  mkdir "${urchin_tmp}"
+  mkdir "${tmp}"
 }
-
 mktemp_file() {
   tmp=$(mktemp)
   if ! test -f "${tmp}"; then
