@@ -347,11 +347,9 @@ report_outcome() {
   root="${1}"
   tap_format="${2}"
   log_file="${3}"
-  start="${4}"
-  finish="${5}"
+  elapsed="${4}"
 
   escaped_root="$(fullpath "${root}" | sed 's/\//\\\//g')"
-  elapsed=$(($finish - $start))
 
   if "${tap_format}"; then
     printf \#\ 
@@ -707,17 +705,18 @@ main() {
   fi
 
   # --------------------   REALLY RUN   -------------------- #
-  start=$(date +%s)
-
-  # 1 test file or folder to run
-  # 2 urchin root
-  # 3 Should we cycle shells?
-  # 4 TEST_SHELL
-  while read seed; do
-    recurse "$(fullpath "${seed}")" "${root}" "${cycle_shell}" \
-      "${TEST_SHELL}" || break
-  done < "${test_arg_list}"
-  finish=$(date +%s)
+  elapsed=$({
+    time {
+      # 1 test file or folder to run
+      # 2 urchin root
+      # 3 Should we cycle shells?
+      # 4 TEST_SHELL
+      while read seed; do
+        recurse "$(fullpath "${seed}")" "${root}" "${cycle_shell}" \
+          "${TEST_SHELL}" || break
+      done < "${test_arg_list}"
+    }
+  }  3>&1 1>&2 2>&3 3>& | grep ^real | cut -f 2)
 
   if test $(cat "${urchin_tmp}"/log | wc -l) -eq 0; then
     echo 'No tests found' >&2
