@@ -93,3 +93,19 @@ OpenIndiana grep does not support -q
 
 I get `/urchin: syntax error at line 84: \`}' unexpected` on
 unixware and solaris.
+
+mktemp
+
+    > tlevine@hpux.polarhome.com -p 785
+    F sh (8 seconds)
+      | 
+      | HP-UX hpux.polarhome.com B.11.11 U 9000/785 (ta)
+      | Welcome to HPUX/PA... member of polarhome.com realm
+      | 
+      | 
+      | HP-UX hpux.polarhome.com B.11.11 U 9000/785 (ta)
+      | Welcome to HPUX/PA... member of polarhome.com realm
+      | 
+      | mktemp: option requires an argument -- d
+      | ./urchin[96]: /tmp/tlevinea21441/log: Cannot create the specified file.
+
