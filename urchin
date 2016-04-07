@@ -213,10 +213,6 @@ recurse() {
   cycle_shell="${3}"
   TEST_SHELL="${4}"
 
-  if $print_debug; then
-    echo Entered directory "${PWD}"
-  fi
-
   for ignore in setup_dir teardown_dir setup teardown; do
     if test "$(basename "${potential_test}")" = "${ignore}"; then
       return
@@ -247,9 +243,6 @@ recurse() {
       fi
 
       if test -f setup_dir; then
-        if $print_debug; then
-          echo Sourcing "${PWD}/setup_dir"
-        fi
         . ./setup_dir
       fi
 
@@ -266,9 +259,6 @@ recurse() {
           if wait "${!}"; then exit_code=0; else exit_code="${?}"; fi
           if "${exit_on_not_ok}" && test "${exit_code}" -ne 0; then
             if test -f teardown_dir; then
-              if $print_debug; then
-                echo Sourcing "${PWD}/teardown_dir"
-              fi
               . ./teardown_dir
             fi
             return 1
@@ -277,27 +267,17 @@ recurse() {
       done
       wait
       if test -f teardown_dir; then
-        if $print_debug; then
-          echo Sourcing "${PWD}/teardown_dir"
-        fi
         . ./teardown_dir
       fi
     )
     elif [ -f "${potential_test}" ]; then
       cd -- "$(dirname -- "${potential_test}")"
 
-      if $print_debug; then
-        echo Running "${potential_test}"
-      fi
-
       # Determine the environment variable to define for test scripts
       # that reflects the specified or implied shell to use for shell-code tests.
       while read the_test_shell; do
         (
           if test -f setup; then
-            if $print_debug; then
-              echo Sourcing "${PWD}/setup"
-            fi
             . ./setup
           fi
 
@@ -327,9 +307,6 @@ recurse() {
           finish=$(epoch)
 
           if test -f teardown; then
-            if $print_debug; then
-              echo Sourcing "${PWD}/teardown"
-            fi
             . ./teardown
           fi
 
@@ -351,9 +328,6 @@ recurse() {
           if wait "${!}"; then exit_code=0; else exit_code="${?}"; fi
           if "${exit_on_not_ok}" && test "${exit_code}" -ne 0; then
             if test -f teardown_dir; then
-              if $print_debug; then
-                echo Sourcing "${PWD}/teardown_dir"
-              fi
               . ./teardown_dir
             fi
             return 1
@@ -572,7 +546,7 @@ And these options affect how much is printed.
 -v                       Print stdout from failing tests.
 -vv                      Print names of passed tests.
 -vvv, --verbose          Print stdout from all tests.
--vvvv, --debug           Print debugging messages.
+-vvvv, --debug           Run with set -x.
 
 The remaining flags provide information about urchin.
 
@@ -619,7 +593,6 @@ main() {
   print_not_ok=true
   print_ok_stdout=false
   print_not_ok_stdout=false
-  print_debug=false
   while [ "${#}" -gt 0 ]
   do
       case "${1}" in
@@ -669,7 +642,7 @@ main() {
           -vvvv|--debug) print_not_ok_stdout=true
                          print_ok=true;
                          print_ok_stdout=true
-                         print_debug=true;;
+                         set -x;;
 
           -h|--help) urchin_help
                      urchin_exit 0;;
@@ -711,7 +684,7 @@ main() {
     fi
   fi
 
-  if $print_debug; then
+  if $print_margins; then
     echo Cycling with the following shells:
     cat "${shell_list}"
   fi
