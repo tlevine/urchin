@@ -119,3 +119,9 @@ So I need a portable seconds-from epoch
 I also need to handle when no arguments are passed to urchin.
 
 Exit code is wrong for which on HP-UX
+
+Same error as above
+
+    tlevine@solaris$ ./urchin --run-in-series tests/Errors/
+    ./urchin: syntax error at line 84: `tmp=$' unexpected
+
