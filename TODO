@@ -131,8 +131,54 @@ before they make your test suite simpler; the documentation should
 strongly recommend writing your tests without magic files and then
 refactoring and only then considering moving things to magic files.
 
+Remote testing
+----------------
+In order to test Urchin across multiple operating systems, I have
+already added tests in Urchin's test suite that run Urchin tests in
+remote servers. I would like to move this to Urchin itself so that
+Urchin can test other things on remote servers.
 
+Urchin's output presently looks like this.
 
+    Cycling with the following shells: sh bash dash mksh zsh 
+    Running tests at 2016-04-07T12:33:49
+
+    Flags/
+    > --timeout output
+    . bash (0 seconds)
+    . dash (0 seconds)
+    . mksh (0 seconds)
+    . sh (0 seconds)
+    . zsh (0 seconds)
+
+    Done, took 1 second.
+    5 tests passed.
+    0 tests skipped.
+    0 tests failed.
+
+After the change, the output should look like this.
+
+    Cycling with the following shells: sh dash mksh
+    Running tests at 2016-04-07T12:33:49
+
+    Flags/
+    > --timeout output
+    . dash on localhost (0 seconds)
+    . dash on localhost:8080 (0 seconds)
+    . dash on tlevine@hpux.polarhome.com (0 seconds)
+    . mksh on localhost (0 seconds)
+    . mksh on tlevine@hpux.polarhome.com (0 seconds)
+    . sh on localhost (0 seconds)
+    . sh on localhost:8080 (0 seconds)
+    . sh on tlevine@hpux.polarhome.com (0 seconds)
+
+    Done, took 1 second.
+    8 tests passed.
+    0 tests skipped.
+    0 tests failed.
+
+This is just how the output should look; the tests run in whatever order
+makes sense.
 
 Bugs
 -------
