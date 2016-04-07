@@ -68,6 +68,17 @@ if [ -n "${ZSH_VERSION}" ]; then
   emulate sh
 fi
 
+epoch_date() {
+  date +%s
+}
+
+epoch_pax() {
+  # Based on http://stackoverflow.com/a/7262588/407226
+  tmp="$(mktemp)"
+  echo "ibase=8;$({ pax -wx cpio "${tmp}"; echo; } | cut -c 48-59)" | bc
+  rm "${tmp}"
+}
+
 validate_test_arg() {
   # Must be a file or directory
   if [ ! -e "${1}" ]; then
@@ -116,6 +127,14 @@ else
   urchin_exit 1
 fi
 
+if epoch_date 2>&1 /dev/null; then
+  epoch=epoch_date
+elif epoch_pax 2>&1 /dev/null; then
+  epoch=epoch_pax
+else
+  echo I could not find a seconds counter. >&2
+  urchin_exit 1
+fi
 
 stdout_file() {
   the_test="${1}"
@@ -275,7 +294,7 @@ recurse() {
           fi
 
           # Run the test
-          start=$(date +%s)
+          start=$(epoch)
           set +e
           { 
             if "${cycle_shell}"; then
@@ -297,7 +316,7 @@ recurse() {
           } > "$(stdout_file "${potential_test}" "${the_test_shell}")" 2>&1
           exit_code="${?}"
           set -e
-          finish=$(date +%s)
+          finish=$(epoch)
 
           if test -f teardown; then
             if $print_debug; then
@@ -707,7 +726,7 @@ main() {
   fi
 
   # --------------------   REALLY RUN   -------------------- #
-  start=$(date +%s)
+  start=$(epoch)
 
   # 1 test file or folder to run
   # 2 urchin root
@@ -717,7 +736,7 @@ main() {
     recurse "$(fullpath "${seed}")" "${root}" "${cycle_shell}" \
       "${TEST_SHELL}" || break
   done < "${test_arg_list}"
-  finish=$(date +%s)
+  finish=$(epoch)
 
   if test $(cat "${urchin_tmp}"/log | wc -l) -eq 0; then
     echo 'No tests found' >&2
