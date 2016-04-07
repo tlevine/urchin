@@ -86,12 +86,14 @@ mktemp_dir() {
     rm "${tmp}"
   fi
   mkdir "${tmp}"
+  echo "${tmp}"
 }
 mktemp_file() {
   tmp=$(mktemp)
   if ! test -f "${tmp}"; then
     > "${tmp}"
   fi
+  echo "${tmp}"
 }
 
 
