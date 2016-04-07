@@ -584,6 +584,7 @@ main() {
   cycle_shell=true
   shell_list="${urchin_tmp}"/shell_list
   test_arg_list="${urchin_tmp}"/test_list
+  > "${test_arg_list}"
   run_in_series=false
   force=false
   exit_on_not_ok=false
@@ -687,8 +688,9 @@ main() {
   fi
 
   if $print_margins; then
-    echo Cycling with the following shells:
-    cat "${shell_list}"
+    printf 'Cycling with the following shells: '
+    cat "${shell_list}" | tr '\n' \ 
+    echo
   fi
 
   if test -n "${urchin_timeout}"; then
