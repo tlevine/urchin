@@ -117,3 +117,5 @@ date
 So I need a portable seconds-from epoch
 
 I also need to handle when no arguments are passed to urchin.
+
+Exit code is wrong for which on HP-UX
