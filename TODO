@@ -132,3 +132,15 @@ I use this a lot.
     52
 
 Darn
+
+
+
+
+Update tests to support
+
+* md5
+* rsync
+* mktemp
+* epoch
+* Report cycling by default
+* New format for reporting cycling
