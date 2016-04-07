@@ -79,6 +79,16 @@ Both md5sum and md5 should be supported.
 
 Trouble logging in to hpux, irix, miros, netbsd, tru64, qnx, ....
 
+    $ rsync -e 'ssh -p 785' urchin tlevine@hpux.polarhome.com:.blah
+    HP-UX hpux.polarhome.com B.11.11 U 9000/785 (ta)
+    Welcome to HPUX/PA... member of polarhome.com realm
+
+    bash: rsync: command not found
+    rsync: connection unexpectedly closed (0 bytes received so far) [sender]
+    rsync error: remote command not found (code 127) at io.c(226)
+    [sender=3.1.1]
+
+
 OpenIndiana grep does not support -q
 
 I get `/urchin: syntax error at line 84: \`}' unexpected` on
