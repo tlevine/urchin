@@ -99,11 +99,11 @@ urchin_exit() {
 }
 
 if which md5 1> /dev/null 2> /dev/null; then
-  alias urchin_md5='md5 -q'
+  urchin_md5=md5
 elif which md5sum 1> /dev/null 2> /dev/null; then
-  alias urchin_md5='md5sum | cut -d\  -f1'
+  urchin_md5=md5sum
 else
-  echo Could not find md5sum command >&2
+  echo Could not find MD5 hash command >&2
   urchin_exit 1
 fi
 
@@ -114,7 +114,13 @@ stdout_file() {
 
   x="${urchin_tmp}/stdout$(fullpath "$the_test")"
   mkdir -p "${x}"
-  echo "${x}/$(echo "${the_shell}" | urchin_md5)"
+  case "${urchin_md5}" in
+    md5sum) y=$(echo "${the_shell}" | md5sum | cut -d\  -f1) ;;
+    md5) y=$(echo "${the_shell}" | md5 -q) ;;
+    *) echo md5 command is not configured >&2; urchin_exit 1;;
+  esac
+  y=$(echo "${the_shell}" | $urchin_md5)"
+  echo "${x}/${y}"
 }
 
 # Expand relative paths
