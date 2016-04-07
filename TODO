@@ -109,3 +109,8 @@ mktemp
       | mktemp: option requires an argument -- d
       | ./urchin[96]: /tmp/tlevinea21441/log: Cannot create the specified file.
 
+date
+
+    tlevine@hpux64$ ./urchin tests/ -n -vv
+    date: bad format character - s
+
