@@ -698,6 +698,9 @@ main() {
   fi
 
   if $print_margins; then
+    if $tap_format; then
+      printf '# '
+    fi
     printf 'Cycling with the following shells: '
     cat "${shell_list}" | tr '\n' \ 
     echo
