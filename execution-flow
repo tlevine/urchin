@@ -89,9 +89,15 @@ When it needs the stdout files, it prints them over ssh.
 
 New flags
 ----------
+In making this remotes feature, I wound up adding some others.
 
--r, --remote      Host to use as a remote
+-r, --remote      SSH host to use as a remote
 -F, --format      Output format, one of "urchin", "tap", "dsv", "remote"
+
+Urchin runs only locally by default. If you pass at least one --remote
+flag, Urchin runs tests only on the specified remotes; it can't run both
+locally and remotely in the same run. If you want to do that, you could
+wait until I add that feature, or you can add "localhost" as a remote.
 
 Settings that I'm thinking about
 
