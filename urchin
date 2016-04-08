@@ -356,12 +356,14 @@ report_outcome() {
   escaped_root="$(fullpath "${root}" | sed 's/\//\\\//g')"
   elapsed=$(($finish - $start))
 
-  if "${tap_format}"; then
-    printf \#\ 
-  fi
   if "${print_margins}" || "${tap_format}"; then
-    echo Running tests at $(date +%Y-%m-%dT%H:%M:%S)
+    if $tap_format; then printf \#\ ; fi
+    echo Ran tests at $(date +%Y-%m-%dT%H:%M:%S) with the following shells:
+    if $tap_format; then printf \#\ ; fi
+    cat "${shell_list}" | tr '\n' \ 
+    echo
   fi
+
 
   for number in n oks skips not_oks; do
     eval "${number}=0"
@@ -697,15 +699,6 @@ main() {
     fi
   fi
 
-  if $print_margins; then
-    if $tap_format; then
-      printf '# '
-    fi
-    printf 'Cycling with the following shells: '
-    cat "${shell_list}" | tr '\n' \ 
-    echo
-  fi
-
   if test -n "${urchin_timeout}"; then
     # Choose the timeout command
     if timeout -t 0 true 2> /dev/null; then
@@ -741,9 +734,13 @@ main() {
     urchin_exit 1
   fi
     
-  report_outcome "${root}" "${tap_format}" "${urchin_tmp}"/log "${start}" \
-    "${finish}"
-  urchin_exit "${?}"
+  if test -n "${RUNNING_ON_REMOTE}"; then
+    cat "${urchin_tmp}"/log
+  else
+    report_outcome "${root}" "${tap_format}" "${urchin_tmp}"/log \
+      "${start}" "${finish}"
+    urchin_exit "${?}"
+  fi
 }
 
 test -n "${TESTING_URCHIN_INTERNALS}" || main "$@"
