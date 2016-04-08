@@ -61,3 +61,7 @@ and the result might look like this.
 
     sh on nsa:Counting tests/.test/faila:0:not_ok
 
+This gets processed in the reporting step like usual, according to
+whatever format is specified. Instead of printing just "sh" as the
+environment in which the particular test was run, the report will print
+"sh on nsa".
