@@ -1,0 +1,63 @@
+When Urchin runs a directory of files, it goes through the following
+steps.
+
+1. Head
+2. Test
+3. Foot
+4. Reporting
+
+Urchin stores files in a temporary directory, creating a new directory
+on each invocation. The directory contains these things.
+
+* head (file)
+* test (file)
+* foot (file)
+* stdout (directory)
+
+When run on remotes, the temporary directory corresponding to the local
+master process additionally has these files.
+
+* remote-test
+
+Messages from the head, test, and foot steps go in the corresponding
+files. In the head and foot phases, messages are just simple prints.
+Messages from the test phase always correspond to a particular test
+file, and they are written to the test file in a delimiter-separated
+format.
+
+Stdout and stderr from test runs are written to files in the stdout
+directory, one file per test file per shell that the file is run in.
+
+In most cases Urchin begins printing to the screen only during the
+reporting phase. The only case where anything is printed beforehand is
+when Urchin is run with -vvvv; that sets "+x", so the commands are
+printed as they run, though all other output is still suppressed.
+
+Test results are reported in the reporting phase. Four output formats
+are available.
+
+* Urchin's human-readable format (default)
+* Test Anything Protocol
+* Delimiter-separated values (used internally)
+* Remote Urchin worker output
+
+When Urchin runs tests on a remote, it copies tests to the remote and
+then calls Urchin with "--format=remote". This specifies the following.
+
+* The temporary directory should be kept, rather than deleted, after
+  Urchin runs.
+* The path of the temporary directory should be printed as output.
+* No other output should be printed to stdout.
+
+After the remote Urchin finishes running, the local urchin downloads
+the remote Urchin's test log file from the temporary directory.
+It modifies the file to include the remote's name and then concatenates
+the result to the "remote-test" file in the local temporary directory.
+For example, the file from the remote might look like this,
+
+    sh:Counting tests/.test/faila:0:not_ok
+
+and the result might look like this.
+
+    sh on nsa:Counting tests/.test/faila:0:not_ok
+
