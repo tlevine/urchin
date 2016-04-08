@@ -149,14 +149,23 @@ fi
 stdout_file() {
   the_test="${1}"
   the_shell="${2}"
+  host="${3}"
 
-  x="${urchin_tmp}/stdout$(fullpath "$the_test")"
-  mkdir -p "${x}"
+  if test -n "${host}"; then
+    # This assumes the tests ran on a remote and have been copied.
+    x="${urchin_tmp}/remote/${host}/stdout${the_test}"
+  else
+    # This can be run during the tests.
+    x="${urchin_tmp}/stdout$(fullpath "$the_test")"
+    mkdir -p "${x}"
+  fi
+
   case "${urchin_md5}" in
     md5sum) y=$(echo "${the_shell}" | md5sum | cut -d\  -f1) ;;
     md5) y=$(echo "${the_shell}" | md5 | sed 's/.* //') ;;
     *) echo md5 command is not configured >&2; urchin_exit 1;;
   esac
+
   echo "${x}/${y}"
 }
 
@@ -409,13 +418,13 @@ report_outcome() {
       fi
 
       if test -z "${the_shell}"; then
-        the_shell='File is not executable.'
+        the_shell='File is not executable'
       fi
-      echo "${not}ok $n - ${path} (${the_shell}) ${skip}"
+      echo "${not}ok $n - ${path} (${the_shell}${onhost}) ${skip}"
       if { test "${result}" = not_ok && "${print_not_ok_stdout}"; } ||
          { test "${result}" = ok && "${print_ok_stdout}"; }; then
         echo '# ------------ Begin output ------------'
-        sed 's/^/# /' "$(stdout_file "${abspath}" "${the_shell}${onhost}")"
+        sed 's/^/# /' "$(stdout_file "${abspath}" "${the_shell}" "${host}")"
         echo '# ------------ End output ------------'
       fi
       echo "# Previous test took ${file_elapsed} seconds."
@@ -456,7 +465,7 @@ report_outcome() {
           if "${print_ok}"; then
             header
             if test -z "${the_shell}"; then
-              echo '  (File is not executable.)'
+              echo "  (File is not executable${onhost}.)"
             else
               echo "  ${the_shell}${onhost} (${file_elapsed} $(plural second $file_elapsed))"
             fi
@@ -465,7 +474,7 @@ report_outcome() {
       esac
       if { test "${result}" = not_ok && "${print_not_ok_stdout}"; } ||
          { test "${result}" = ok && "${print_ok_stdout}"; }; then
-        sed 's/^/  | /' "$(stdout_file "${abspath}" "${the_shell}")"
+        sed 's/^/  | /' "$(stdout_file "${abspath}" "${the_shell}" "${host}")"
       fi
     fi
 
@@ -595,10 +604,13 @@ validate_strings() {
 }
 
 main() {
+  argv="$@"
+
   cycle_shell=true
   shell_list="${urchin_tmp}"/shell_list
   test_arg_list="${urchin_tmp}"/test_list
   > "${test_arg_list}"
+  remotes_list="${urchin_tmp}"/remotes
   run_in_series=false
   force=false
   exit_on_not_ok=false
@@ -740,12 +752,34 @@ main() {
   fi
     
   if test -n "${RUNNING_ON_REMOTE}"; then
-    cat "${urchin_tmp}"/log
+    echo "${urchin_tmp}"
+  elif test -f "${remotes_list}"; then
+    while read remote; do
+      remote_main $remote "${argv}"
+    done < "${remotes_list}"
   else
     report_outcome "${root}" "${tap_format}" "${urchin_tmp}"/log \
       "${start}" "${finish}"
     urchin_exit "${?}"
   fi
+}
+
+remote_main() {
+  hostname="${1}"; shift
+  flags="${1}"; shift
+  urchin_dir=.urchin-cross-shell-test
+
+  rsync --archive -e "ssh ${flags}"
+    ../urchin ../tests "${hostname}":"${urchin_dir}" ||
+    scp -r ${flags} ../urchin ../tests "${hostname}":"${urchin_dir}"
+
+  remote_tmp="$(ssh "${hostname}" ${flags} "cd ${urchin_dir} && ./urchin $@")"
+
+  remotedir="${hostname}":"${remote_tmp}"
+  localdir="${urchin_tmp}/remote/${host}"
+  rsync --archive -e "ssh ${flags}" "${remotedir}" "${localdir}" ||
+    scp -r ${flags} "${remotedir}"
+  
 }
 
 test -n "${TESTING_URCHIN_INTERNALS}" || main "$@"
