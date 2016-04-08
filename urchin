@@ -353,6 +353,11 @@ report_outcome() {
   start="${4}"
   finish="${5}"
 
+  host="${6}"
+  if test -n "${host}"; then
+    onhost=" on ${host}"
+  fi
+
   escaped_root="$(fullpath "${root}" | sed 's/\//\\\//g')"
   elapsed=$(($finish - $start))
 
@@ -410,7 +415,7 @@ report_outcome() {
       if { test "${result}" = not_ok && "${print_not_ok_stdout}"; } ||
          { test "${result}" = ok && "${print_ok_stdout}"; }; then
         echo '# ------------ Begin output ------------'
-        sed 's/^/# /' "$(stdout_file "${abspath}" "${the_shell}")"
+        sed 's/^/# /' "$(stdout_file "${abspath}" "${the_shell}${onhost}")"
         echo '# ------------ End output ------------'
       fi
       echo "# Previous test took ${file_elapsed} seconds."
@@ -433,7 +438,7 @@ report_outcome() {
             else
               printf "${success_mark} "
             fi
-            echo "${the_shell} ("${file_elapsed}" $(plural second $file_elapsed))"
+            echo "${the_shell}${onhost} (${file_elapsed} $(plural second $file_elapsed))"
           fi
         ;;
         not_ok)
@@ -444,7 +449,7 @@ report_outcome() {
             else
               printf "${fail_mark} "
             fi
-            echo "${the_shell} ("${file_elapsed}" $(plural second $file_elapsed))"
+            echo "${the_shell}${onhost} (${file_elapsed} $(plural second $file_elapsed))"
           fi
         ;;
         skip)
@@ -453,7 +458,7 @@ report_outcome() {
             if test -z "${the_shell}"; then
               echo '  (File is not executable.)'
             else
-              echo "  ${the_shell} ("${file_elapsed}" $(plural second $file_elapsed))"
+              echo "  ${the_shell}${onhost} (${file_elapsed} $(plural second $file_elapsed))"
             fi
           fi
         ;;
