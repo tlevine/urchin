@@ -86,3 +86,18 @@ environment in which the particular test was run, the report will print
 "sh on nsa".
 
 When it needs the stdout files, it prints them over ssh.
+
+New flags
+----------
+
+-r, --remote      Host to use as a remote
+-F, --format      Output format, one of "urchin", "tap", "dsv", "remote"
+
+Settings that I'm thinking about
+
+* Port for rsync/ssh
+* SSH protocol version
+* --rsync-path
+
+Can those all be set in ssh_config? Probably not --rsync-path, but
+I guess I could just fix it on the remote.
