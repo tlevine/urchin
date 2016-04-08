@@ -148,27 +148,7 @@ Go to https://thomaslevine.com/!/urchin/ for documentation on writing tests.
 EOF
 }
 
-# -------------------- Temporary directory -------------------- 
-urchin_tmp=$(mktemp_dir)
-> "${urchin_tmp}/log"
-
-urchin_exit() {
-  rm -Rf "${urchin_tmp}"
-  exit "$@"
-}
-
-
 # -------------------- Portable wrappers -------------------- 
-epoch_date() {
-  date +%s
-}
-epoch_pax() {
-  # Based on http://stackoverflow.com/a/7262588/407226
-  tmp="$(mktemp_file)"
-  echo "ibase=8;$({ pax -wx cpio "${tmp}"; echo; } | cut -c 48-59)" | bc
-  rm "${tmp}"
-}
-
 mktemp_dir() {
   # Support HP-UX mktemp that has wrong exit codes and
   # can't make directories.
@@ -187,7 +167,26 @@ mktemp_file() {
   echo "${tmp}"
 }
 
+# -------------------- Temporary directory -------------------- 
+urchin_tmp=$(mktemp_dir)
+> "${urchin_tmp}/log"
+
+urchin_exit() {
+  rm -Rf "${urchin_tmp}"
+  exit "$@"
+}
+
 # -------------------- Utilities -------------------- 
+epoch_date() {
+  date +%s
+}
+epoch_pax() {
+  # Based on http://stackoverflow.com/a/7262588/407226
+  tmp="$(mktemp_file)"
+  echo "ibase=8;$({ pax -wx cpio "${tmp}"; echo; } | cut -c 48-59)" | bc
+  rm "${tmp}"
+}
+
 plural () {
   # Make $1 a plural according to the number $2.
   # If $3 is supplied, use that instead of "${1}s".
