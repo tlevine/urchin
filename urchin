@@ -114,11 +114,12 @@ The following flags affect how Urchin processes tests.
                          does not contain the word "test".
 
 These options affect how results are formatted. Options -q, and -v
-have no effect when combined with --tap. -vv, -vvv, and -vvvv do have
-effect when combined with --tap.
+have no effect when combined with formats other than "urchin".
+-vv, -vvv, and -vvvv do have effect when combined with formats "urchin"
+or "tap".
 
 -p, --pretty             Print results in color and with fancy symbols.
--t, --tap                Format output in Test Anything Protocol (TAP)
+-F, --format <name>      XXX
 
 And these options affect how much is printed.
 
@@ -451,6 +452,8 @@ recurse() {
   fi
 }
 
+# This should not require the root variable; fix the paths before they
+# get to the log file.
 report_outcome() {
   root="${1}"
   tap_format="${2}"
@@ -601,7 +604,7 @@ main() {
   run_in_series=false
   force=false
   exit_on_not_ok=false
-  tap_format=false
+  format=urchin
   print_in_color=false
 
   print_margins=true
@@ -634,7 +637,7 @@ main() {
             echo "${shell_for_sh_tests}" >> "${shell_list}"
             ;;
           -n|--disable-cycling) cycle_shell=false;; 
-          -t|--tap) tap_format=true;;
+          -F|--format) shift ; format="${1}";;
           -T|--timeout)
             shift
             urchin_timeout="${1}" 
@@ -704,12 +707,14 @@ main() {
   fi
 
   if $print_margins; then
-    if $tap_format; then
-      printf '# '
+    if test "${format}" = tap; then
+      printf '# ' >> "${urchin_tmp}"/head
     fi
-    printf 'Cycling with the following shells: '
-    cat "${shell_list}" | tr '\n' \ 
-    echo
+    if test "${format}" = urchin || test "${format}" = tap; then
+      printf 'Cycling with the following shells: ' >> "${urchin_tmp}"/head
+    fi
+    cat "${shell_list}" | tr '\n' \  >> "${urchin_tmp}"/head
+    echo >> "${urchin_tmp}"/head
   fi
 
   if test -n "${urchin_timeout}"; then
@@ -747,7 +752,7 @@ main() {
     urchin_exit 1
   fi
     
-  report_outcome "${root}" "${tap_format}" "${urchin_tmp}"/log "${start}" \
+  report_outcome "${root}" "${format}" "${urchin_tmp}"/log "${start}" \
     "${finish}"
   urchin_exit "${?}"
 }
