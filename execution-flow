@@ -1,3 +1,9 @@
+Here I discuss Urchin's general execution flow and how it is handled
+specifically when tests are run on remote environments.
+
+
+Steps of an Urchin run
+----------------------
 When Urchin runs a directory of files, it goes through the following
 steps.
 
@@ -28,6 +34,8 @@ format.
 Stdout and stderr from test runs are written to files in the stdout
 directory, one file per test file per shell that the file is run in.
 
+The reporting phase
+----------------------
 In most cases Urchin begins printing to the screen only during the
 reporting phase. The only case where anything is printed beforehand is
 when Urchin is run with -vvvv; that sets "+x", so the commands are
@@ -36,13 +44,24 @@ printed as they run, though all other output is still suppressed.
 Test results are reported in the reporting phase. Four output formats
 are available.
 
-* Urchin's human-readable format (default)
-* Test Anything Protocol
-* Delimiter-separated values (used internally)
-* Remote Urchin worker output
+1. Urchin's human-readable format (default)
+2. Test Anything Protocol
+3. Delimiter-separated values (used internally)
+4. Remote Urchin worker output
 
+Most of the output is generated based on the delimiter-separated values
+in the test log file. The first two formats also include stdout and
+stderr from the tests, depending on verbosity level flags; when it needs
+these, Urchin reads them from appropriate files in the temporary
+directory.
+
+I could discuss the further details of each format elsewhere.
+
+Remotes
+----------------------
 When Urchin runs tests on a remote, it copies tests to the remote and
-then calls Urchin with "--format=remote". This specifies the following.
+then calls Urchin on the remote with "--format=remote". This specifies
+the following.
 
 * The temporary directory should be kept, rather than deleted, after
   Urchin runs.
@@ -55,13 +74,15 @@ It modifies the file to include the remote's name and then concatenates
 the result to the "remote-test" file in the local temporary directory.
 For example, the file from the remote might look like this,
 
-    sh:Counting tests/.test/faila:0:not_ok
+    :sh:Counting tests/.test/faila:0:not_ok
 
 and the result might look like this.
 
-    sh on nsa:Counting tests/.test/faila:0:not_ok
+    nsa:sh:Counting tests/.test/faila:0:not_ok
 
 This gets processed in the reporting step like usual, according to
 whatever format is specified. Instead of printing just "sh" as the
 environment in which the particular test was run, the report will print
 "sh on nsa".
+
+When it needs the stdout files, it prints them over ssh.
