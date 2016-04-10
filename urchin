@@ -149,6 +149,15 @@ RUN_IN_SERIES        Set this to have the same effect as
                      -b/--run-in-series. This is helpful if you are
                      calling urchin inside an urchin test suite.
 
+Exit codes have the following meanings
+
+0                    All tests were ok
+1                    At least one test was not ok.
+2                    No tests were found.
+10                   Dependencies are missing (locally, not on remotes).
+11                   Flags were not valid.
+12                   File names contain unsupported delimiters (HT or LF).
+
 Go to https://thomaslevine.com/!/urchin/ for documentation on writing tests.
 
 EOF
@@ -161,7 +170,7 @@ elif command -v md5sum 1> /dev/null 2> /dev/null; then
   urchin_md5=md5sum
 else
   echo Could not find MD5 hash command >&2
-  exit 1
+  exit 10
 fi
 
 if epoch_date 2>&1 > /dev/null; then
@@ -170,7 +179,7 @@ elif epoch_pax 2>&1 > /dev/null; then
   epoch=epoch_pax
 else
   echo I could not find a seconds counter. >&2
-  exit 1
+  exit 10
 fi
 
 
@@ -191,6 +200,13 @@ mktemp_file() {
     > "${tmp}"
   fi
   echo "${tmp}"
+}
+
+md5 () {
+  case "${urchin_md5}" in
+    md5sum) echo "${1}" | md5sum | sed 's/ .*//' ;;
+    md5) echo "${1}" | md5 | sed 's/.* //' ;;
+  esac
 }
 
 # -------------------- Temporary directory -------------------- 
@@ -616,7 +632,7 @@ main() {
             command -v "${shell_for_sh_tests}" > /dev/null || {
               echo "Cannot find specified shell: '${shell_for_sh_tests}'" >&2
               urchin_help >&2
-              urchin_exit 11
+              urchin_exit 13
             }
 
             if contains "${potential_test}" "${HT}"; then
@@ -639,7 +655,7 @@ you don't need to quote the TEST_SHELL variable." >&2
             urchin_timeout="${1}" 
             if ! contains "${urchin_timeout}" '[0-9][0-9.]*\(s\|m\|h\|d\|\)' ; then
               echo Bad timeout argument: "${urchin_timeout}" >&2
-              urchin_exit 1
+              urchin_exit 11
             fi ;;
           -p|--pretty) print_in_color=true;;
 
@@ -732,7 +748,7 @@ want to run urchin on that directory.' >&2
       TIMEOUT="timeout ${urchin_timeout}"
     else
       echo I couldn\'t figure out how to use your version of timeout >&2
-      urchin_exit 1
+      urchin_exit 13
     fi
   fi
 
@@ -756,7 +772,7 @@ want to run urchin on that directory.' >&2
 
   if test $(cat "${urchin_tmp}"/log | wc -l) -eq 0; then
     echo 'No tests found' >&2
-    urchin_exit 1
+    urchin_exit 12
   fi
     
   cat "${urchin_tmp}"/head
