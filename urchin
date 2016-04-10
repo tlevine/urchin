@@ -309,6 +309,8 @@ recurse() {
   cycle_shell="${3}"
   TEST_SHELL="${4}"
 
+  root="$(urchin_root "${1}")"
+
   for ignore in setup_dir teardown_dir setup teardown; do
     if test "$(basename "${potential_test}")" = "${ignore}"; then
       return
@@ -418,7 +420,8 @@ recurse() {
           fi
 
           elapsed=$(($finish - $start))
-          printf "${potential_test}\t${the_test_shell}\t${result}\t${elapsed}\n" \
+          rel="${potential_test##"${root}/"}"
+          printf "${rel}\t${the_test_shell}\t${result}\t${elapsed}\n" \
             >> "${urchin_tmp}"/log
           exit "${exit_code}"
         ) &
@@ -446,13 +449,12 @@ recurse() {
 # This should not require the root variable; fix the paths before they
 # get to the log file.
 report_outcome() {
-  root="${1}"
+  root="$(fullpath "${1}")"
   format="${2}"
   log_file="${3}"
   start="${4}"
   finish="${5}"
 
-  escaped_root="$(fullpath "${root}" | sed 's/\//\\\//g')"
   elapsed=$(($finish - $start))
   for number in n oks skips not_oks; do
     eval "${number}=0"
@@ -464,8 +466,8 @@ report_outcome() {
   cat "${log_file}" | LC_COLLATE=C sort > "${sorted_log_file}"
 
   while read line; do
-    abspath=$(echo "${line}" | cut -f1)
-    path=$(echo "${abspath}" | sed "s/$escaped_root\/\?//")
+    path=$(echo "${line}" | cut -f1)
+    abspath=${urchin_tmp}/${path}
     the_shell=$(echo "${line}" | cut -f2)
     result=$(echo "${line}" | cut -f3)
     file_elapsed=$(echo "$line" | cut -f4)
