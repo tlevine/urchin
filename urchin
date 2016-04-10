@@ -156,8 +156,7 @@ Exit codes have the following meanings
 10                   Dependencies are missing (locally, not on remotes).
 11                   Flags were not valid.
 12                   File names contain unsupported delimiters (HT or LF).
-13                   An test shell passed with -s/--shell is not available.
-14                   A test shell was in the PATH but failed to run.
+13                   An test shell specified with -s/--shell is not available.
 
 Go to https://thomaslevine.com/!/urchin/ for documentation on writing tests.
 
@@ -338,9 +337,6 @@ format_tap() {
     # Number of files that have run, including this one
     n=$(( ${n:-0} + 1))
 
-    if test -z "${the_shell}"; then
-      the_shell='File is not executable.'
-    fi
     case "${result}" in
       ok) echo "ok $n - ${path} (${the_shell}${remote})"
           if "${print_ok_stdout}"; then print_stdout; fi ;;
@@ -391,15 +387,20 @@ format_urchin() {
 
   while IFS="${HT}" read remote the_shell path result file_elapsed; do
     abspath=${urchin_tmp}/${path}
+    if test -z "${remote}"; then
+      on=" on ${remote}"
+    else
+      on=
+    fi
 
     currentdir="$(dirname -- "${path}")"
     prevdir="${currentdir}"
 
     if test -z "${the_shell}"; then
-      message="${the_shell} on ${remote} is not executable."
+      message="(Skipped${on})"
     else
       unit="$(plural second "${file_elapsed}")"
-      message="${the_shell} on ${remote} (${file_elapsed} ${unit})"
+      message="${the_shell}${on} (${file_elapsed} ${unit})"
     fi
 
     # Keep track of how many files have been ok, not ok, and skipped.
