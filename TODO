@@ -278,3 +278,16 @@ NetBSD
 
 
 
+Things I can use to make things better
+------------------------
+${x##*blah}
+$IFS and set --
+Redirection, especiall <<-
+Maybe fifo
+for x in "$@"
+until
+readonly
+
+Variable assignments specified with special built-in utilities remain in
+effect after the built-in completes; this shall not be the case with a
+regular built-in or other utility.
