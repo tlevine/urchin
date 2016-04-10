@@ -351,7 +351,7 @@ format_tap() {
     echo '# ------------ End output ------------'
   }
 
-  while IFS="${HT}" read remote the_shell path result file_elapsed; do
+  while IFS="${HT}" read -r remote the_shell path result file_elapsed; do
     # Number of files that have run, including this one
     n=$(( ${n:-0} + 1))
 
@@ -403,7 +403,7 @@ format_urchin() {
     sed 's/^/  | /' "$(stdout_file "${tmp_dir}" "${path}" "${the_shell}")"
   }
 
-  while IFS="${HT}" read remote the_shell path result file_elapsed; do
+  while IFS="${HT}" read -r remote the_shell path result file_elapsed; do
     abspath=${tmp_dir}/${path}
 
     currentdir="$(dirname -- "${path}")"
@@ -458,38 +458,28 @@ format_urchin() {
 # 1) At least one test failed.
 # *) Something else went wrong; Urchin should exit with the same code.
 recurse() {
-  test_suite_root="${1}"
-  requested_path="${2}"
+  abs_root="${1}"
+  abs_requested="${2}"
+  abs_current="${3}"
 
-  abs="$(fullpath "${3}")"
-  rel="${abs##"${test_suite_root}/"}"
+  rel_requested="$(localpath ${abs_root} ${abs_requested})"
+  rel_current="$(localpath ${abs_root} ${abs_current})"
 
   for ignore in setup_dir teardown_dir setup teardown; do
-    if test "$(basename "${potential_test}")" = "${ignore}"; then
-      return
+    if test "$(basename "${abs_current}")" = "${ignore}"; then
+      return 0
     fi
   done
 
-  # Return if we should not run this file
-  if contains "${potential_test}" "^${requested_path}" ||
-     contains "${requested_path}" "^${potential_test}" ; then
-    if test "$(dirname "${potential_test}")" = \
-            "$(dirname "${requested_path}")" &&
-       test "${potential_test}" != "${requested_path}"; then
-      return 0
-    fi
-  else
-    return 0
-  fi
-
-  if contains "${potential_test}" "${HT}"; then
-    echo "${shell_list}" | while read sh; do
-      log "${remote}" "${sh}" "${rel}" tab '' >> "${urchin_tmp}"/log
+  if contains "${rel_current}" "${HT}"; then
+    echo "${shell_list}" | while read -r sh; do
+      no_tab="$(echo "${rel_current}" | tr '\t' ' ')"
+      log "${remote}" "${sh}" "${no_tab}" tab '' >> "${urchin_tmp}"/log
     done
-  elif [ -x "${potential_test}" ]; then
-    if [ -d "${potential_test}" ]; then
+  elif [ -x "${rel_current}" ]; then
+    if [ -d "${rel_current}" ]; then
     (
-      cd -- "${potential_test}"
+      cd -- "${rel_current}"
       if test -f .urchin_dir && grep series .urchin_dir > /dev/null; then
         run_in_series_dir=true
       else
@@ -525,21 +515,21 @@ recurse() {
         . ./teardown_dir
       fi
     )
-    elif [ -f "${potential_test}" ]; then
-      cd -- "$(dirname -- "${potential_test}")"
-      echo "${shell_list}" | while read the_test_shell; do
+    elif [ -f "${rel_current}" ]; then
+      cd -- "$(dirname -- "${rel_current}")"
+      echo "${shell_list}" | while read -r the_test_shell; do
         (
           if test -f setup; then
             . ./setup
           fi
 
           # Run with a shell?
-          if has_shebang_line "${potential_test}"; then
-            set -- "${potential_test}"
+          if has_shebang_line "${rel_current}"; then
+            set -- "${rel_current}"
           else
-            set -- "${the_test_shell}" "${potential_test}"
+            set -- "${the_test_shell}" "${rel_current}"
           fi
-          out_file="$(stdout_file "${tmp_dir}" "${potential_test}" "${the_test_shell}")"
+          out_file="$(stdout_file "${tmp_dir}" "${rel_current}" "${the_test_shell}")"
 
           # Run the test
           start=$("${epoch}")
@@ -560,7 +550,7 @@ recurse() {
           esac
 
           elapsed=$(($finish - $start))
-          rel="${potential_test##"${root}/"}"
+          rel="${rel_current##"${root}/"}"
           printf "\t${the_test_shell}\t${rel}\t${result}\t${elapsed}\n" \
             >> "${urchin_tmp}"/log
           exit "${exit_code}"
@@ -580,8 +570,8 @@ recurse() {
     fi
   else
     # Skip because the file is not executable.
-    echo "${shell_list}" | while read sh; do
-      printf "\t${sh}\t${potential_test}\tskip\t0\n" >> "${urchin_tmp}"/log
+    echo "${shell_list}" | while read -r sh; do
+      printf "\t${sh}\t${rel_current}\tskip\t0\n" >> "${urchin_tmp}"/log
     done
   fi
 }
@@ -731,7 +721,7 @@ wantto run urchin on that directory.' >&2
   echo >> "${urchin_tmp}"/head
 
   start=$("${epoch}")
-  echo "${test_seeds}" | while read seed; do
+  echo "${test_seeds}" | while read -r seed; do
     set +e
     recurse "${root}" "$(fullpath "${seed}")" "${TEST_SHELL}"
     return_code=$?
