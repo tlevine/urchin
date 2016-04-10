@@ -343,6 +343,17 @@ meta_verbosity() {
   echo "if test \${${1}} -ge ${2}; then ${3}=true; fi"
 }
 
+return_on_nonzero() {
+  echo '
+  if test "${1}" -ne 0; then
+    if test -f teardown_dir; then
+      . ./teardown_dir
+    fi
+    return $return_code
+  fi
+  '
+}
+
 # -------------------- Printing output -------------------- 
 # Format functions may read a log file from stdin.
 
@@ -471,6 +482,9 @@ recurse() {
   abs_requested="${2}"
   abs_current="${3}"
 
+  run_in_series_root="${4}"
+  return_on_not_ok="${5}"
+
   rel_requested="$(localpath ${abs_root} ${abs_requested})"
   rel_current="$(localpath ${abs_root} ${abs_current})"
 
@@ -486,14 +500,23 @@ recurse() {
       log "${remote}" "${sh}" "${no_tab}" tab '' >> "${urchin_tmp}"/log
     done
   elif [ -x "${abs_current}" ]; then
+
+    finalize='
+      if test -f .urchin_dir && grep series ./.urchin_dir > /dev/null ||
+        "${run_in_series_root}"; then
+        return_code=$(catch wait "${!}")
+        if "${return_on_not_ok}" && test "${exit_code}" -ne 0; then
+          if test -f teardown_dir; then
+            . ./teardown_dir
+          fi
+          return $return_code
+        fi
+      fi
+    '
+
     if [ -d "${abs_current}" ]; then
     (
       cd -- "${abs_current}"
-      if test -f .urchin_dir && grep series .urchin_dir > /dev/null; then
-        run_in_series_dir=true
-      else
-        run_in_series_dir=false
-      fi
 
       if test -f setup_dir; then
         . ./setup_dir
@@ -506,18 +529,8 @@ recurse() {
         fi
 
         recurse "${requested_path}" "${test}" &
+        eval "${finalize}"
 
-        if "${run_in_series}" || "${run_in_series_dir}"; then
-          if ! wait "${!}"; then
-            return_code="$?"
-            if "${exit_on_not_ok}"; then
-              if test -f teardown_dir; then
-                . ./teardown_dir
-              fi
-              return "${return_code}"
-            fi
-          fi
-        fi
       done
       wait
       if test -f teardown_dir; then
@@ -562,16 +575,7 @@ recurse() {
             >> "${urchin_tmp}"/log
           exit "${exit_code}"
         ) &
-
-        if "${run_in_series}"; then
-          if wait "${!}"; then exit_code=0; else exit_code="${?}"; fi
-          if "${exit_on_not_ok}" && test "${exit_code}" -ne 0; then
-            if test -f teardown_dir; then
-              . ./teardown_dir
-            fi
-            return 1
-          fi
-        fi
+        eval "${finalize}"
       done
       wait
     fi
