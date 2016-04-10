@@ -410,6 +410,14 @@ format_urchin() {
     fi
     prevpath="${path}"
   done
+
+  if "${print_margins}"; then
+    echo
+    echo "Done, took ${elapsed} $(plural second ${elapsed})."
+    echo "${oks} $(plural test "${oks}") passed."
+    echo "${skips} $(plural test "${skips}") skipped."
+    echo "${not_oks} $(plural test "${not_oks}") failed."
+  fi
 }
 
 # -------------------- Main stuff -------------------- 
@@ -582,13 +590,6 @@ report_outcome() {
     echo "# Full test suite took ${elapsed} $(plural second ${elapsed})."
     echo 1.."${n}"
   elif test "${format}" = urchin; then
-    if "${print_margins}"; then
-      echo
-      echo "Done, took ${elapsed} $(plural second ${elapsed})."
-      echo "${oks} $(plural test "${oks}") passed."
-      echo "${skips} $(plural test "${skips}") skipped."
-      echo "${not_oks} $(plural test "${not_oks}") failed."
-    fi
   fi
   test "${not_oks}" -eq '0'
 }
