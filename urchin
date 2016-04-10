@@ -249,14 +249,15 @@ localpath() {
   child="$(fullpath "${2}" | sed 's/\/*$//')"
   
   if test "${parent}" = "${child}"; then
-    echo .
+    # Same file
+    return 1
+  elif contains "${child}" "^${parent}";
+    # Child is really a child.
+    echo "${child##"${parent}/"}"
+    return 0
   else
-    rel="${child##"${parent}/"}"
-    if test "${rel}" = "${parent}"; then
-      return 1
-    else
-      echo "${rel}"
-    fi
+    # Child is not really a child.
+    return 2
   fi
 }
 
@@ -273,10 +274,6 @@ contains() {
 
 is_set() {
   set | grep "^${1}=" > /dev/null
-}
-
-remove_trailing_slash() {
-  echo "$1" | sed s/\\/$//
 }
 
 # File where a test's stdout and stderr is saved
