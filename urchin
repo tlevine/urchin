@@ -147,7 +147,7 @@ The remaining flags provide information about urchin.
 Urchin recognizes certain environment variables.
 
 TEST_SHELL           This is sometimes over-ridden; see -s.
-RUN_IN_SERIES        Set this to true to have the same effect as
+RUN_IN_SERIES        Set this to have the same effect as
                      -b/--run-in-series. This is helpful if you are
                      calling urchin inside an urchin test suite.
 
@@ -219,11 +219,10 @@ plural () {
   # Make $1 a plural according to the number $2.
   # If $3 is supplied, use that instead of "${1}s".
   # Result is written to stdout.
-  if [ "${2}" = 1 ]
-  then
-    printf '%s\n' "${1}"
+  if [ "${2}" = 1 ]; then
+    echo "${1}"
   else
-    printf '%s\n' "${3-${1}s}"
+    echo "${3-${1}s}"
   fi
 }
 
@@ -266,6 +265,10 @@ contains() {
        contains "${container}" "${1}" && shift &&
        contains "${container}" "${@}" ;;
    esac
+}
+
+is_set() {
+  set | grep "^${1}=" > /dev/null
 }
 
 remove_trailing_slash() {
@@ -689,21 +692,19 @@ want to run urchin on that directory.' >&2
   fi
 
   # -------------------- VALIDATE INPUT -------------------- #
-  if ! "${cycle_shell}" && test -f "${shell_list}"; then
+  if ! "${cycle_shell}" && ! is_set shell_list; then
     echo "The -n/--disable-cycling and -s/--shell options clash with each other." >&2
     urchin_exit 11
   fi
 
   # If -s was not passed, use the available default shells.
-  if ! test -f "${shell_list}"; then
+  if test -z "${shell_list}"; then
     if $cycle_shell; then
       for shell in $DEFAULT_SHELLS; do
-        if command -v $shell 1> /dev/null 2> /dev/null; then
-          echo $shell >> "$shell_list"
+        if command -v "${shell}" 1> /dev/null 2> /dev/null; then
+          shell_list="${shell}${FS}${shell_list}"
         fi
       done
-    else
-      echo > "$shell_list"
     fi
   fi
 
@@ -725,7 +726,7 @@ want to run urchin on that directory.' >&2
     echo >> "${urchin_tmp}"/head
   fi
 
-  if test -n "${urchin_timeout}"; then
+  if is_set urchin_timeout; then
     # Choose the timeout command
     if timeout -t 0 true 2> /dev/null; then
       TIMEOUT="timeout -t ${urchin_timeout}"
@@ -767,4 +768,4 @@ want to run urchin on that directory.' >&2
   urchin_exit "${?}"
 }
 
-test -n "${TESTING_URCHIN_INTERNALS}" || main "$@"
+is_set TESTING_URCHIN_INTERNALS || main "$@"
