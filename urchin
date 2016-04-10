@@ -226,6 +226,14 @@ plural () {
   fi
 }
 
+read_many() {
+  if delimiter="${1}" && shift; then
+    while test "${#}" -gt 0; do
+      echo "while read -d '${delimiter}'; do"
+    done
+  fi
+}
+
 has_shebang_line() {
   head -n 1 "${1}" | grep -v '^#!/bin/sh$' | grep -q '^#!'
 }
