@@ -99,12 +99,6 @@ The following flags affect how this multiple-shell testing is handled.
 -s, --shell <shell>      Tell Urchin to use a different list of shells.
                          (You can pass this flag multiple times.)
 
--n, --disable-cycling    Disable the cycling of shells; Urchin will
-                         execute test files ordinarily, implicitly using
-                         sh for files that lack shebang lines. It will
-                         set the TEST_SHELL variable to "/bin/sh" if and
-                         only if TEST_SHELL is empty or undefined.
-
 The following flags affect how Urchin processes tests.
 
 -b, --run-in-series      Run tests in series. The default is to run tests
@@ -517,27 +511,18 @@ recurse() {
             . ./setup
           fi
 
+          # Run with a shell?
+          if has_shebang_line "${potential_test}"; then
+            set -- "${potential_test}"
+          else
+            set -- "${the_test_shell}" "${potential_test}"
+          fi
+          out_file="$(stdout_file "${tmp_dir}" "${potential_test}" "${the_test_shell}")"
+
           # Run the test
           start=$("${epoch}")
           set +e
-          { 
-            if "${cycle_shell}"; then
-              if has_shebang_line "${potential_test}"; then
-                TEST_SHELL="${the_test_shell}" $TIMEOUT "${potential_test}"
-              else
-                TEST_SHELL="${the_test_shell}" $TIMEOUT \
-                  "${the_test_shell}" "${potential_test}"
-              fi
-            else
-              # Shell cycling is disabled with -n; use the present value of
-              # TEST_SHELL or default to /bin/sh
-              if [ -n "${TEST_SHELL}" ]; then
-                $TIMEOUT "${potential_test}"
-              else
-                TEST_SHELL=/bin/sh $TIMEOUT "${potential_test}"
-              fi
-            fi
-          } > "$(stdout_file "${tmp_dir}" "${potential_test}" "${the_test_shell}")" 2>&1
+          TEST_SHELL="${the_test_shell}" $TIMEOUT "$@"  > "${out_file}" 2>&1
           exit_code="${?}"
           set -e
           finish=$("${epoch}")
@@ -599,7 +584,6 @@ report_outcome() {
 
 
 main() {
-  cycle_shell=true
   test_arg_list="${urchin_tmp}"/test_list
   > "${test_arg_list}"
   format=urchin
@@ -614,11 +598,11 @@ main() {
             shift
             shell_for_sh_tests="${1}"
            
-            command -v "${shell_for_sh_tests}" > /dev/null || {
+            if ! command -v "${shell_for_sh_tests}" > /dev/null; then
               echo "Cannot find specified shell: '${shell_for_sh_tests}'" >&2
               urchin_help >&2
               urchin_exit 13
-            }
+            fi
 
             if contains "${potential_test}" "${HT}" "${LF}"; then
               echo 'Shell paths may contain all characters other than' >&2
@@ -634,12 +618,12 @@ you don't need to quote the TEST_SHELL variable." >&2
 
             shell_list="${shell_for_sh_tests}${LF}${shell_list}"
             ;;
-          -n|--disable-cycling) cycle_shell=false;; 
           -F|--format) shift ; format="${1}";;
           -T|--timeout)
             shift
             urchin_timeout="${1}" 
-            if ! contains "${urchin_timeout}" '[0-9][0-9.]*\(s\|m\|h\|d\|\)' ; then
+            if ! contains "${urchin_timeout}" \
+              '[0-9][0-9.]*\(s\|m\|h\|d\|\)' ; then
               echo Bad timeout argument: "${urchin_timeout}" >&2
               urchin_exit 11
             fi ;;
@@ -653,6 +637,7 @@ you don't need to quote the TEST_SHELL variable." >&2
 
           -h|--help) urchin_help
                      urchin_exit 0;;
+
           --version) echo "${VERSION}"
               urchin_exit;;
           -*) urchin_help >&2
@@ -682,12 +667,6 @@ want to run urchin on that directory.' >&2
   done
   if "${RUN_IN_SERIES}" 2> /dev/null; then
     run_in_series=true
-  fi
-
-  # -------------------- VALIDATE INPUT -------------------- #
-  if ! "${cycle_shell}" && ! is_set shell_list; then
-    echo "The -n/--disable-cycling and -s/--shell options clash with each other." >&2
-    urchin_exit 11
   fi
 
   # If -s was not passed, use the available default shells.
