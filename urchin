@@ -49,11 +49,9 @@
 set -e
 
 # Delimiters
-FS=$(printf '\u001C')
-GS=$(printf '\u001D')
-RS=$(printf '\u001E')
-US=$(printf '\u001F')
-DELIMITERS="[${FS}${GS}${RS}${US}]"
+LF="$(printf '\n')"
+HT="$(printf '\t')"
+DELIMITERS="[${LF}${HT}]"
 
 # Urchin version number
 VERSION=0.0.0-master
@@ -465,8 +463,7 @@ report_outcome() {
   sorted_log_file=$(mktemp_file)
   cat "${log_file}" | LC_COLLATE=C sort > "${sorted_log_file}"
 
-  while read -d "${GS}" line; do
-    read -d "${FS}" path the_shell result file_elapsed
+  while IFS="${HT}" read path the_shell result file_elapsed; do
     abspath=${urchin_tmp}/${path}
 
     prevdir="${currentdir}"
@@ -612,8 +609,8 @@ main() {
               urchin_exit 11
             }
 
-            if contains "${potential_test}" "${DELIMITERS}"; then
-              echo Shell paths may not contain the delimiter characters. >&2
+            if contains "${potential_test}" "${HT}"; then
+              echo 'Shell paths may not contain tab characters (HT).' >&2
               urchin_exit 11
             fi
 
@@ -655,8 +652,8 @@ you don't need to quote the TEST_SHELL variable." >&2
               urchin_exit;;
           -*) urchin_help >&2
               urchin_exit 11;;
-          *)  if contains "${1}" "${DELIMITERS}"; then
-                echo 'Test file names may not contain delimiter characters.' >&2
+          *)  if contains "${1}" "${HT}"; then
+                echo 'Test file names may not contain tab characters (HT).' >&2
                 urchin_exit 11
               elif [ ! -e "${1}" ]; then
                 echo "No such file or directory: '${1}'" >&2
@@ -701,7 +698,7 @@ want to run urchin on that directory.' >&2
     if $cycle_shell; then
       for shell in $DEFAULT_SHELLS; do
         if command -v "${shell}" 1> /dev/null 2> /dev/null; then
-          shell_list="${shell}${FS}${shell_list}"
+          shell_list="${shell}${HT}${shell_list}"
         fi
       done
     fi
