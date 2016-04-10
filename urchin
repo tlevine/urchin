@@ -272,9 +272,10 @@ remove_trailing_slash() {
   echo "$1" | sed s/\\/$//
 }
 
+# Find the root directory of the present test suite
 urchin_root() {
   # Call recursively but remember the original argument.
-  current="$(remove_trailing_slash "${1}")"
+  current="${1%/}"
   if test -n "${2}"; then
     orig="${2}"
   else
@@ -296,7 +297,7 @@ urchin_root() {
   elif test -f "${current}"; then
     urchin_root "$(dirname -- "${current}")" "${orig}"
   elif test -f "${current}"/.urchin_root; then
-    remove_trailing_slash "${current}"
+    echo "${current}"
   else
     urchin_root "${current}"/.. "${orig}"
   fi
