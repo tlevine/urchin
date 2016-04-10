@@ -287,6 +287,7 @@ Maybe fifo
 for x in "$@"
 until
 readonly
+getopts
 
 Variable assignments specified with special built-in utilities remain in
 effect after the built-in completes; this shall not be the case with a

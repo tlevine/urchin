@@ -48,6 +48,12 @@
 
 set -e
 
+# Delimiters
+FS=$(printf '\u001C')
+GS=$(printf '\u001D')
+RS=$(printf '\u001E')
+US=$(printf '\u001F')
+
 # Urchin version number
 VERSION=0.0.0-master
 
