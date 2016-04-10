@@ -422,6 +422,11 @@ format_urchin() {
 }
 
 # -------------------- Main stuff -------------------- 
+
+# Return codes have the following meaning
+# 0) All tests succeded
+# 1) At least one test failed.
+# *) Something else went wrong; Urchin should exit with the same code.
 recurse() {
   requested_path="${1}"
   potential_test="$(fullpath "${2}")"
@@ -450,7 +455,7 @@ recurse() {
 
   if contains "${potential_test}" "${HT}"; then
     echo 'Test file names may not contain tabs (HT).' >&2
-    urchin_exit 11
+    return 11
   fi
 
   if [ -x "${potential_test}" ]; then
@@ -701,18 +706,25 @@ wantto run urchin on that directory.' >&2
 
   start=$("${epoch}")
   echo "${test_seeds}" | while read seed; do
-    recurse "${root}" "$(fullpath "${seed}")""${TEST_SHELL}" || break
+    set +e
+    recurse "${root}" "$(fullpath "${seed}")""${TEST_SHELL}"
+    return_code=$?
+    set -e
+    test "${return_code}" -eq 0 || break
   done
   finish=$("${epoch}")
 
-  if ! test -f "${urchin_tmp}"/log ; then
-    echo 'No tests found' >&2
-    exit_code=2
-  else 
-    cat "${urchin_tmp}"/head
-    report_outcome "${root}" "${format}" "${urchin_tmp}"/log "${start}" \
-      "${finish}"
-  # cat "${urchin_tmp}"/foot
+  if test "${return_code}" -eq 0; then
+    if test -f "${urchin_tmp}"/log ; then
+      echo Print output.
+    # cat "${urchin_tmp}"/head
+    # report_outcome "${root}" "${format}" "${urchin_tmp}"/log "${start}" \
+    #   "${finish}"
+    # cat "${urchin_tmp}"/foot
+    else
+      echo 'No tests found' >&2
+      return_code=2
+    fi
   fi
 
   rm -Rf "${urchin_tmp}"
