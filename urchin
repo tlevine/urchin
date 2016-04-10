@@ -295,9 +295,9 @@ urchin_root() {
 }
 
 # -------------------- Dependency checks -------------------- 
-if which md5 1> /dev/null 2> /dev/null; then
+if command -v md5 1> /dev/null 2> /dev/null; then
   urchin_md5=md5
-elif which md5sum 1> /dev/null 2> /dev/null; then
+elif command -v md5sum 1> /dev/null 2> /dev/null; then
   urchin_md5=md5sum
 else
   echo Could not find MD5 hash command >&2
@@ -616,7 +616,7 @@ main() {
             shift
             shell_for_sh_tests="${1}"
            
-            which "${shell_for_sh_tests}" > /dev/null || {
+            command -v "${shell_for_sh_tests}" > /dev/null || {
               echo "Cannot find specified shell: '${shell_for_sh_tests}'" >&2
               urchin_help >&2
               urchin_exit 11
@@ -691,7 +691,7 @@ main() {
   if ! test -f "${shell_list}"; then
     if $cycle_shell; then
       for shell in $DEFAULT_SHELLS; do
-        if which $shell 1> /dev/null 2> /dev/null; then
+        if command -v $shell 1> /dev/null 2> /dev/null; then
           echo $shell >> "$shell_list"
         fi
       done
