@@ -315,6 +315,12 @@ format_tap() {
   $(verbosity v 2 print_not_ok_stdout)
   $(verbosity v 3 print_ok_stdout)
 
+  print_stdout() {
+    echo '# ------------ Begin output ------------'
+    sed 's/^/# /' "$(stdout_file "${path}" "${the_shell}")"
+    echo '# ------------ End output ------------'
+  }
+
   while IFS="${HT}" read remote the_shell path result file_elapsed; do
     # Number of files that have run, including this one
     n=$(( ${n:-0} + 1))
@@ -323,23 +329,17 @@ format_tap() {
       the_shell='File is not executable.'
     fi
     case "${result}" in
-      ok) "ok $n - ${path} (${the_shell}${remote})" ;;
-      not_ok) "not_ok $n - ${path} (${the_shell}${remote})" ;;
+      ok) echo "ok $n - ${path} (${the_shell}${remote})"
+          if "${print_ok_stdout}"; then print_stdout; fi ;;
+      not_ok) echo "not_ok $n - ${path} (${the_shell}${remote})"
+              if "${print_not_ok_stdout}"; then print_stdout; fi ;;
       skip) "ok $n - ${path} (${the_shell}${remote}) # SKIP" ;;
     esac
-
-    if { test "${result}" = not_ok && "${print_not_ok_stdout}"; } ||
-       { test "${result}" = ok && "${print_ok_stdout}"; }; then
-      echo '# ------------ Begin output ------------'
-      sed 's/^/# /' "$(stdout_file "${path}" "${the_shell}")"
-      echo '# ------------ End output ------------'
-    fi
     echo "# Previous test took ${file_elapsed} seconds."
 
     # Number of files that have been ok, not ok, and skipped
     eval "old_count=${result}s"
     eval "${result}s=$(($old_count+1))"
-
   done
 }
 
@@ -372,6 +372,10 @@ format_urchin() {
     fi
   }
 
+  print_stdout() {
+    sed 's/^/  | /' "$(stdout_file "${path}" "${the_shell}")"
+  }
+
   while IFS="${HT}" read remote the_shell path result file_elapsed; do
     abspath=${urchin_tmp}/${path}
 
@@ -390,17 +394,13 @@ format_urchin() {
           fi ;;
       not_ok) if "${print_not_ok}"; then
                 header && echo "${fail_mark} ${message}"
+                if "${print_not_ok_stdout}"; then print_stdout; fi
               fi ;;
       skip) if "${print_ok}"; then
               header && echo "${skip_mark} ${message}"
+              if "${print_ok_stdout}"; then print_stdout; fi
             fi ;;
     esac
-
-    if { test "${result}" = not_ok && "${print_not_ok_stdout}"; } ||
-       { test "${result}" = ok && "${print_ok_stdout}"; }; then
-      sed 's/^/  | /' "$(stdout_file "${path}" "${the_shell}")"
-    fi
-
     prevpath="${path}"
   done
 
