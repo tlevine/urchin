@@ -471,15 +471,15 @@ recurse() {
     fi
   done
 
-  if contains "${rel_current}" "${HT}"; then
+  if contains "${abs_current}" "${HT}"; then
     echo "${shell_list}" | while read -r sh; do
       no_tab="$(echo "${rel_current}" | tr '\t' ' ')"
       log "${remote}" "${sh}" "${no_tab}" tab '' >> "${urchin_tmp}"/log
     done
-  elif [ -x "${rel_current}" ]; then
-    if [ -d "${rel_current}" ]; then
+  elif [ -x "${abs_current}" ]; then
+    if [ -d "${abs_current}" ]; then
     (
-      cd -- "${rel_current}"
+      cd -- "${abs_current}"
       if test -f .urchin_dir && grep series .urchin_dir > /dev/null; then
         run_in_series_dir=true
       else
@@ -515,26 +515,26 @@ recurse() {
         . ./teardown_dir
       fi
     )
-    elif [ -f "${rel_current}" ]; then
-      cd -- "$(dirname -- "${rel_current}")"
-      echo "${shell_list}" | while read -r the_test_shell; do
+    elif [ -f "${abs_current}" ]; then
+      cd -- "$(dirname -- "${abs_current}")"
+      echo "${shell_list}" | while read -r sh; do
         (
           if test -f setup; then
             . ./setup
           fi
 
           # Run with a shell?
-          if has_shebang_line "${rel_current}"; then
-            set -- "${rel_current}"
+          if has_shebang_line "${abs_current}"; then
+            set -- "${abs_current}"
           else
-            set -- "${the_test_shell}" "${rel_current}"
+            set -- "${sh}" "${abs_current}"
           fi
-          out_file="$(stdout_file "${tmp_dir}" "${rel_current}" "${the_test_shell}")"
+          out_file="$(stdout_file "${tmp_dir}" "${rel_current}" "${sh}")"
 
           # Run the test
           start=$("${epoch}")
           set +e
-          TEST_SHELL="${the_test_shell}" $TIMEOUT "$@"  > "${out_file}" 2>&1
+          TEST_SHELL="${sh}" $TIMEOUT "$@"  > "${out_file}" 2>&1
           exit_code="${?}"
           set -e
           finish=$("${epoch}")
@@ -551,7 +551,7 @@ recurse() {
 
           elapsed=$(($finish - $start))
           rel="${rel_current##"${root}/"}"
-          printf "\t${the_test_shell}\t${rel}\t${result}\t${elapsed}\n" \
+          printf "\t${sh}\t${rel}\t${result}\t${elapsed}\n" \
             >> "${urchin_tmp}"/log
           exit "${exit_code}"
         ) &
