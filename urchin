@@ -705,8 +705,7 @@ main() {
       printf \#\ >> "${urchin_tmp}"/head
     fi
     if test "${format}" = urchin || test "${format}" = tap; then
-      echo Running tests at $(date +%Y-%m-%dT%H:%M:%S) \
-        >> "${urchin_tmp}"/head
+      echo Running tests at $(date +%Y-%m-%dT%H:%M:%S) >> "${urchin_tmp}"/head
     fi
 
     if test "${format}" = tap; then
@@ -754,8 +753,10 @@ main() {
     urchin_exit 1
   fi
     
+  cat "${urchin_tmp}"/head
   report_outcome "${root}" "${format}" "${urchin_tmp}"/log "${start}" \
     "${finish}"
+# cat "${urchin_tmp}"/foot
   urchin_exit "${?}"
 }
 
