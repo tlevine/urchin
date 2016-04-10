@@ -238,28 +238,34 @@ indent() {
 
 # Expand relative paths
 fullpath() {
-  readlink -f -- "${1}"
+  if test -e "${1}"; then
+    readlink -f -- "${1}" | sed 's/\/*$//'
+  else
+    echo "Could not find file or directory: ${1}" >&2
+    return 1
+  fi
 }
 
-# If $1 and $2 are the same path, return with code 1
-# If $1 is a parent of $2, echo the path of $2 relative $1.
+# If $1 is an ascestor of $2, echo the path of $2 relative $1.
+# If either of $1 or $2 does not exist, return with code 1
+# If $1 is not an ancestor of $2, return with code 2
 # Otherwise, return with code 2.
 localpath() {
-  parent="$(fullpath "${1}" | sed 's/\/*$//')"
-  child="$(fullpath "${2}" | sed 's/\/*$//')"
-  
-  if test "${parent}" = "${child}"; then
-    # Same file
-    return 1
-  elif contains "${child}" "^${parent}";
+  test -e "${1}" && test -e "${2}" || return 1 # A file is missing.
+
+  parent="$(fullpath "${1}")"
+  child="$(fullpath "${2}")"
+
+  if echo "${child}" | grep "^${parent}/" > /dev/null; then
     # Child is really a child.
-    echo "${child##"${parent}/"}"
+    echo "${child#"${parent}/"}"
     return 0
   else
     # Child is not really a child.
     return 2
   fi
 }
+
 
 contains() {
   case "$#" in
