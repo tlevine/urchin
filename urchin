@@ -329,6 +329,15 @@ test_suite_root() {
   fi
 }
 
+# Print the return code of a command, and suppress printing.
+catch() {
+  if eval "${*}" &> /dev/null; then
+    echo 0
+  else
+    echo "$?"
+  fi
+}
+
 # -------------------- Metafunctions -------------------- 
 meta_verbosity() {
   echo "if test \${${1}} -ge ${2}; then ${3}=true; fi"
@@ -523,21 +532,21 @@ recurse() {
             . ./setup
           fi
 
+          out_file="$(stdout_file "${tmp_dir}" "${rel_current}" "${sh}")"
+
           # Run with a shell?
           if has_shebang_line "${abs_current}"; then
             set -- "${abs_current}"
           else
             set -- "${sh}" "${abs_current}"
           fi
-          out_file="$(stdout_file "${tmp_dir}" "${rel_current}" "${sh}")"
 
           # Run the test
+          cmd='TEST_SHELL="${sh}" $TIMEOUT "$@"  > "${out_file}" 2>&1'
           start=$("${epoch}")
-          set +e
-          TEST_SHELL="${sh}" $TIMEOUT "$@"  > "${out_file}" 2>&1
-          exit_code="${?}"
-          set -e
+          exit_code="$(catch "${cmd}")"
           finish=$("${epoch}")
+          elapsed=$(($finish - $start))
 
           if test -f teardown; then
             . ./teardown
@@ -549,9 +558,7 @@ recurse() {
             *) result=not_ok ;;
           esac
 
-          elapsed=$(($finish - $start))
-          rel="${rel_current##"${root}/"}"
-          printf "\t${sh}\t${rel}\t${result}\t${elapsed}\n" \
+          log "${remote}" "${rel_curent}" "${result}" "${elapsed}" \
             >> "${urchin_tmp}"/log
           exit "${exit_code}"
         ) &
