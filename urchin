@@ -300,6 +300,99 @@ urchin_root() {
   fi
 }
 
+# -------------------- Printing output -------------------- 
+format_tap() {
+  result="${1}"
+  remote="${2}" # may be ''
+  the_shell="${3}"
+  path="${4}"
+
+  if test -z "${the_shell}"; then
+    the_shell='File is not executable.'
+  fi
+  case "${result}" in
+    ok) "ok $n - ${path} (${the_shell}${remote})" ;;
+    not_ok) "not_ok $n - ${path} (${the_shell}${remote})" ;;
+    skip) "ok $n - ${path} (${the_shell}${remote}) # SKIP" ;;
+  esac
+
+  if { test "${result}" = not_ok && "${print_not_ok_stdout}"; } ||
+     { test "${result}" = ok && "${print_ok_stdout}"; }; then
+    echo '# ------------ Begin output ------------'
+    sed 's/^/# /' "$(stdout_file "${path}" "${the_shell}")"
+    echo '# ------------ End output ------------'
+  fi
+  echo "# Previous test took ${file_elapsed} seconds."
+}
+
+# -------------------- Metafunctions -------------------- 
+meta_verbosity() {
+  echo "if test \${verbosity} -gt ${1}; then ${2}=true; fi"
+}
+
+$(verbosity 1 print_margins)
+$(verbosity 1 print_not_ok)
+$(verbosity 2 print_not_ok_stdout)
+$(verbosity 2 print_ok)
+$(verbosity 3 print_ok_stdout)
+
+format_urchin() {
+  result="${1}"
+  remote="${2}" # may be ''
+  the_shell="${3}"
+  path="${4}"
+  verbosity="${5}"
+
+
+  header() {
+    if test "${prevdir}" != "${currentdir}"; then
+      echo
+    fi
+    if test "${prevpath}" != "${path}"; then
+      printf "$(dirname -- "${path}")/\n> $(basename -- "${path}")\n"
+    fi
+  }
+
+  case "${result}" in
+    ok)
+      if "${print_ok}"; then
+        header
+        if "${print_in_color}"; then
+          printf "\033[32m${success_mark} \033[0m"
+        else
+          printf "${success_mark} "
+        fi
+        echo "${the_shell} ("${file_elapsed}" $(plural second $file_elapsed))"
+      fi
+    ;;
+    not_ok)
+      if "${print_not_ok}"; then
+        header
+        if "${print_in_color}"; then
+          printf "\033[31m${fail_mark} \033[0m"
+        else
+          printf "${fail_mark} "
+        fi
+        echo "${the_shell} ("${file_elapsed}" $(plural second $file_elapsed))"
+      fi
+    ;;
+    skip)
+      if "${print_ok}"; then
+        header
+        if test -z "${the_shell}"; then
+          echo '  (Specified shell is not executable.)'
+        else
+          echo "  ${the_shell} ("${file_elapsed}" $(plural second $file_elapsed))"
+        fi
+      fi
+    ;;
+  esac
+  if { test "${result}" = not_ok && "${print_not_ok_stdout}"; } ||
+     { test "${result}" = ok && "${print_ok_stdout}"; }; then
+    sed 's/^/  | /' "$(stdout_file "${path}" "${the_shell}")"
+  fi
+}
+
 # -------------------- Main stuff -------------------- 
 recurse() {
   requested_path="${1}"
@@ -476,79 +569,6 @@ report_outcome() {
     # Number of files that have been ok, not ok, and skipped
     eval "old_count=${result}s"
     eval "${result}s=$(($old_count+1))"
-
-    if test "${format}" = tap; then
-      if [ "${result}" = not_ok ]; then
-        not='not '
-      else
-        not=''
-      fi
-      if [ "${result}" = skip ]; then
-        skip='# SKIP'
-      else
-        skip=''
-      fi
-
-      if test -z "${the_shell}"; then
-        the_shell='File is not executable.'
-      fi
-      echo "${not}ok $n - ${path} (${the_shell}) ${skip}"
-      if { test "${result}" = not_ok && "${print_not_ok_stdout}"; } ||
-         { test "${result}" = ok && "${print_ok_stdout}"; }; then
-        echo '# ------------ Begin output ------------'
-        sed 's/^/# /' "$(stdout_file "${abspath}" "${the_shell}")"
-        echo '# ------------ End output ------------'
-      fi
-      echo "# Previous test took ${file_elapsed} seconds."
-    else
-      header() {
-        if test "${prevdir}" != "${currentdir}"; then
-          echo
-        fi
-        if test "${prevpath}" != "${path}"; then
-          printf "$(dirname -- "${path}")/\n> $(basename -- "${path}")\n"
-        fi
-      }
-
-      case "${result}" in
-        ok)
-          if "${print_ok}"; then
-            header
-            if "${print_in_color}"; then
-              printf "\033[32m${success_mark} \033[0m"
-            else
-              printf "${success_mark} "
-            fi
-            echo "${the_shell} ("${file_elapsed}" $(plural second $file_elapsed))"
-          fi
-        ;;
-        not_ok)
-          if "${print_not_ok}"; then
-            header
-            if "${print_in_color}"; then
-              printf "\033[31m${fail_mark} \033[0m"
-            else
-              printf "${fail_mark} "
-            fi
-            echo "${the_shell} ("${file_elapsed}" $(plural second $file_elapsed))"
-          fi
-        ;;
-        skip)
-          if "${print_ok}"; then
-            header
-            if test -z "${the_shell}"; then
-              echo '  (File is not executable.)'
-            else
-              echo "  ${the_shell} ("${file_elapsed}" $(plural second $file_elapsed))"
-            fi
-          fi
-        ;;
-      esac
-      if { test "${result}" = not_ok && "${print_not_ok_stdout}"; } ||
-         { test "${result}" = ok && "${print_ok_stdout}"; }; then
-        sed 's/^/  | /' "$(stdout_file "${abspath}" "${the_shell}")"
-      fi
-    fi
 
   prevpath="${path}"
   done < "${sorted_log_file}"
