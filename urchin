@@ -241,6 +241,25 @@ fullpath() {
   readlink -f -- "${1}"
 }
 
+# If 1 and 2 are the same path, echo "."
+# If 1 is a parent of 2, echo the path of 2 relative 1.
+# Otherwise, return with code 1.
+localpath() {
+  parent="$(fullpath "${1}" | sed 's/\/*$//')"
+  child="$(fullpath "${2}" | sed 's/\/*$//')"
+  
+  if test "${parent}" = "${child}"; then
+    echo .
+  else
+    rel="${child##"${parent}/"}"
+    if test "${rel}" = "${parent}"; then
+      return 1
+    else
+      echo "${rel}"
+    fi
+  fi
+}
+
 contains() {
   case "$#" in
     1) grep "${1}" > /dev/null ;;
@@ -438,10 +457,9 @@ format_urchin() {
 recurse() {
   test_suite_root="${1}"
   requested_path="${2}"
-  potential_test="$(fullpath "${3}")"
 
-  abs="${potential_test}"
-  rel="${potential_test##"${test_suite_root}/"}"
+  abs="$(fullpath "${3}")"
+  rel="${abs##"${test_suite_root}/"}"
 
   for ignore in setup_dir teardown_dir setup teardown; do
     if test "$(basename "${potential_test}")" = "${ignore}"; then
