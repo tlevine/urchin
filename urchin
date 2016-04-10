@@ -680,24 +680,6 @@ want to run urchin on that directory.' >&2
     fi
   fi
 
-  if $print_margins; then
-    if test "${format}" = tap; then
-      printf \#\ >> "${urchin_tmp}"/head
-    fi
-    if test "${format}" = urchin || test "${format}" = tap; then
-      echo Running tests at $(date +%Y-%m-%dT%H:%M:%S) >> "${urchin_tmp}"/head
-    fi
-
-    if test "${format}" = tap; then
-      printf '# ' >> "${urchin_tmp}"/head
-    fi
-    if test "${format}" = urchin || test "${format}" = tap; then
-      printf 'Cycling with the following shells: ' >> "${urchin_tmp}"/head
-    fi
-    echo "${shell_list}" | tr "${HT}" \  >> "${urchin_tmp}"/head
-    echo >> "${urchin_tmp}"/head
-  fi
-
   if is_set urchin_timeout; then
     # Choose the timeout command
     if timeout -t 0 true 2> /dev/null; then
@@ -716,6 +698,13 @@ want to run urchin on that directory.' >&2
   fi
 
   # --------------------   REALLY RUN   -------------------- #
+
+  # Write header information
+  echo Running tests at $(date +%Y-%m-%dT%H:%M:%S) >> "${urchin_tmp}"/head
+  printf 'Cycling with the following shells: ' >> "${urchin_tmp}"/head
+  echo "${shell_list}" | tr "${HT}" \  >> "${urchin_tmp}"/head
+  echo >> "${urchin_tmp}"/head
+
   start=$("${epoch}")
 
   # 1 test file or folder to run
