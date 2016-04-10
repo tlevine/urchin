@@ -226,14 +226,6 @@ plural () {
   fi
 }
 
-read_many() {
-  if delimiter="${1}" && shift; then
-    while test "${#}" -gt 0; do
-      echo "while read -d '${delimiter}'; do"
-    done
-  fi
-}
-
 has_shebang_line() {
   head -n 1 "${1}" | grep -v '^#!/bin/sh$' | grep -q '^#!'
 }
@@ -473,12 +465,9 @@ report_outcome() {
   sorted_log_file=$(mktemp_file)
   cat "${log_file}" | LC_COLLATE=C sort > "${sorted_log_file}"
 
-  while read line; do
-    path=$(echo "${line}" | cut -f1)
+  while read -d "${GS}" line; do
+    read -d "${FS}" path the_shell result file_elapsed
     abspath=${urchin_tmp}/${path}
-    the_shell=$(echo "${line}" | cut -f2)
-    result=$(echo "${line}" | cut -f3)
-    file_elapsed=$(echo "$line" | cut -f4)
 
     prevdir="${currentdir}"
     currentdir="$(dirname -- "${path}")"
