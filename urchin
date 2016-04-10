@@ -338,11 +338,11 @@ format_tap() {
     n=$(( ${n:-0} + 1))
 
     case "${result}" in
-      ok) echo "ok $n - ${path} (${the_shell}${remote})"
+      ok) echo "ok $n - ${path} (${the_shell}${on})"
           if "${print_ok_stdout}"; then print_stdout; fi ;;
-      not_ok) echo "not_ok $n - ${path} (${the_shell}${remote})"
+      not_ok) echo "not_ok $n - ${path} (${the_shell}${on})"
               if "${print_not_ok_stdout}"; then print_stdout; fi ;;
-      skip) "ok $n - ${path} (${the_shell}${remote}) # SKIP" ;;
+      skip) "ok $n - ${path} (${the_shell}${on}) # SKIP" ;;
     esac
     echo "# Previous test took ${file_elapsed} seconds."
 
@@ -387,21 +387,22 @@ format_urchin() {
 
   while IFS="${HT}" read remote the_shell path result file_elapsed; do
     abspath=${urchin_tmp}/${path}
+
+    currentdir="$(dirname -- "${path}")"
+    prevdir="${currentdir}"
+
+    # Format the message
     if test -z "${remote}"; then
       on=" on ${remote}"
     else
       on=
     fi
-
-    currentdir="$(dirname -- "${path}")"
-    prevdir="${currentdir}"
-
-    if test -z "${the_shell}"; then
-      message="(Skipped${on})"
+    if test result = skip; then
+      parantheses="(skipped)"
     else
-      unit="$(plural second "${file_elapsed}")"
-      message="${the_shell}${on} (${file_elapsed} ${unit})"
+      parantheses="(${file_elapsed} $(plural second "${file_elapsed}"))"
     fi
+    message="${the_shell}${on} (${file_elapsed} ${unit})"
 
     # Keep track of how many files have been ok, not ok, and skipped.
     eval "${result}s=$((${result}s+1))"
@@ -568,9 +569,10 @@ recurse() {
       wait
     fi
   else
-    # Shell is '' because "File is not executable".
-    # Why does that happen?
-    printf "\t\t${potential_test}\tskip\t0\n" >> "${urchin_tmp}"/log
+    # Skip because the file is not executable.
+    echo "${shell_list}" | while read sh; do
+      printf "\t${sh}\t${potential_test}\tskip\t0\n" >> "${urchin_tmp}"/log
+    done
   fi
 }
 
