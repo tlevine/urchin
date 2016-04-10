@@ -584,8 +584,6 @@ report_outcome() {
 
 
 main() {
-  test_arg_list="${urchin_tmp}"/test_list
-  > "${test_arg_list}"
   format=urchin
 
   while [ "${#}" -gt 0 ]
@@ -642,8 +640,9 @@ you don't need to quote the TEST_SHELL variable." >&2
               urchin_exit;;
           -*) urchin_help >&2
               urchin_exit 11;;
-          *)  if contains "${1}" "${HT}"; then
-                echo 'Test file names may not contain tab characters (HT).' >&2
+          *)  if contains "${1}" "${HT}" "${LF}"; then
+                echo 'Test file names may contain all characters other than' >&2
+                echo 'horizontal tab (\t) and line feed (\n).' >&2
                 urchin_exit 11
               elif [ ! -e "${1}" ]; then
                 echo "No such file or directory: '${1}'" >&2
@@ -661,7 +660,7 @@ in case that was an accident. Use the -f flag if you really
 want to run urchin on that directory.' >&2
                 urchin_exit 12
               fi
-              echo "${1}" >> "${test_arg_list}" ;;
+              test_seeds="${1}${LF}${test_seeds}" ;;
       esac
       shift
   done
@@ -706,20 +705,14 @@ want to run urchin on that directory.' >&2
   echo >> "${urchin_tmp}"/head
 
   start=$("${epoch}")
-
-  # 1 test file or folder to run
-  # 2 urchin root
-  # 3 Should we cycle shells?
-  # 4 TEST_SHELL
-  while read seed; do
-    recurse "$(fullpath "${seed}")" "${root}" "${cycle_shell}" \
-      "${TEST_SHELL}" || break
-  done < "${test_arg_list}"
+  echo "${test_seeds}" | while read seed; do
+    recurse "${root}" "$(fullpath "${seed}")""${TEST_SHELL}" || break
+  done
   finish=$("${epoch}")
 
   if test $(cat "${urchin_tmp}"/log | wc -l) -eq 0; then
     echo 'No tests found' >&2
-    urchin_exit 12
+    urchin_exit 2
   fi
     
   cat "${urchin_tmp}"/head
