@@ -427,7 +427,7 @@ format_urchin() {
   fi
 }
 
-# XXX
+# ---------- Temporary directory global variable ---------- 
 urchin_tmp=$(mktemp_dir)
 > "${urchin_tmp}/log"
 
