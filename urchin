@@ -338,32 +338,20 @@ catch() {
   fi
 }
 
-# -------------------- Metafunctions -------------------- 
+# -------------------- Printing output -------------------- 
+# Format functions may read a log file from stdin.
+
 meta_verbosity() {
   echo "if test \${${1}} -ge ${2}; then ${3}=true; fi"
 }
-
-return_on_nonzero() {
-  echo '
-  if test "${1}" -ne 0; then
-    if test -f teardown_dir; then
-      . ./teardown_dir
-    fi
-    return $return_code
-  fi
-  '
-}
-
-# -------------------- Printing output -------------------- 
-# Format functions may read a log file from stdin.
 
 format_tap() {
   v="${1}"
   tmp_dir="${2}"
   elapsed="${3}"
 
-  $(verbosity v 2 print_not_ok_stdout)
-  $(verbosity v 3 print_ok_stdout)
+  $(meta_verbosity v 2 print_not_ok_stdout)
+  $(meta_verbosity v 3 print_ok_stdout)
 
   print_stdout() {
     echo '# ------------ Begin output ------------'
@@ -396,11 +384,11 @@ format_urchin() {
   verbosity="${3}"
   print_in_color="${4}"
 
-  $(verbosity v 1 print_margins)
-  $(verbosity v 1 print_not_ok)
-  $(verbosity v 2 print_not_ok_stdout)
-  $(verbosity v 2 print_ok)
-  $(verbosity v 3 print_ok_stdout)
+  $(meta_verbosity v 1 print_margins)
+  $(meta_verbosity v 1 print_not_ok)
+  $(meta_verbosity v 2 print_not_ok_stdout)
+  $(meta_verbosity v 2 print_ok)
+  $(meta_verbosity v 3 print_ok_stdout)
 
   if $print_in_color; then
     success_mark=$(printf "\033[32m✓ \033[0m")
@@ -500,8 +488,7 @@ recurse() {
       log "${remote}" "${sh}" "${no_tab}" tab '' >> "${urchin_tmp}"/log
     done
   elif [ -x "${abs_current}" ]; then
-
-    finalize='
+    meta_finalize='
       if test -f .urchin_dir && grep series ./.urchin_dir > /dev/null ||
         "${run_in_series_root}"; then
         return_code=$(catch wait "${!}")
@@ -529,7 +516,7 @@ recurse() {
         fi
 
         recurse "${requested_path}" "${test}" &
-        eval "${finalize}"
+        eval "${meta_finalize}"
 
       done
       wait
@@ -575,7 +562,7 @@ recurse() {
             >> "${urchin_tmp}"/log
           exit "${exit_code}"
         ) &
-        eval "${finalize}"
+        eval "${meta_finalize}"
       done
       wait
     fi
