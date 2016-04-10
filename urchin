@@ -53,6 +53,7 @@ FS=$(printf '\u001C')
 GS=$(printf '\u001D')
 RS=$(printf '\u001E')
 US=$(printf '\u001F')
+DELIMITERS="[${FS}${GS}${RS}${US}]"
 
 # Urchin version number
 VERSION=0.0.0-master
@@ -206,14 +207,6 @@ plural () {
   fi
 }
 
-validate_strings() {
-  test $(echo "${1}" | wc -l) -eq 1 || {
-    echo '$1 may not contain tab or newline characters.' >&2
-    echo 'If this is really a problem, tell me, and I may fix it.' >&2
-    urchin_exit 11
-  }
-}
-
 has_shebang_line() {
   head -n 1 "${1}" | grep -v '^#!/bin/sh$' | grep -q '^#!'
 }
@@ -222,28 +215,6 @@ indent() {
   level="${1}"
   if test "${level}" -gt 0; then
     printf "%$((2 * ${level}))s"
-  fi
-}
-
-validate_test_arg() {
-  # Must be a file or directory
-  if [ ! -e "${1}" ]; then
-    echo "No such file or directory: '${1}'" >&2
-    echo "${USAGE}" >&2
-    urchin_exit 11
-  fi
-
-  # Molly guard
-  root="$(urchin_root "${1}")"
-  if ! {
-    basename "$(fullpath "${root}")" |
-    grep -qi 'test' || "${force}"
-  }; then
-    echo 'The root directory of the tests that you are running urchin on
-  does not contain the word "test", so I am not running,
-  in case that was an accident. Use the -f flag if you really
-  want to run urchin on that directory.' >&2
-    urchin_exit 1
   fi
 }
 
@@ -344,7 +315,10 @@ recurse() {
     return 0
   fi
 
-  validate_strings "${potential_test}" 'Test file names'
+  if echo "${potential_test}" grep "${DELIMITERS}" > /dev/null; then
+    echo 'Test file names may not contain ASCII delimiters.' >&2
+    urchin_exit 11
+  fi
 
   if [ -x "${potential_test}" ]; then
     if [ -d "${potential_test}" ]; then
@@ -628,10 +602,17 @@ main() {
               urchin_exit 11
             }
 
-            validate_strings "${shell_for_sh_tests}" 'Shell paths'
-            if echo "${shell_for_sh_tests}" | grep -q \ ; then
-              echo "Warning: It is best if shell paths contain no spaces so that
-  you don't need to quote the TEST_SHELL variable." >&2
+            if echo "${shell_for_sh_tests}" |
+              grep "${DELIMITER}" > /dev/null; then
+              echo Shell paths may not contain the delimiter characters. >&2
+              urchin_exit 11
+            fi
+
+            if echo "${shell_for_sh_tests}" |
+              grep "[${IFS}]" > /dev/null; then
+              echo "Warning: It is best if field-separator characters
+(usually spaces) are absent from shell paths so that
+you don't need to quote the TEST_SHELL variable." >&2
             fi
 
             echo "${shell_for_sh_tests}" >> "${shell_list}"
@@ -671,6 +652,30 @@ main() {
               urchin_exit 11;;
           *)  validate_strings "${1}" 'Test file names'
               validate_test_arg "${1}"
+validate_test_arg() {
+  # Must be a file or directory
+  if [ ! -e "${1}" ]; then
+    echo "No such file or directory: '${1}'" >&2
+    echo "${USAGE}" >&2
+    urchin_exit 11
+  fi
+
+  # Molly guard
+  root="$(urchin_root "${1}")"
+  if ! {
+    basename "$(fullpath "${root}")" |
+    grep -qi 'test' || "${force}"
+  }; then
+    echo 'The root directory of the tests that you are running urchin on
+  does not contain the word "test", so I am not running,
+  in case that was an accident. Use the -f flag if you really
+  want to run urchin on that directory.' >&2
+    urchin_exit 1
+  fi
+}
+
+
+
               echo "${1}" >> "${test_arg_list}" ;;
       esac
       shift
