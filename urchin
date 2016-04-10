@@ -271,6 +271,14 @@ stdout_file() {
   echo "${x}/$(md5 "${the_shell}")"
 }
 
+# Print a line of a log file
+log() {
+  for arg in "$@"; do
+    printf "${arg}\t"
+  done
+  printf '\n'
+}
+
 # Root directory of the present test suite
 # USAGE: test_suite_root <directory>
 test_suite_root() {
@@ -428,12 +436,12 @@ format_urchin() {
 # 1) At least one test failed.
 # *) Something else went wrong; Urchin should exit with the same code.
 recurse() {
-  requested_path="${1}"
-  potential_test="$(fullpath "${2}")"
-  cycle_shell="${3}"
-  TEST_SHELL="${4}"
+  test_suite_root="${1}"
+  requested_path="${2}"
+  potential_test="$(fullpath "${3}")"
 
-  root="$(test_suite_root "${1}")"
+  abs="${potential_test}"
+  rel="${potential_test##"${test_suite_root}/"}"
 
   for ignore in setup_dir teardown_dir setup teardown; do
     if test "$(basename "${potential_test}")" = "${ignore}"; then
@@ -454,11 +462,10 @@ recurse() {
   fi
 
   if contains "${potential_test}" "${HT}"; then
-    echo 'Test file names may not contain tabs (HT).' >&2
-    return 11
-  fi
-
-  if [ -x "${potential_test}" ]; then
+    echo "${shell_list}" | while read sh; do
+      log "${remote}" "${sh}" "${rel}" tab '' >> "${urchin_tmp}"/log
+    done
+  elif [ -x "${potential_test}" ]; then
     if [ -d "${potential_test}" ]; then
     (
       cd -- "${potential_test}"
@@ -478,7 +485,7 @@ recurse() {
           break
         fi
 
-        recurse "${requested_path}" "${test}" "${TEST_SHELL}" &
+        recurse "${requested_path}" "${test}" &
 
         if "${run_in_series}" || "${run_in_series_dir}"; then
           if ! wait "${!}"; then
@@ -705,7 +712,7 @@ wantto run urchin on that directory.' >&2
   start=$("${epoch}")
   echo "${test_seeds}" | while read seed; do
     set +e
-    recurse "${root}" "$(fullpath "${seed}")""${TEST_SHELL}"
+    recurse "${root}" "$(fullpath "${seed}")" "${TEST_SHELL}"
     return_code=$?
     set -e
     test "${return_code}" -eq 0 || break
