@@ -478,16 +478,17 @@ recurse() {
           break
         fi
 
-        recurse "${requested_path}" "${test}" "${cycle_shell}" \
-          "${TEST_SHELL}" &
+        recurse "${requested_path}" "${test}" "${TEST_SHELL}" &
 
         if "${run_in_series}" || "${run_in_series_dir}"; then
-          if wait "${!}"; then exit_code=0; else exit_code="${?}"; fi
-          if "${exit_on_not_ok}" && test "${exit_code}" -ne 0; then
-            if test -f teardown_dir; then
-              . ./teardown_dir
+          if ! wait "${!}"; then
+            return_code="$?"
+            if "${exit_on_not_ok}"; then
+              if test -f teardown_dir; then
+                . ./teardown_dir
+              fi
+              return "${return_code}"
             fi
-            return 1
           fi
         fi
       done
@@ -498,9 +499,6 @@ recurse() {
     )
     elif [ -f "${potential_test}" ]; then
       cd -- "$(dirname -- "${potential_test}")"
-
-      # Determine the environment variable to define for test scripts
-      # that reflects the specified or implied shell to use for shell-code tests.
       echo "${shell_list}" | while read the_test_shell; do
         (
           if test -f setup; then
