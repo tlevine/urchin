@@ -156,6 +156,26 @@ Go to https://thomaslevine.com/!/urchin/ for documentation on writing tests.
 EOF
 }
 
+# -------------------- Dependency checks -------------------- 
+if command -v md5 1> /dev/null 2> /dev/null; then
+  urchin_md5=md5
+elif command -v md5sum 1> /dev/null 2> /dev/null; then
+  urchin_md5=md5sum
+else
+  echo Could not find MD5 hash command >&2
+  exit 1
+fi
+
+if epoch_date 2>&1 > /dev/null; then
+  epoch=epoch_date
+elif epoch_pax 2>&1 > /dev/null; then
+  epoch=epoch_pax
+else
+  echo I could not find a seconds counter. >&2
+  exit 1
+fi
+
+
 # -------------------- Portable wrappers -------------------- 
 mktemp_dir() {
   # Support HP-UX mktemp that has wrong exit codes and
@@ -270,26 +290,6 @@ urchin_root() {
     urchin_root "${current}"/.. "${orig}"
   fi
 }
-
-# -------------------- Dependency checks -------------------- 
-if command -v md5 1> /dev/null 2> /dev/null; then
-  urchin_md5=md5
-elif command -v md5sum 1> /dev/null 2> /dev/null; then
-  urchin_md5=md5sum
-else
-  echo Could not find MD5 hash command >&2
-  urchin_exit 1
-fi
-
-if epoch_date 2>&1 > /dev/null; then
-  epoch=epoch_date
-elif epoch_pax 2>&1 > /dev/null; then
-  epoch=epoch_pax
-else
-  echo I could not find a seconds counter. >&2
-  urchin_exit 1
-fi
-
 
 # -------------------- Main stuff -------------------- 
 recurse() {
