@@ -493,21 +493,24 @@ recurse() {
         "${run_in_series_root}"; then
         return_code=$(catch wait "${!}")
         if "${return_on_not_ok}" && test "${exit_code}" -ne 0; then
-          if test -f teardown_dir; then
-            . ./teardown_dir
-          fi
+          eval "$(dot_if_exists teardown_dir)"
           return $return_code
         fi
       fi
     '
+    dot_if_exists() {
+      echo "
+      if test -f ${1}; then
+        . ./${1}
+      fi
+      "
+    }
 
     if [ -d "${abs_current}" ]; then
     (
       cd -- "${abs_current}"
 
-      if test -f setup_dir; then
-        . ./setup_dir
-      fi
+      eval "$(dot_if_exists setup_dir)"
 
       for test in *; do
         if test "${test}" = '*' && ! test -e "${test}"; then
@@ -520,17 +523,13 @@ recurse() {
 
       done
       wait
-      if test -f teardown_dir; then
-        . ./teardown_dir
-      fi
+      eval "$(dot_if_exists teardown_dir)"
     )
     elif [ -f "${abs_current}" ]; then
       cd -- "$(dirname -- "${abs_current}")"
       echo "${shell_list}" | while read -r sh; do
         (
-          if test -f setup; then
-            . ./setup
-          fi
+          eval "$(dot_if_exists setup)"
 
           out_file="$(stdout_file "${tmp_dir}" "${rel_current}" "${sh}")"
 
@@ -548,9 +547,7 @@ recurse() {
           finish=$("${epoch}")
           elapsed=$(($finish - $start))
 
-          if test -f teardown; then
-            . ./teardown
-          fi
+          eval "$(dot_if_exists teardown)"
 
           case "${exit_code}" in
             0) result=ok ;;
