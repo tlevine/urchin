@@ -505,7 +505,7 @@ recurse() {
 
       # Determine the environment variable to define for test scripts
       # that reflects the specified or implied shell to use for shell-code tests.
-      while read the_test_shell; do
+      echo "${shell_list}" | while read the_test_shell; do
         (
           if test -f setup; then
             . ./setup
@@ -562,7 +562,7 @@ recurse() {
             return 1
           fi
         fi
-      done < "${shell_list}"
+      done
       wait
     fi
   else
@@ -572,10 +572,7 @@ recurse() {
   fi
 }
 
-# This should not require the root variable; fix the paths before they
-# get to the log file.
 report_outcome() {
-  root="$(fullpath "${1}")"
   format="${2}"
   log_file="${3}"
   start="${4}"
@@ -596,20 +593,10 @@ report_outcome() {
 
 main() {
   cycle_shell=true
-  shell_list="${urchin_tmp}"/shell_list
   test_arg_list="${urchin_tmp}"/test_list
   > "${test_arg_list}"
-  run_in_series=false
-  force=false
-  exit_on_not_ok=false
   format=urchin
-  print_in_color=false
 
-  print_margins=true
-  print_ok=false
-  print_not_ok=true
-  print_ok_stdout=false
-  print_not_ok_stdout=false
   while [ "${#}" -gt 0 ]
   do
       case "${1}" in
@@ -636,8 +623,7 @@ main() {
 (usually spaces) are absent from shell paths so that
 you don't need to quote the TEST_SHELL variable." >&2
             fi
-
-            echo "${shell_for_sh_tests}" >> "${shell_list}"
+            shell_list="${shell_for_sh_tests}${LF}${shell_list}"
             ;;
           -n|--disable-cycling) cycle_shell=false;; 
           -F|--format) shift ; format="${1}";;
@@ -650,18 +636,11 @@ you don't need to quote the TEST_SHELL variable." >&2
             fi ;;
           -p|--pretty) print_in_color=true;;
 
-          -q|--quiet)    print_not_ok=false
-                         print_margins=false;; 
-          -v)            print_not_ok_stdout=true;;
-          -vv)           print_not_ok_stdout=true
-                         print_ok=true;;
-          -vvv|--verbose)print_not_ok_stdout=true
-                         print_ok=true;
-                         print_ok_stdout=true;;
-          -vvvv|--debug) print_not_ok_stdout=true
-                         print_ok=true;
-                         print_ok_stdout=true
-                         set -x;;
+          -q|--quiet)     verbosity=0 ;;
+          -v)             verbosity=2 ;;
+          -vv)            verbosity=3 ;;
+          -vvv|--verbose) verbosity=4 ;;
+          -vvvv|--debug)  verbosity=5 ;;
 
           -h|--help) urchin_help
                      urchin_exit 0;;
@@ -703,7 +682,7 @@ want to run urchin on that directory.' >&2
   fi
 
   # If -s was not passed, use the available default shells.
-  if test -z "${shell_list}"; then
+  if ! is_set "${shell_list}"; then
     if $cycle_shell; then
       for shell in $DEFAULT_SHELLS; do
         if command -v "${shell}" 1> /dev/null 2> /dev/null; then
@@ -727,7 +706,7 @@ want to run urchin on that directory.' >&2
     if test "${format}" = urchin || test "${format}" = tap; then
       printf 'Cycling with the following shells: ' >> "${urchin_tmp}"/head
     fi
-    cat "${shell_list}" | tr '\n' \  >> "${urchin_tmp}"/head
+    echo "${shell_list}" | tr "${HT}" \  >> "${urchin_tmp}"/head
     echo >> "${urchin_tmp}"/head
   fi
 
