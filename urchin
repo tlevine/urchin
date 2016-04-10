@@ -653,32 +653,25 @@ you don't need to quote the TEST_SHELL variable." >&2
               urchin_exit;;
           -*) urchin_help >&2
               urchin_exit 11;;
-          *)  validate_strings "${1}" 'Test file names'
-              validate_test_arg "${1}"
-validate_test_arg() {
-  # Must be a file or directory
-  if [ ! -e "${1}" ]; then
-    echo "No such file or directory: '${1}'" >&2
-    echo "${USAGE}" >&2
-    urchin_exit 11
-  fi
-
-  # Molly guard
-  root="$(urchin_root "${1}")"
-  if ! {
-    basename "$(fullpath "${root}")" |
-    grep -i 'test' > /dev/null || "${force}"
-  }; then
-    echo 'The root directory of the tests that you are running urchin on
-  does not contain the word "test", so I am not running,
-  in case that was an accident. Use the -f flag if you really
-  want to run urchin on that directory.' >&2
-    urchin_exit 1
-  fi
-}
-
-
-
+          *)  if contains "${1}" "${DELIMITERS}"; then
+                echo 'Test file names may not contain delimiter characters.' >&2
+                urchin_exit 11
+              elif [ ! -e "${1}" ]; then
+                echo "No such file or directory: '${1}'" >&2
+                echo "${USAGE}" >&2
+                urchin_exit 11
+              elif ! {
+                # Molly guard
+                root="$(urchin_root "${1}")"
+                basename "$(fullpath "${root}")" |
+                grep -i 'test' > /dev/null || "${force}"
+              }; then
+                echo 'The root directory of the tests that you are running urchin on
+does not contain the word "test", so I am not running,
+in case that was an accident. Use the -f flag if you really
+want to run urchin on that directory.' >&2
+                urchin_exit 12
+              fi
               echo "${1}" >> "${test_arg_list}" ;;
       esac
       shift
