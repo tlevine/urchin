@@ -257,12 +257,7 @@ stdout_file() {
 
   x="${urchin_tmp}/stdout$(fullpath "$the_test")"
   mkdir -p "${x}"
-  case "${urchin_md5}" in
-    md5sum) y=$(echo "${the_shell}" | md5sum | cut -d\  -f1) ;;
-    md5) y=$(echo "${the_shell}" | md5 | sed 's/.* //') ;;
-    *) echo md5 command is not configured >&2; urchin_exit 1;;
-  esac
-  echo "${x}/${y}"
+  echo "${x}/$(md5 "${the_shell}")"
 }
 
 # Expand relative paths
@@ -545,13 +540,11 @@ recurse() {
             . ./teardown
           fi
 
-          if [ "${exit_code}" -eq 0 ]; then
-            result=ok
-          elif [ "${exit_code}" -eq 3 ]; then
-            result=skip
-          else
-            result=not_ok
-          fi
+          case "${exit_code}" in
+            0) result=ok ;;
+            3) result=skip ;;
+            *) result=not_ok ;;
+          esac
 
           elapsed=$(($finish - $start))
           rel="${potential_test##"${root}/"}"
@@ -571,8 +564,6 @@ recurse() {
         fi
       done < "${shell_list}"
       wait
-    else
-      echo "${potential_test}: Neither file nor directory!?" >&2
     fi
   else
     # Shell is '' because "File is not executable".
