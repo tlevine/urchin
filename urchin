@@ -275,14 +275,10 @@ remove_trailing_slash() {
 # Find the root directory of the present test suite
 urchin_root() {
   # Call recursively but remember the original argument.
+  orig="${2:-$1}"
   current="${1%/}"
-  if test -n "${2}"; then
-    orig="${2}"
-  else
-    orig="${1}"
-  fi
 
-  abscurrent="$(fullpath "${1}")"
+  abscurrent="$(fullpath "${current}")"
   if test "${abscurrent}" = / ||
     basename "${abscurrent}" | contains '^\.' ; then
     # Stop traversing upwards at / and at hidden directories.
