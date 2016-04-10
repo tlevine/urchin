@@ -257,6 +257,17 @@ fullpath() {
   readlink -f -- "${1}"
 }
 
+contains() {
+  case "$#" in
+    1) grep "${1}" > /dev/null ;;
+    2) echo "${1}" | contains "${2}" ;;
+    3) contains "${1}" "${2}" && contains "${1}" "${3}" ;;
+    *) container="${1}" && shift
+       contains "${container}" "${1}" && shift &&
+       contains "${container}" "${@}" ;;
+   esac
+}
+
 remove_trailing_slash() {
   echo "$1" | sed s/\\/$//
 }
@@ -304,8 +315,8 @@ recurse() {
     fi
   done
 
-  if echo "${requested_path}" | grep -q "^${potential_test}" ||
-     echo "${potential_test}" | grep -q "^${requested_path}" ; then
+  if contains "${potential_test}" "^${potential_test}" ||
+     contains "${potential_test}" "^${requested_path}" ; then
     if test "$(dirname "${potential_test}")" = \
             "$(dirname "${requested_path}")" &&
        test "${potential_test}" != "${requested_path}"; then
@@ -315,7 +326,7 @@ recurse() {
     return 0
   fi
 
-  if echo "${potential_test}" grep "${DELIMITERS}" > /dev/null; then
+  if contains "${potential_test}" "${DELIMITERS}"; then
     echo 'Test file names may not contain ASCII delimiters.' >&2
     urchin_exit 11
   fi
@@ -602,14 +613,12 @@ main() {
               urchin_exit 11
             }
 
-            if echo "${shell_for_sh_tests}" |
-              grep "${DELIMITER}" > /dev/null; then
+            if contains "${potential_test}" "${DELIMITERS}"; then
               echo Shell paths may not contain the delimiter characters. >&2
               urchin_exit 11
             fi
 
-            if echo "${shell_for_sh_tests}" |
-              grep "[${IFS}]" > /dev/null; then
+            if contains "${shell_for_sh_tests}" "[${IFS}]"; then
               echo "Warning: It is best if field-separator characters
 (usually spaces) are absent from shell paths so that
 you don't need to quote the TEST_SHELL variable." >&2
@@ -622,10 +631,7 @@ you don't need to quote the TEST_SHELL variable." >&2
           -T|--timeout)
             shift
             urchin_timeout="${1}" 
-            if ! {
-              echo "${urchin_timeout}" |
-              grep '[0-9][0-9.]*\(s\|m\|h\|d\|\)'
-            }; then
+            if ! contains "${urchin_timeout}" '[0-9][0-9.]*\(s\|m\|h\|d\|\)' ; then
               echo Bad timeout argument: "${urchin_timeout}" >&2
               urchin_exit 1
             fi ;;
