@@ -378,36 +378,29 @@ format_urchin() {
     currentdir="$(dirname -- "${path}")"
     prevdir="${currentdir}"
 
+    if test -z "${the_shell}"; then
+      message="${the_shell} on ${remote} is not executable."
+    else
+      unit="$(plural second "${file_elapsed}")"
+      message="${the_shell} on ${remote} (${file_elapsed} ${unit})"
+    fi
     case "${result}" in
-      ok)
-        if "${print_ok}"; then
-          header
-          printf "${success_mark} "
-          echo "${the_shell} ("${file_elapsed}" $(plural second $file_elapsed))"
-        fi
-      ;;
-      not_ok)
-        if "${print_not_ok}"; then
-          header
-          printf "${fail_mark} "
-          echo "${the_shell} ("${file_elapsed}" $(plural second $file_elapsed))"
-        fi
-      ;;
-      skip)
-        if "${print_ok}"; then
-          header
-          if test -z "${the_shell}"; then
-            echo '  (Specified shell is not executable.)'
-          else
-            echo "  ${the_shell} ("${file_elapsed}" $(plural second $file_elapsed))"
-          fi
-        fi
-      ;;
+      ok) if "${print_ok}"; then
+            header && echo "${success_mark} ${message}"
+          fi ;;
+      not_ok) if "${print_not_ok}"; then
+                header && echo "${fail_mark} ${message}"
+              fi ;;
+      skip) if "${print_ok}"; then
+              header && echo "${skip_mark} ${message}"
+            fi ;;
     esac
+
     if { test "${result}" = not_ok && "${print_not_ok_stdout}"; } ||
        { test "${result}" = ok && "${print_ok_stdout}"; }; then
       sed 's/^/  | /' "$(stdout_file "${path}" "${the_shell}")"
     fi
+
     prevpath="${path}"
   done
 
