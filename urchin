@@ -241,9 +241,9 @@ fullpath() {
   readlink -f -- "${1}"
 }
 
-# If 1 and 2 are the same path, echo "."
-# If 1 is a parent of 2, echo the path of 2 relative 1.
-# Otherwise, return with code 1.
+# If $1 and $2 are the same path, return with code 1
+# If $1 is a parent of $2, echo the path of $2 relative $1.
+# Otherwise, return with code 2.
 localpath() {
   parent="$(fullpath "${1}" | sed 's/\/*$//')"
   child="$(fullpath "${2}" | sed 's/\/*$//')"
@@ -285,7 +285,7 @@ stdout_file() {
   the_test="${2}"
   the_shell="${3}"
 
-  x="${tmp_dir}/stdout$(fullpath "$the_test")"
+  x="${tmp_dir}/stdout$(localpath "$the_test")"
   mkdir -p "${x}"
   echo "${x}/$(md5 "${the_shell}")"
 }
