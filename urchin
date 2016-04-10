@@ -300,49 +300,68 @@ urchin_root() {
   fi
 }
 
-# -------------------- Printing output -------------------- 
-format_tap() {
-  result="${1}"
-  remote="${2}" # may be ''
-  the_shell="${3}"
-  path="${4}"
-
-  if test -z "${the_shell}"; then
-    the_shell='File is not executable.'
-  fi
-  case "${result}" in
-    ok) "ok $n - ${path} (${the_shell}${remote})" ;;
-    not_ok) "not_ok $n - ${path} (${the_shell}${remote})" ;;
-    skip) "ok $n - ${path} (${the_shell}${remote}) # SKIP" ;;
-  esac
-
-  if { test "${result}" = not_ok && "${print_not_ok_stdout}"; } ||
-     { test "${result}" = ok && "${print_ok_stdout}"; }; then
-    echo '# ------------ Begin output ------------'
-    sed 's/^/# /' "$(stdout_file "${path}" "${the_shell}")"
-    echo '# ------------ End output ------------'
-  fi
-  echo "# Previous test took ${file_elapsed} seconds."
-}
-
 # -------------------- Metafunctions -------------------- 
 meta_verbosity() {
-  echo "if test \${verbosity} -gt ${1}; then ${2}=true; fi"
+  echo "if test \${${1}} -gt ${2}; then ${3}=true; fi"
 }
 
-$(verbosity 1 print_margins)
-$(verbosity 1 print_not_ok)
-$(verbosity 2 print_not_ok_stdout)
-$(verbosity 2 print_ok)
-$(verbosity 3 print_ok_stdout)
+# -------------------- Printing output -------------------- 
+# Format functions may read a log file from stdin.
+
+format_tap() {
+  v="${1}"
+  tmp_dir="${2}"
+
+  $(verbosity v 2 print_not_ok_stdout)
+  $(verbosity v 3 print_ok_stdout)
+
+  while IFS="${HT}" read remote the_shell path result file_elapsed; do
+    # Number of files that have run, including this one
+    n=$(( ${n:-0} + 1))
+
+    if test -z "${the_shell}"; then
+      the_shell='File is not executable.'
+    fi
+    case "${result}" in
+      ok) "ok $n - ${path} (${the_shell}${remote})" ;;
+      not_ok) "not_ok $n - ${path} (${the_shell}${remote})" ;;
+      skip) "ok $n - ${path} (${the_shell}${remote}) # SKIP" ;;
+    esac
+
+    if { test "${result}" = not_ok && "${print_not_ok_stdout}"; } ||
+       { test "${result}" = ok && "${print_ok_stdout}"; }; then
+      echo '# ------------ Begin output ------------'
+      sed 's/^/# /' "$(stdout_file "${path}" "${the_shell}")"
+      echo '# ------------ End output ------------'
+    fi
+    echo "# Previous test took ${file_elapsed} seconds."
+
+    # Number of files that have been ok, not ok, and skipped
+    eval "old_count=${result}s"
+    eval "${result}s=$(($old_count+1))"
+
+  done
+}
 
 format_urchin() {
-  result="${1}"
-  remote="${2}" # may be ''
-  the_shell="${3}"
-  path="${4}"
-  verbosity="${5}"
+  v="${1}"
+  tmp_dir="${2}"
+  verbosity="${3}"
+  print_in_color="${4}"
 
+  $(verbosity v 1 print_margins)
+  $(verbosity v 1 print_not_ok)
+  $(verbosity v 2 print_not_ok_stdout)
+  $(verbosity v 2 print_ok)
+  $(verbosity v 3 print_ok_stdout)
+
+  if $print_in_color; then
+    success_mark=$(printf "\033[32m✓ \033[0m")
+    fail_mark=$(printf "\033[31m✗ \033[0m")
+  else
+    success_mark=.\ 
+    fail_mark=F\ 
+  fi
 
   header() {
     if test "${prevdir}" != "${currentdir}"; then
@@ -353,44 +372,44 @@ format_urchin() {
     fi
   }
 
-  case "${result}" in
-    ok)
-      if "${print_ok}"; then
-        header
-        if "${print_in_color}"; then
-          printf "\033[32m${success_mark} \033[0m"
-        else
+  while IFS="${HT}" read remote the_shell path result file_elapsed; do
+    abspath=${urchin_tmp}/${path}
+
+    currentdir="$(dirname -- "${path}")"
+    prevdir="${currentdir}"
+
+    case "${result}" in
+      ok)
+        if "${print_ok}"; then
+          header
           printf "${success_mark} "
+          echo "${the_shell} ("${file_elapsed}" $(plural second $file_elapsed))"
         fi
-        echo "${the_shell} ("${file_elapsed}" $(plural second $file_elapsed))"
-      fi
-    ;;
-    not_ok)
-      if "${print_not_ok}"; then
-        header
-        if "${print_in_color}"; then
-          printf "\033[31m${fail_mark} \033[0m"
-        else
+      ;;
+      not_ok)
+        if "${print_not_ok}"; then
+          header
           printf "${fail_mark} "
+          echo "${the_shell} ("${file_elapsed}" $(plural second $file_elapsed))"
         fi
-        echo "${the_shell} ("${file_elapsed}" $(plural second $file_elapsed))"
-      fi
-    ;;
-    skip)
-      if "${print_ok}"; then
-        header
-        if test -z "${the_shell}"; then
-          echo '  (Specified shell is not executable.)'
-        else
-          echo "  ${the_shell} ("${file_elapsed}" $(plural second $file_elapsed))"
+      ;;
+      skip)
+        if "${print_ok}"; then
+          header
+          if test -z "${the_shell}"; then
+            echo '  (Specified shell is not executable.)'
+          else
+            echo "  ${the_shell} ("${file_elapsed}" $(plural second $file_elapsed))"
+          fi
         fi
-      fi
-    ;;
-  esac
-  if { test "${result}" = not_ok && "${print_not_ok_stdout}"; } ||
-     { test "${result}" = ok && "${print_ok_stdout}"; }; then
-    sed 's/^/  | /' "$(stdout_file "${path}" "${the_shell}")"
-  fi
+      ;;
+    esac
+    if { test "${result}" = not_ok && "${print_not_ok_stdout}"; } ||
+       { test "${result}" = ok && "${print_ok_stdout}"; }; then
+      sed 's/^/  | /' "$(stdout_file "${path}" "${the_shell}")"
+    fi
+    prevpath="${path}"
+  done
 }
 
 # -------------------- Main stuff -------------------- 
@@ -557,21 +576,6 @@ report_outcome() {
   sorted_log_file=$(mktemp_file)
   cat "${log_file}" | LC_COLLATE=C sort > "${sorted_log_file}"
 
-  while IFS="${HT}" read path the_shell result file_elapsed; do
-    abspath=${urchin_tmp}/${path}
-
-    prevdir="${currentdir}"
-    currentdir="$(dirname -- "${path}")"
-
-    # Number of files that have run, including this one
-    n=$(($n + 1))
-
-    # Number of files that have been ok, not ok, and skipped
-    eval "old_count=${result}s"
-    eval "${result}s=$(($old_count+1))"
-
-  prevpath="${path}"
-  done < "${sorted_log_file}"
   rm "${sorted_log_file}"
 
   if test "${format}" = tap; then
@@ -581,17 +585,9 @@ report_outcome() {
     if "${print_margins}"; then
       echo
       echo "Done, took ${elapsed} $(plural second ${elapsed})."
-      printf '%s\n' "${oks} $(plural test "${oks}") passed."
-      printf '%s\n' "${skips} $(plural test "${skips}") skipped."
-
-      # If any tests are not ok, print the message in red.
-      if [ "${not_oks}" -gt 0 ] && "${print_in_color}"; then
-        printf '\033[31m'
-      fi
-      printf '%s\n' "${not_oks} $(plural test "${not_oks}") failed."
-      if "${print_in_color}"; then
-        printf '\033[m\n'
-      fi
+      echo "${oks} $(plural test "${oks}") passed."
+      echo "${skips} $(plural test "${skips}") skipped."
+      echo "${not_oks} $(plural test "${not_oks}") failed."
     fi
   fi
   test "${not_oks}" -eq '0'
@@ -698,14 +694,6 @@ want to run urchin on that directory.' >&2
   done
   if "${RUN_IN_SERIES}" 2> /dev/null; then
     run_in_series=true
-  fi
-
-  if $print_in_color; then
-    success_mark=✓
-    fail_mark=✗
-  else
-    success_mark=.
-    fail_mark=F
   fi
 
   # -------------------- VALIDATE INPUT -------------------- #
