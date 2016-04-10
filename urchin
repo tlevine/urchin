@@ -315,8 +315,9 @@ recurse() {
     fi
   done
 
-  if contains "${potential_test}" \
-    "^${potential_test}" "^${requested_path}" ; then
+  # Return if we should not run this file
+  if contains "${potential_test}" "^${requested_path}" ||
+     contains "${requested_path}" "^${potential_test}" ; then
     if test "$(dirname "${potential_test}")" = \
             "$(dirname "${requested_path}")" &&
        test "${potential_test}" != "${requested_path}"; then
@@ -326,8 +327,8 @@ recurse() {
     return 0
   fi
 
-  if contains "${potential_test}" "${DELIMITERS}"; then
-    echo 'Test file names may not contain ASCII delimiters.' >&2
+  if contains "${potential_test}" "${HT}"; then
+    echo 'Test file names may not contain tabs (HT).' >&2
     urchin_exit 11
   fi
 
@@ -419,7 +420,7 @@ recurse() {
 
           elapsed=$(($finish - $start))
           rel="${potential_test##"${root}/"}"
-          printf "${rel}\t${the_test_shell}\t${result}\t${elapsed}\n" \
+          printf "\t${the_test_shell}\t${rel}\t${result}\t${elapsed}\n" \
             >> "${urchin_tmp}"/log
           exit "${exit_code}"
         ) &
@@ -440,7 +441,7 @@ recurse() {
     fi
   else
     # Shell is ''
-    printf "${potential_test}\t\tskip\t0\n" >> "${urchin_tmp}"/log
+    printf "\t\t${potential_test}\tskip\t0\n" >> "${urchin_tmp}"/log
   fi
 }
 
