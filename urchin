@@ -311,6 +311,7 @@ meta_verbosity() {
 format_tap() {
   v="${1}"
   tmp_dir="${2}"
+  elapsed="${3}"
 
   $(verbosity v 2 print_not_ok_stdout)
   $(verbosity v 3 print_ok_stdout)
@@ -337,10 +338,10 @@ format_tap() {
     esac
     echo "# Previous test took ${file_elapsed} seconds."
 
-    # Number of files that have been ok, not ok, and skipped
-    eval "old_count=${result}s"
-    eval "${result}s=$(($old_count+1))"
   done
+
+  echo "# Full test suite took ${elapsed} $(plural second ${elapsed})."
+  echo 1.."${n}"
 }
 
 format_urchin() {
@@ -388,6 +389,11 @@ format_urchin() {
       unit="$(plural second "${file_elapsed}")"
       message="${the_shell} on ${remote} (${file_elapsed} ${unit})"
     fi
+
+    # Keep track of how many files have been ok, not ok, and skipped.
+    eval "${result}s=$((${result}s+1))"
+
+    # Print the result.
     case "${result}" in
       ok) if "${print_ok}"; then
             header && echo "${success_mark} ${message}"
@@ -553,7 +559,8 @@ recurse() {
       echo "${potential_test}: Neither file nor directory!?" >&2
     fi
   else
-    # Shell is ''
+    # Shell is '' because "File is not executable".
+    # Why does that happen?
     printf "\t\t${potential_test}\tskip\t0\n" >> "${urchin_tmp}"/log
   fi
 }
@@ -568,9 +575,6 @@ report_outcome() {
   finish="${5}"
 
   elapsed=$(($finish - $start))
-  for number in n oks skips not_oks; do
-    eval "${number}=0"
-  done
 
   # Use a temporary file rather than a pipe because a pipe starts a sub-shell
   # and thus makes the above variables local.
@@ -579,11 +583,6 @@ report_outcome() {
 
   rm "${sorted_log_file}"
 
-  if test "${format}" = tap; then
-    echo "# Full test suite took ${elapsed} $(plural second ${elapsed})."
-    echo 1.."${n}"
-  elif test "${format}" = urchin; then
-  fi
   test "${not_oks}" -eq '0'
 }
 
