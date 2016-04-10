@@ -456,21 +456,13 @@ recurse() {
 # get to the log file.
 report_outcome() {
   root="${1}"
-  tap_format="${2}"
+  format="${2}"
   log_file="${3}"
   start="${4}"
   finish="${5}"
 
   escaped_root="$(fullpath "${root}" | sed 's/\//\\\//g')"
   elapsed=$(($finish - $start))
-
-  if "${tap_format}"; then
-    printf \#\ 
-  fi
-  if "${print_margins}" || "${tap_format}"; then
-    echo Running tests at $(date +%Y-%m-%dT%H:%M:%S)
-  fi
-
   for number in n oks skips not_oks; do
     eval "${number}=0"
   done
@@ -497,7 +489,7 @@ report_outcome() {
     eval "old_count=${result}s"
     eval "${result}s=$(($old_count+1))"
 
-    if "${tap_format}"; then
+    if test "${format}" = tap; then
       if [ "${result}" = not_ok ]; then
         not='not '
       else
@@ -574,22 +566,24 @@ report_outcome() {
   done < "${sorted_log_file}"
   rm "${sorted_log_file}"
 
-  if "${tap_format}"; then
+  if test "${format}" = tap; then
     echo "# Full test suite took ${elapsed} $(plural second ${elapsed})."
     echo 1.."${n}"
-  elif "${print_margins}"; then
-    echo
-    echo "Done, took ${elapsed} $(plural second ${elapsed})."
-    printf '%s\n' "${oks} $(plural test "${oks}") passed."
-    printf '%s\n' "${skips} $(plural test "${skips}") skipped."
+  elif test "${format}" = urchin; then
+    if "${print_margins}"; then
+      echo
+      echo "Done, took ${elapsed} $(plural second ${elapsed})."
+      printf '%s\n' "${oks} $(plural test "${oks}") passed."
+      printf '%s\n' "${skips} $(plural test "${skips}") skipped."
 
-    # If any tests are not ok, print the message in red.
-    if [ "${not_oks}" -gt 0 ] && "${print_in_color}"; then
-      printf '\033[31m'
-    fi
-    printf '%s\n' "${not_oks} $(plural test "${not_oks}") failed."
-    if "${print_in_color}"; then
-      printf '\033[m\n'
+      # If any tests are not ok, print the message in red.
+      if [ "${not_oks}" -gt 0 ] && "${print_in_color}"; then
+        printf '\033[31m'
+      fi
+      printf '%s\n' "${not_oks} $(plural test "${not_oks}") failed."
+      if "${print_in_color}"; then
+        printf '\033[m\n'
+      fi
     fi
   fi
   test "${not_oks}" -eq '0'
@@ -707,6 +701,14 @@ main() {
   fi
 
   if $print_margins; then
+    if test "${format}" = tap; then
+      printf \#\ >> "${urchin_tmp}"/head
+    fi
+    if test "${format}" = urchin || test "${format}" = tap; then
+      echo Running tests at $(date +%Y-%m-%dT%H:%M:%S) \
+        >> "${urchin_tmp}"/head
+    fi
+
     if test "${format}" = tap; then
       printf '# ' >> "${urchin_tmp}"/head
     fi
