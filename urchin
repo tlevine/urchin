@@ -51,7 +51,6 @@ set -e
 # Delimiters
 LF="$(printf '\n')"
 HT="$(printf '\t')"
-DELIMITERS="[${LF}${HT}]"
 
 # Urchin version number
 VERSION=0.0.0-master
@@ -157,6 +156,8 @@ Exit codes have the following meanings
 10                   Dependencies are missing (locally, not on remotes).
 11                   Flags were not valid.
 12                   File names contain unsupported delimiters (HT or LF).
+13                   An test shell passed with -s/--shell is not available.
+14                   A test shell was in the PATH but failed to run.
 
 Go to https://thomaslevine.com/!/urchin/ for documentation on writing tests.
 
@@ -613,8 +614,9 @@ main() {
               urchin_exit 13
             }
 
-            if contains "${potential_test}" "${HT}"; then
-              echo 'Shell paths may not contain tab characters (HT).' >&2
+            if contains "${potential_test}" "${HT}" "${LF}"; then
+              echo 'Shell paths may contain all characters other than' >&2
+              echo 'horizontal tab (\t) and line feed (\n).' >&2
               urchin_exit 11
             fi
 
@@ -623,6 +625,7 @@ main() {
 (usually spaces) are absent from shell paths so that
 you don't need to quote the TEST_SHELL variable." >&2
             fi
+
             shell_list="${shell_for_sh_tests}${LF}${shell_list}"
             ;;
           -n|--disable-cycling) cycle_shell=false;; 
@@ -718,7 +721,7 @@ want to run urchin on that directory.' >&2
       TIMEOUT="timeout ${urchin_timeout}"
     else
       echo I couldn\'t figure out how to use your version of timeout >&2
-      urchin_exit 13
+      urchin_exit 10
     fi
   fi
 
