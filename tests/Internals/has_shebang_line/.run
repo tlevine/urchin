@@ -1,3 +1,3 @@
 echo "$1" > $tmp
-TESTING_URCHIN_INTERNALS=true . ../../../urchin
+NO_MAIN= . ../../../urchin
 has_shebang_line $tmp

@@ -742,4 +742,4 @@ wantto run urchin on that directory.' >&2
   exit "${exit_code}"
 }
 
-is_set TESTING_URCHIN_INTERNALS || main "$@"
+is_set NO_MAIN || main "$@"
