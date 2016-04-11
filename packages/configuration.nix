@@ -11,9 +11,18 @@ with lib;
   networking.useDHCP = false;
 
   environment.systemPackages = with pkgs; [
-    busybox
+    # Urchin
     bash dash mksh zsh
+    # busybox
+
+    # Other
+    vim
+
   ];
+  services.openssh = {
+    enable = true;
+    passwordAuthentication = false;
+  };
 
   users.extraUsers.user = {
     name = "tlevine";
