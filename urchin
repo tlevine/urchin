@@ -277,11 +277,11 @@ is_set() {
 
 # File where a test's stdout and stderr is saved
 stdout_file() {
-  tmp_dir="${1}"
+  urchin_tmp="${1}"
   the_test="${2}"
   the_shell="${3}"
 
-  x="${tmp_dir}/stdout$(localpath "$the_test")"
+  x="${urchin_tmp}/stdout$(localpath "$the_test")"
   mkdir -p "${x}"
   echo "${x}/$(md5 "${the_shell}")"
 }
@@ -340,7 +340,7 @@ meta_verbosity() {
 
 format_tap() {
   v="${1}"
-  tmp_dir="${2}"
+  urchin_tmp="${2}"
   elapsed="${3}"
 
   $(meta_verbosity v 2 print_not_ok_stdout)
@@ -348,7 +348,7 @@ format_tap() {
 
   print_stdout() {
     echo '# ------------ Begin output ------------'
-    sed 's/^/# /' "$(stdout_file "${tmp_dir}" "${path}" "${the_shell}")"
+    sed 's/^/# /' "$(stdout_file "${urchin_tmp}" "${path}" "${the_shell}")"
     echo '# ------------ End output ------------'
   }
 
@@ -373,7 +373,7 @@ format_tap() {
 
 format_urchin() {
   v="${1}"
-  tmp_dir="${2}"
+  urchin_tmp="${2}"
   verbosity="${3}"
   print_in_color="${4}"
 
@@ -401,11 +401,11 @@ format_urchin() {
   }
 
   print_stdout() {
-    sed 's/^/  | /' "$(stdout_file "${tmp_dir}" "${path}" "${the_shell}")"
+    sed 's/^/  | /' "$(stdout_file "${urchin_tmp}" "${path}" "${the_shell}")"
   }
 
   while IFS="${HT}" read -r remote the_shell path result file_elapsed; do
-    abspath=${tmp_dir}/${path}
+    abspath=${urchin_tmp}/${path}
 
     currentdir="$(dirname -- "${path}")"
     prevdir="${currentdir}"
@@ -511,8 +511,8 @@ recurse() {
           break
         fi
 
-        recurse "${abs_root}" "${abs_requested}" "${abs_current}/${test}" \
-                          "${run_in_series_root}" "${exit_on_not_ok}" &
+#       recurse "${abs_root}" "${abs_requested}" "${abs_current}/${test}" \
+#                         "${run_in_series_root}" "${exit_on_not_ok}" &
         eval "${meta_finalize}"
 
       done
@@ -525,7 +525,7 @@ recurse() {
         (
           eval "$(dot_if_exists setup)"
 
-          out_file="$(stdout_file "${tmp_dir}" "${rel_current}" "${sh}")"
+          out_file="$(stdout_file "${urchin_tmp}" "${rel_current}" "${sh}")"
 
           # Run with a shell?
           if has_shebang_line "${abs_current}"; then
@@ -552,7 +552,7 @@ recurse() {
           log "${remote}" "${rel_curent}" "${result}" "${elapsed}" \
             >> "${urchin_tmp}"/log
           exit "${exit_code}"
-        ) &
+        )#&
         eval "${meta_finalize}"
       done
       wait
@@ -702,8 +702,13 @@ want to run urchin on that directory.' >&2
   while read -r seed; do
     root="$(test_suite_root "${seed}")"
     abs="$(fullpath "${seed}")"
-    return_code=$(catch recurse "${root}" "${abs}" "${abs}" \
-                          "${run_in_series}" "${exit_on_not_ok}")
+
+    set +e
+    recurse "${root}" "${abs}" "${abs}" \
+      "${run_in_series}" "${exit_on_not_ok}"
+    return_code=$?
+    set -e
+    echo $return_code
     if test "${return_code}" -eq 0; then break; fi
   done<<EOF
   ${test_seeds}
