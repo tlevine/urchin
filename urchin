@@ -157,26 +157,6 @@ Go to https://thomaslevine.com/!/urchin/ for documentation on writing tests.
 EOF
 }
 
-# -------------------- Dependency checks -------------------- 
-if command -v md5 1> /dev/null 2> /dev/null; then
-  urchin_md5=md5
-elif command -v md5sum 1> /dev/null 2> /dev/null; then
-  urchin_md5=md5sum
-else
-  echo Could not find MD5 hash command >&2
-  exit 10
-fi
-
-if epoch_date 2>&1 > /dev/null; then
-  epoch=epoch_date
-elif epoch_pax 2>&1 > /dev/null; then
-  epoch=epoch_pax
-else
-  echo I could not find a seconds counter. >&2
-  exit 10
-fi
-
-
 # -------------------- Portable wrappers -------------------- 
 mktemp_dir() {
   # Support HP-UX mktemp that has wrong exit codes and
@@ -204,6 +184,15 @@ md5 () {
 }
 
 # -------------------- Utilities -------------------- 
+if command -v md5 1> /dev/null 2> /dev/null; then
+  urchin_md5=md5
+elif command -v md5sum 1> /dev/null 2> /dev/null; then
+  urchin_md5=md5sum
+else
+  echo Could not find MD5 hash command >&2
+  exit 10
+fi
+
 epoch_date() {
   date +%s
 }
@@ -213,6 +202,17 @@ epoch_pax() {
   echo "ibase=8;$({ pax -wx cpio "${tmp}"; echo; } | cut -c 48-59)" | bc
   rm "${tmp}"
 }
+
+if epoch_date 2>&1 > /dev/null; then
+  epoch=epoch_date
+elif epoch_pax 2>&1 > /dev/null; then
+  epoch=epoch_pax
+else
+  echo I could not find a seconds counter. >&2
+  exit 10
+fi
+
+
 
 plural () {
   # Make $1 a plural according to the number $2.
@@ -699,7 +699,7 @@ wantto run urchin on that directory.' >&2
     fi
   fi
 
-  if "${exit_on_not_ok}" && ! "${run_in_series}"; then
+  if is_set exit_on_not_ok && ! is_set run_in_series; then
     echo 'You must also pass -b/--series in order to use -e/--exit-on-fail.' >&2
     exit 11
   fi
@@ -716,30 +716,30 @@ wantto run urchin on that directory.' >&2
   echo >> "${urchin_tmp}"/head
 
   start=$("${epoch}")
-  echo "${test_seeds}" | while read -r seed; do
-    set +e
-    recurse "${root}" "$(fullpath "${seed}")" "${TEST_SHELL}"
-    return_code=$?
-    set -e
-    test "${return_code}" -eq 0 || break
-  done
+  return_code=$(
+    echo "${test_seeds}" | while read -r seed; do
+      catch recurse "${root}" "$(fullpath "${seed}")"
+      test "${return_code}" -eq 0 || break
+    done|tail -n1
+  )
   finish=$("${epoch}")
 
-  if test "${return_code}" -le 1; then
-    if test -f "${urchin_tmp}"/log ; then
-      echo Print output.
-    # cat "${urchin_tmp}"/head
-    # report_outcome "${root}" "${format}" "${urchin_tmp}"/log "${start}" \
-    #   "${finish}"
-    # cat "${urchin_tmp}"/foot
-    else
-      echo 'No tests found' >&2
-      return_code=2
-    fi
-  fi
+
+# if test "${return_code}" -le 1; then
+#   if test -f "${urchin_tmp}"/log ; then
+#     echo Print output.
+#   # cat "${urchin_tmp}"/head
+#   # report_outcome "${root}" "${format}" "${urchin_tmp}"/log "${start}" \
+#   #   "${finish}"
+#   # cat "${urchin_tmp}"/foot
+#   else
+#     echo 'No tests found' >&2
+#     return_code=2
+#   fi
+# fi
 
   rm -Rf "${urchin_tmp}"
-  exit "${exit_code}"
+  exit "${return_code}"
 }
 
 is_set NO_MAIN || main "$@"
