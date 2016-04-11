@@ -464,7 +464,7 @@ recurse() {
   abs_current="${3}"
 
   run_in_series_root="${4}"
-  return_on_not_ok="${5}"
+  exit_on_not_ok="${5}"
 
   rel_requested="$(localpath ${abs_root} ${abs_requested})"
   rel_current="$(localpath ${abs_root} ${abs_current})"
@@ -485,7 +485,7 @@ recurse() {
       if test -f .urchin_dir && grep series ./.urchin_dir > /dev/null ||
         "${run_in_series_root}"; then
         return_code=$(catch wait "${!}")
-        if "${return_on_not_ok}" && test "${exit_code}" -ne 0; then
+        if "${exit_on_not_ok}" && test "${exit_code}" -ne 0; then
           eval "$(dot_if_exists teardown_dir)"
           return $return_code
         fi
@@ -511,7 +511,8 @@ recurse() {
           break
         fi
 
-        recurse "${requested_path}" "${test}" &
+        recurse "${abs_root}" "${abs_requested}" "${abs_current}/${test}" \
+                          "${run_in_series_root}" "${exit_on_not_ok}" &
         eval "${meta_finalize}"
 
       done
@@ -570,7 +571,10 @@ main() {
   format=urchin
   if "${RUN_IN_SERIES}" 2> /dev/null; then
     run_in_series=true
+  else
+    run_in_series=false
   fi
+  exit_on_not_ok=false
 
   # Shift if possible; error otherwise.
   flag_arg() {
@@ -696,7 +700,10 @@ want to run urchin on that directory.' >&2
 
   start=$("${epoch}")
   while read -r seed; do
-    return_code=$(catch recurse "${root}" "$(fullpath "${seed}")")
+    root="$(test_suite_root "${seed}")"
+    abs="$(fullpath "${seed}")"
+    return_code=$(catch recurse "${root}" "${abs}" "${abs}" \
+                          "${run_in_series}" "${exit_on_not_ok}")
     if test "${return_code}" -eq 0; then break; fi
   done<<EOF
   ${test_seeds}
@@ -705,8 +712,7 @@ EOF
 
   if test "${return_code}" -le 1; then
     if test -f "${urchin_tmp}"/log ; then
-      echo Print output.
-#     cat "${urchin_tmp}"/head
+      cat "${urchin_tmp}"/head
 
 # "${urchin_tmp}"/log
 # elapsed=$(($finish - $start))
