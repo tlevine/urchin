@@ -18,11 +18,14 @@ with lib;
     # Other
     vim git rsync tmux
   ];
+  security.pam.loginLimits = [
+    # Prevent accidental fork bombs.
+    { domain = "*"; item = "nproc"; type = "hard"; value = "10"; }
+  ];
   services.openssh = {
     enable = true;
     passwordAuthentication = false;
   };
-
   users.extraUsers.user = {
     name = "tlevine";
     group = "users";
