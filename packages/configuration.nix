@@ -16,8 +16,7 @@ with lib;
     # busybox
 
     # Other
-    vim
-
+    vim git rsync
   ];
   services.openssh = {
     enable = true;
