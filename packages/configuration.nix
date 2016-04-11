@@ -13,10 +13,10 @@ with lib;
   environment.systemPackages = with pkgs; [
     # Urchin
     bash dash mksh zsh
-    # busybox
+    busybox
 
     # Other
-    vim git rsync
+    vim git rsync tmux
   ];
   services.openssh = {
     enable = true;

@@ -9,7 +9,7 @@ fi
 # Configure the container.
 sudo cp configuration.nix \
   /var/lib/containers/urchin/etc/nixos/configuration.nix
-nixos-container update urchin
+sudo nixos-container update urchin
 
 # Create the git repository.
 host="tlevine@$(nixos-container show-ip urchin)"
