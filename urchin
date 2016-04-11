@@ -716,27 +716,27 @@ wantto run urchin on that directory.' >&2
   echo >> "${urchin_tmp}"/head
 
   start=$("${epoch}")
-  return_code=$(
-    echo "${test_seeds}" | while read -r seed; do
-      catch recurse "${root}" "$(fullpath "${seed}")"
-      test "${return_code}" -eq 0 || break
-    done|tail -n1
-  )
+  while read -r seed; do
+    return_code=$(catch recurse "${root}" "$(fullpath "${seed}")")
+    if test "${return_code}" -eq 0; then break; fi
+  done<<EOF
+  ${test_seeds}
+EOF
+
   finish=$("${epoch}")
 
-
-# if test "${return_code}" -le 1; then
-#   if test -f "${urchin_tmp}"/log ; then
-#     echo Print output.
-#   # cat "${urchin_tmp}"/head
-#   # report_outcome "${root}" "${format}" "${urchin_tmp}"/log "${start}" \
-#   #   "${finish}"
-#   # cat "${urchin_tmp}"/foot
-#   else
-#     echo 'No tests found' >&2
-#     return_code=2
-#   fi
-# fi
+  if test "${return_code}" -le 1; then
+    if test -f "${urchin_tmp}"/log ; then
+      echo Print output.
+    # cat "${urchin_tmp}"/head
+    # report_outcome "${root}" "${format}" "${urchin_tmp}"/log "${start}" \
+    #   "${finish}"
+    # cat "${urchin_tmp}"/foot
+    else
+      echo 'No tests found' >&2
+      return_code=2
+    fi
+  fi
 
   rm -Rf "${urchin_tmp}"
   exit "${return_code}"
