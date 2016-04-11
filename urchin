@@ -450,6 +450,7 @@ format_urchin() {
 # 1) At least one test failed.
 # *) Something else went wrong; Urchin should exit with the same code.
 recurse() {
+  echo "$@"
   abs_root="${1}"
   abs_requested="${2}"
   abs_current="${3}"
@@ -505,9 +506,9 @@ recurse() {
           break
         fi
 
-#       recurse "${abs_root}" "${abs_requested}" "${abs_current}/${test}" \
-#                         "${run_in_series_root}" "${exit_on_not_ok}" &
-        eval "${meta_finalize}"
+        recurse "${abs_root}" "${abs_requested}" "${abs_current}/${test}" \
+                          "${run_in_series_root}" "${exit_on_not_ok}"#&
+      # eval "${meta_finalize}"
 
       done
       wait
@@ -547,7 +548,7 @@ recurse() {
             >> "${urchin_tmp}"/log
           exit "${exit_code}"
         )#&
-        eval "${meta_finalize}"
+      # eval "${meta_finalize}"
       done
       wait
     fi
@@ -644,6 +645,11 @@ you don't need to quote the TEST_SHELL variable." >&2
     esac
     shift
   done
+
+  if ! is_set test_seeds; then
+    echo Missing test location >&2
+    exit 2
+  fi
 
   if is_set molly && ! is_set force; then
     echo 'The root directory of the tests that you are running urchin on
