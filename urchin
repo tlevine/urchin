@@ -450,7 +450,7 @@ format_urchin() {
 # 1) At least one test failed.
 # *) Something else went wrong; Urchin should exit with the same code.
 recurse() {
-  echo "$@"
+  echo "$3 $4 $5"
   abs_root="${1}"
   abs_requested="${2}"
   abs_current="${3}"
@@ -507,7 +507,8 @@ recurse() {
         fi
 
         recurse "${abs_root}" "${abs_requested}" "${abs_current}/${test}" \
-                          "${run_in_series_root}" "${exit_on_not_ok}"#&
+                          "${run_in_series_root}" "${exit_on_not_ok}"
+        #&
       # eval "${meta_finalize}"
 
       done
@@ -547,10 +548,11 @@ recurse() {
           log "${remote}" "${rel_curent}" "${result}" "${elapsed}" \
             >> "${urchin_tmp}"/log
           exit "${exit_code}"
-        )#&
+        )
+        #&
       # eval "${meta_finalize}"
       done
-      wait
+     #wait
     fi
   elif test -n "${rel_current}"; then
     # Skip because the file is not executable.
