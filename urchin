@@ -161,18 +161,11 @@ EOF
 mktemp_dir() {
   # Support HP-UX mktemp that has wrong exit codes and
   # can't make directories.
-  tmp=$(mktemp /tmp/urchin.XXXXXXXX)
+  tmp=$(mktemp)
   if test -f "${tmp}"; then
     rm "${tmp}"
   fi
   mkdir "${tmp}"
-  echo "${tmp}"
-}
-mktemp_file() {
-  tmp=$(mktemp /tmp/urchin.XXXXXXXX)
-  if ! test -f "${tmp}"; then
-    > "${tmp}"
-  fi
   echo "${tmp}"
 }
 
@@ -198,7 +191,7 @@ epoch_date() {
 }
 epoch_pax() {
   # Based on http://stackoverflow.com/a/7262588/407226
-  tmp="$(mktemp_file)"
+  tmp="$(mktemp)"
   echo "ibase=8;$({ pax -wx cpio "${tmp}"; echo; } | cut -c 48-59)" | bc
   rm "${tmp}"
 }
@@ -563,32 +556,14 @@ recurse() {
       done
       wait
     fi
-  else
+  elif test -n "${rel_current}"; then
     # Skip because the file is not executable.
     echo "${shell_list}" | while read -r sh; do
       printf "\t${sh}\t${rel_current}\tskip\t0\n" >> "${urchin_tmp}"/log
     done
   fi
+  echo ${rel_current} 3 >> /tmp/bbb
 }
-
-report_outcome() {
-  format="${2}"
-  log_file="${3}"
-  start="${4}"
-  finish="${5}"
-
-  elapsed=$(($finish - $start))
-
-  # Use a temporary file rather than a pipe because a pipe starts a sub-shell
-  # and thus makes the above variables local.
-  sorted_log_file=$(mktemp_file)
-  cat "${log_file}" | LC_COLLATE=C sort > "${sorted_log_file}"
-
-  rm "${sorted_log_file}"
-
-  test "${not_oks}" -eq '0'
-}
-
 
 main() {
   # Defaults
@@ -663,18 +638,22 @@ you don't need to quote the TEST_SHELL variable." >&2
              # Molly guard
              root="$(test_suite_root "${1}")"
              basename "$(fullpath "${root}")" |
-             grep -i 'test' > /dev/null || "${force}"
+             grep -i 'test' > /dev/null
            }; then
-             echo 'The root directory of the tests that you are running urchin on
-doesnot contain the word "test", so I am not running,
-in case that was an accident. Use the -f flag if you really
-wantto run urchin on that directory.' >&2
-             exit 12
+             molly=true
            fi
            test_seeds="${1}${LF}${test_seeds}" ;;
     esac
     shift
   done
+
+  if is_set molly && ! is_set force; then
+    echo 'The root directory of the tests that you are running urchin on
+doesnot contain the word "test", so I am not running,
+in case that was an accident. Use the -f flag if you really
+want to run urchin on that directory.' >&2
+    exit 12
+  fi
 
   # If -s was not passed, use the available default shells.
   if ! is_set "${shell_list}"; then
@@ -722,16 +701,26 @@ wantto run urchin on that directory.' >&2
   done<<EOF
   ${test_seeds}
 EOF
-
   finish=$("${epoch}")
 
   if test "${return_code}" -le 1; then
     if test -f "${urchin_tmp}"/log ; then
       echo Print output.
-    # cat "${urchin_tmp}"/head
-    # report_outcome "${root}" "${format}" "${urchin_tmp}"/log "${start}" \
-    #   "${finish}"
-    # cat "${urchin_tmp}"/foot
+#     cat "${urchin_tmp}"/head
+
+# "${urchin_tmp}"/log
+# elapsed=$(($finish - $start))
+
+# # Use a temporary file rather than a pipe because a pipe starts a sub-shell
+# # and thus makes the above variables local.
+# sorted_log_file=$(mktemp)
+# cat "${log_file}" | LC_COLLATE=C sort > "${sorted_log_file}"
+
+# rm "${sorted_log_file}"
+
+# test "${not_oks}" -eq '0'
+
+
     else
       echo 'No tests found' >&2
       return_code=2
