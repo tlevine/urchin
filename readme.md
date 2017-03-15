@@ -21,8 +21,10 @@ is like. Clone the repository
 
 Run the tests
 
-    cd urchin
-    ./urchin tests
+```sh
+cd urchin
+./urchin tests
+```
 
 ## Dependencies
 Urchin depends on the following programs.
@@ -50,9 +52,11 @@ of these programs.
 Urchin is contained in a single file, so you can install it by copying it to a
 directory in your `PATH`. For example, you can run the following as root.
 
-    cd /usr/local/bin
-    wget https://raw.githubusercontent.com/tlevine/urchin/v0.1.0-rc3/urchin
-    chmod +x urchin
+```sh
+cd /usr/local/bin
+wget https://raw.githubusercontent.com/tlevine/urchin/v0.1.0-rc3/urchin
+chmod +x urchin
+```
 
 Urchin can be installed with npm too.
 
@@ -110,9 +114,11 @@ directory tree. The test passes if the file exits 0; otherwise, it fails.
 
 urchin looks for files within a directory in the following manner,
 
-    for file in *; do
-      do_something_with_test_file $file
-    done
+```sh
+for file in *; do
+  do_something_with_test_file $file
+done
+```
 
 so files are run in whatever order `*` produces. The order is
 configured in your environment, at least in
@@ -125,18 +131,20 @@ order the tests ran in.
 
 Below you can see how the locale can affect the order.
 
-    $ printf '!c\n@a\n~b\n' | LC_COLLATE=C sort
-    !c
-    @a
-    ~b
-    $ printf '!c\n@a\n~b\n' | LC_COLLATE=en_US.UTF-8 sort
-    @a
-    ~b
-    !c
-    $ printf '!c\n@a\n~b\n' | sort -d
-    @a
-    ~b
-    !c
+```sh
+$ printf '!c\n@a\n~b\n' | LC_COLLATE=C sort
+!c
+@a
+~b
+$ printf '!c\n@a\n~b\n' | LC_COLLATE=en_US.UTF-8 sort
+@a
+~b
+!c
+$ printf '!c\n@a\n~b\n' | sort -d
+@a
+~b
+!c
+```
 
 ### Writing cross-shell compatibility tests for testing shell code
 
