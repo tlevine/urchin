@@ -1,3 +1,5 @@
+**The repository at https://github.com/tlevine/urchin will go away. New location is https://git.sdf.org/tlevine/urchin.**
+
                        __    _     
       __  ____________/ /_  (_)___ 
      / / / / ___/ ___/ __ \/ / __ \
