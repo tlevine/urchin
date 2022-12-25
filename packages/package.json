@@ -12,7 +12,7 @@
   "bin": "./urchin",
   "repository": {
     "type": "git",
-    "url": "git://github.com/tlevine/urchin.git"
+    "url": "https://git.sdf.org/tlevine/urchin"
   },
   "keywords": [
     "shell",
