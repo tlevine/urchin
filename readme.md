@@ -17,7 +17,7 @@ have shells called "tests".
 Urchin's tests are written in Urchin, so you can run them to see what Urchin
 is like. Clone the repository
 
-    git clone git://github.com/tlevine/urchin.git
+    git clone https://git.sdf.org/tlevine/urchin
 
 Run the tests
 
@@ -51,7 +51,7 @@ Urchin is contained in a single file, so you can install it by copying it to a
 directory in your `PATH`. For example, you can run the following as root.
 
     cd /usr/local/bin
-    wget https://raw.githubusercontent.com/tlevine/urchin/v0.1.0-rc3/urchin
+    wget https://git.sdf.org/tlevine/urchin/raw/branch/master/urchin
     chmod +x urchin
 
 Urchin can be installed with npm too.
